@@ -70,6 +70,11 @@ export async function POST(req: NextRequest) {
     await addPoints(userId, POINTS.SUBMIT, "ارسال خبر", "submit")
     await recordActivity(userId)
 
+    // ردپای چرخه: رویداد ورود خبر (برای تایم‌لاین زنده)
+    await db.newsEvent.create({
+      data: { newsId: news.id, stage: "", action: "submitted", actorId: user.id, actorName: user.fullName, actorRole: user.role },
+    })
+
     // ثبت خودکار در چالش فعال (سناریوی ۴)
     let challengeJoined: string | null = null
     if (challengeId) {

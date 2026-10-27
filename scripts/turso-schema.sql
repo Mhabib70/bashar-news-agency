@@ -47,6 +47,20 @@ CREATE TABLE "NewsItem" (
 );
 
 -- CreateTable
+CREATE TABLE "NewsEvent" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "newsId" INTEGER NOT NULL,
+    "stage" TEXT NOT NULL DEFAULT '',
+    "action" TEXT NOT NULL,
+    "actorId" TEXT NOT NULL DEFAULT '',
+    "actorName" TEXT NOT NULL DEFAULT '',
+    "actorRole" TEXT NOT NULL DEFAULT '',
+    "note" TEXT NOT NULL DEFAULT '',
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "NewsEvent_newsId_fkey" FOREIGN KEY ("newsId") REFERENCES "NewsItem" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- CreateTable
 CREATE TABLE "Challenge" (
     "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     "code" TEXT NOT NULL DEFAULT '',
@@ -133,6 +147,9 @@ CREATE TABLE "Notification" (
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_username_key" ON "User"("username");
+
+-- CreateIndex
+CREATE INDEX "NewsEvent_newsId_createdAt_idx" ON "NewsEvent"("newsId", "createdAt");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "ChallengeParticipation_challengeId_userId_key" ON "ChallengeParticipation"("challengeId", "userId");

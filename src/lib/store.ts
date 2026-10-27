@@ -54,7 +54,7 @@ type Store = {
   logout: () => void
   refresh: () => Promise<void>
   submitNews: (p: SubmitPayload) => Promise<Result>
-  reviewNews: (newsId: number, action: "approve" | "reject", reason?: string, note?: string) => Promise<Result>
+  reviewNews: (newsId: number, action: "approve" | "reject", reason?: string, note?: string, mode?: "advance" | "final") => Promise<Result>
   resubmitNews: (newsId: number, title?: string, content?: string, category?: string) => Promise<Result>
   joinChallenge: (challengeId: number) => Promise<Result>
   createChallenge: (p: { title: string; description: string; reward: string; deadlineAt: string }) => Promise<Result>
@@ -62,6 +62,7 @@ type Store = {
   broadcast: (title: string, text: string) => Promise<Result>
   fetchUsers: () => Promise<UserInfo[]>
   moderateUser: (targetId: string, action: "approve" | "reject", reason?: string) => Promise<Result>
+  setUserRole: (targetId: string, newRole: "reporter" | "district_manager" | "specialist", newDistrict?: string) => Promise<Result>
   uploadMedia: (file: File) => Promise<{ ok: boolean; url?: string; mediaType?: string; message?: string }>
   uploadAvatar: (dataUrl: string) => Promise<Result>
   fetchUserDetail: (targetId: string) => Promise<AdminUserDetail | null>
@@ -133,13 +134,13 @@ export const useApp = create<Store>((set, get) => ({
     }
   },
 
-  reviewNews: async (newsId, action, reason, note) => {
+  reviewNews: async (newsId, action, reason, note, mode) => {
     const uid = get().userId
     if (!uid) return { ok: false }
     try {
-      const r = await api<Result & { message: string }>("/api/news/review", {
+      const r = await api<Result & { message: string }>('/api/news/review', {
         method: "POST",
-        body: JSON.stringify({ userId: uid, newsId, action, reason, note }),
+        body: JSON.stringify({ userId: uid, newsId, action, reason, note, mode }),
       })
       await get().refresh()
       return { ok: true, message: r.message }
@@ -240,6 +241,20 @@ export const useApp = create<Store>((set, get) => ({
       const r = await api<Result & { message: string }>("/api/users", {
         method: "POST",
         body: JSON.stringify({ userId: uid, targetId, action, reason }),
+      })
+      return { ok: true, message: r.message }
+    } catch (e) {
+      return { ok: false, message: (e as Error).message }
+    }
+  },
+
+  setUserRole: async (targetId, newRole, newDistrict) => {
+    const uid = get().userId
+    if (!uid) return { ok: false }
+    try {
+      const r = await api<Result & { message: string }>("/api/users", {
+        method: "POST",
+        body: JSON.stringify({ userId: uid, targetId, action: "set_role", newRole, newDistrict }),
       })
       return { ok: true, message: r.message }
     } catch (e) {

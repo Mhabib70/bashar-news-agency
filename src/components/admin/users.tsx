@@ -294,11 +294,12 @@ export function UserPhoto({ user, size = 48, tilted = false }: { user: { fullNam
 
 // ---------- پرونده کامل کاربر ----------
 function UserDetailDialog({ userId, onClose, onChanged }: { userId: string | null; onClose: () => void; onChanged: () => void }) {
-  const { fetchUserDetail, moderateUser, refresh } = useApp()
+  const { fetchUserDetail, moderateUser, setUserRole, refresh } = useApp()
   const { toast } = useToast()
   const [detail, setDetail] = useState<AdminUserDetail | null>(null)
   const [loadedId, setLoadedId] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
+  const [roleDistrict, setRoleDistrict] = useState("")
 
   useEffect(() => {
     if (!userId) return
@@ -324,6 +325,22 @@ function UserDetailDialog({ userId, onClose, onChanged }: { userId: string | nul
     if (res.ok) {
       toast({ title: "انجام شد", description: res.message })
       onClose()
+      await Promise.all([onChanged(), refresh()])
+    } else {
+      toast({ title: "خطا", description: res.message, variant: "destructive" })
+    }
+  }
+
+  // انتصاب نقش — موتور چرخه سه‌مرحله‌ای (مدیر حوزه/کارشناس باید اینجا ساخته شوند)
+  const assignRole = async (newRole: "reporter" | "district_manager" | "specialist") => {
+    if (!detail) return
+    setBusy(true)
+    const res = await setUserRole(detail.user.id, newRole, newRole === "district_manager" ? roleDistrict || detail.user.district : undefined)
+    setBusy(false)
+    if (res.ok) {
+      toast({ title: "انجام شد", description: res.message })
+      const d = await fetchUserDetail(detail.user.id)
+      if (d) setDetail(d)
       await Promise.all([onChanged(), refresh()])
     } else {
       toast({ title: "خطا", description: res.message, variant: "destructive" })
@@ -386,6 +403,55 @@ function UserDetailDialog({ userId, onClose, onChanged }: { userId: string | nul
                 <button onClick={() => act("reject", "incomplete")} disabled={busy} className="flex flex-1 items-center justify-center gap-1.5 rounded-full border border-danger/40 py-3 text-[13px] font-bold text-danger-soft disabled:opacity-50">
                   <X className="h-4 w-4" /> رد درخواست
                 </button>
+              </div>
+            )}
+
+            {/* نقش سازمانی — منصوب‌کردن چرخه سه‌مرحله‌ای */}
+            {u.status === "active" && u.role !== "admin" && (
+              <div className="rounded-[24px] border border-line bg-surface p-4">
+                <div className="mb-1 flex items-center justify-between">
+                  <p className="text-[13px] font-black text-ink">نقش در چرخه بررسی</p>
+                  <span className="rounded-full bg-neon/12 px-2.5 py-0.5 text-[10px] font-bold text-neon">{ROLE_LABELS[u.role]}</span>
+                </div>
+                <p className="mb-3 text-[11px] leading-5 text-ink-muted">
+                  مدیر حوزه، اخبار حوزه خودش را در مرحله ۱ بررسی می‌کند؛ کارشناس مرحله ۲ را. برای راه‌اندازی کامل چرخه، حداقل یک مدیر حوزه و یک کارشناس منصوب کنید.
+                </p>
+                {u.role === "district_manager" && (
+                  <div className="mb-3">
+                    <p className="mb-1.5 text-[11px] font-bold text-ink-muted">حوزه مسئولیت مدیر حوزه:</p>
+                    <select
+                      value={roleDistrict || u.district}
+                      onChange={(e) => setRoleDistrict(e.target.value)}
+                      className="w-full rounded-2xl border border-line bg-surface px-3 py-2.5 text-[12.5px] text-ink outline-none focus:border-neon/50"
+                    >
+                      {Object.entries(DISTRICT_LABELS).map(([k, v]) => (
+                        <option key={k} value={k}>{v}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+                <div className="grid grid-cols-3 gap-2">
+                  {(
+                    [
+                      { key: "reporter", label: "خبرنگار", emoji: "📝" },
+                      { key: "district_manager", label: "مدیر حوزه", emoji: "🏛️" },
+                      { key: "specialist", label: "کارشناس", emoji: "🔍" },
+                    ] as const
+                  ).map((r) => (
+                    <button
+                      key={r.key}
+                      onClick={() => assignRole(r.key)}
+                      disabled={busy || u.role === r.key}
+                      className={cn(
+                        "rounded-2xl border px-2 py-2.5 text-[11.5px] font-bold transition-colors disabled:opacity-60",
+                        u.role === r.key ? "border-neon bg-neon/10 text-neon" : "border-line bg-surface text-ink hover:border-neon/40",
+                      )}
+                    >
+                      <span className="block text-[15px]">{r.emoji}</span>
+                      {u.role === r.key ? "نقش فعلی" : `تبدیل به ${r.label}`}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
 

@@ -38,11 +38,18 @@ export default function Page() {
     }
   }, [])
 
-  // تازه‌سازی دوره‌ای
+  // پیش‌نمایش آنلاین چرخه: پولینگ هوشمند — فقط وقتی صفحه مرئی است + رفرش فوری هنگام بازگشت
   useEffect(() => {
     if (!userId) return
-    const t = setInterval(() => refresh(), 30000)
-    return () => clearInterval(t)
+    const tick = () => {
+      if (typeof document !== "undefined" && document.visibilityState === "visible") refresh()
+    }
+    const t = setInterval(tick, 30000)
+    document.addEventListener("visibilitychange", tick)
+    return () => {
+      clearInterval(t)
+      document.removeEventListener("visibilitychange", tick)
+    }
   }, [userId, refresh])
 
   const openSubmit = (preset?: typeof submitPreset) => {

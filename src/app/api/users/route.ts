@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { notifyUser } from "@/lib/server/notify"
-import { USER_REJECT_TITLES } from "@/lib/domain"
+import { USER_REJECT_TITLES, ROLE_LABELS, DISTRICT_LABELS } from "@/lib/domain"
 
 // مدیریت کاربران — فقط ادمین کل
 // GET  بدون targetId: لیست همه اعضا | GET با targetId: پرونده کامل کاربر
@@ -98,6 +98,38 @@ export async function POST(req: NextRequest) {
       await db.user.update({ where: { id: target.id }, data: { status: "rejected", rejectReason: reasonKey } })
       await notifyUser(target.id, "user_status", "❌ درخواست عضویت شما رد شد", `دلیل: ${USER_REJECT_TITLES[reasonKey]} — در صورت نیاز می‌توانید مجدداً ثبت‌نام کنید.`, `user:${target.id}`, { force: true })
       return NextResponse.json({ ok: true, message: `درخواست ${target.fullName} رد شد (${USER_REJECT_TITLES[reasonKey]}).` })
+    }
+
+    // انتصاب نقش — کلید رفع گلوگاه چرخه: ادمین می‌تواند خبرنگار را به مدیر حوزه یا کارشناس ارتقا دهد
+    if (action === "set_role") {
+      const newRole = String(body.newRole ?? "")
+      if (!["reporter", "district_manager", "specialist"].includes(newRole)) {
+        return NextResponse.json({ error: "نقش نامعتبر است" }, { status: 400 })
+      }
+      if (target.status === "pending") {
+        return NextResponse.json({ error: "اول عضویت این کاربر را تایید کنید" }, { status: 409 })
+      }
+      // مدیر حوزه باید حوزه مشخص داشته باشد — اختیاری: تغییر حوزه در همین اکشن
+      const newDistrict = typeof body.newDistrict === "string" && body.newDistrict ? body.newDistrict : target.district
+      const wasRole = target.role
+      await db.user.update({ where: { id: target.id }, data: { role: newRole, district: newDistrict } })
+      const roleChanged = wasRole !== newRole
+      await notifyUser(
+        target.id,
+        "user_status",
+        roleChanged ? "🎖️ نقش سازمانی شما تغییر کرد" : "👤 نقش شما به‌روزرسانی شد",
+        roleChanged
+          ? `${admin.fullName} نقش شما را به «${ROLE_LABELS[newRole]}» تغییر داد.${newRole === "district_manager" ? ` حوزه مسئولیت شما: ${DISTRICT_LABELS[newDistrict] ?? newDistrict}` : ""}`
+          : `حوزه شما به «${DISTRICT_LABELS[newDistrict] ?? newDistrict}» به‌روزرسانی شد.`,
+        `user:${target.id}`,
+        { force: true },
+      )
+      return NextResponse.json({
+        ok: true,
+        message: roleChanged
+          ? `نقش ${target.fullName} به «${ROLE_LABELS[newRole]}» تغییر کرد.`
+          : `حوزه ${target.fullName} به‌روزرسانی شد.`,
+      })
     }
 
     return NextResponse.json({ error: "عملیات نامعتبر" }, { status: 400 })

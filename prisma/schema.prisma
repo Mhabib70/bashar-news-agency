@@ -57,10 +57,28 @@ model NewsItem {
   reviewedBy   String    @default("")
   reviewedAt   DateTime?
   challengeId  Int?
-  mediaUrl     String    @default("") // آدرس فایل رسانه آپلودشده
-  durationMin  Int       @default(0) // زمان صرف‌شده برای تهیه خبر (دقیقه)
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  mediaUrl     String @default("") // آدرس فایل رسانه آپلودشده
+  durationMin  Int    @default(0) // زمان صرف‌شده برای تهیه خبر (دقیقه)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  events NewsEvent[]
+}
+
+// ردپای کامل چرخه بررسی — پیش‌نمایش آنلاین مراحل برای خبرنگار و مدیران
+model NewsEvent {
+  id        Int      @id @default(autoincrement())
+  newsId    Int
+  news      NewsItem @relation(fields: [newsId], references: [id], onDelete: Cascade)
+  stage     String   @default("") // "" (ارسال/بازارسال) | district | specialist | admin
+  action    String   // submitted | advanced | final_approved | rejected | resubmitted
+  actorId   String   @default("")
+  actorName String   @default("")
+  actorRole String   @default("")
+  note      String   @default("") // دلیل رد یا یادداشت
+  createdAt DateTime @default(now())
+
+  @@index([newsId, createdAt])
 }
 
 model Challenge {

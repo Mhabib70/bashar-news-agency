@@ -4,9 +4,9 @@ import Image from "next/image"
 import { useMemo, useState } from "react"
 import { Plus, PencilLine, X, FileText, Search } from "lucide-react"
 import { useApp } from "@/lib/store"
-import { SectionHeader, StatusChip, StageDots } from "@/components/app/bits"
+import { SectionHeader, StatusChip, StageDots, StageTimeline, StageChip } from "@/components/app/bits"
 import { fa, durFmt, relTime, jalali } from "@/lib/format"
-import { CATEGORY_LABELS, REJECT_REASONS, reviewStageLabel, DISTRICT_LABELS } from "@/lib/domain"
+import { CATEGORY_LABELS, REJECT_REASONS, DISTRICT_LABELS } from "@/lib/domain"
 import { cn } from "@/lib/utils"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 
@@ -134,9 +134,7 @@ export function NewsScreen({ onQuickSubmit, draftsView }: { onQuickSubmit: () =>
             </div>
             <div className="mt-3 flex items-center justify-between border-t border-line pt-3">
               <StageDots status={n.status} stage={n.reviewStage} />
-              <span className="text-[10px] text-ink-muted">
-                {n.status === "pending" ? `مرحله فعلی: ${reviewStageLabel(n.reviewStage)}` : n.status === "approved" ? "منتشر شد" : "بازگشت به شما"}
-              </span>
+              <StageChip status={n.status} stage={n.reviewStage} />
             </div>
           </button>
         ))}
@@ -175,26 +173,9 @@ export function NewsScreen({ onQuickSubmit, draftsView }: { onQuickSubmit: () =>
                 </div>
               )}
 
-              <div className="mt-4 rounded-2xl border border-line bg-surface p-4">
-                <p className="mb-2.5 text-[12px] font-bold text-ink-muted">چرخه بررسی سه‌مرحله‌ای</p>
-                <div className="space-y-2">
-                  {(["district", "specialist", "admin"] as const).map((s, i) => {
-                    const done = detailNews.status === "approved" || (detailNews.status === "pending" && ["district", "specialist", "admin"].indexOf(detailNews.reviewStage) > i)
-                    const current = detailNews.status === "pending" && detailNews.reviewStage === s
-                    const failed = detailNews.status === "rejected"
-                    return (
-                      <div key={s} className="flex items-center gap-2.5">
-                        <span className={cn("flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-black", done ? "bg-neon text-neon-foreground" : current ? "bg-warn text-black" : failed ? "bg-danger/20 text-danger-soft" : "bg-surface-2 text-ink-muted")}>
-                          {fa(i + 1)}
-                        </span>
-                        <span className={cn("text-[12px] font-semibold", done || current ? "text-ink" : "text-ink-muted")}>
-                          {reviewStageLabel(s)}
-                          {current && " — در انتظار بررسی"}
-                        </span>
-                      </div>
-                    )
-                  })}
-                </div>
+              <div className="mt-4">
+                <p className="mb-2 text-[12.5px] font-black text-ink">پیش‌نمایش زنده چرخه بررسی</p>
+                <StageTimeline news={detailNews} />
               </div>
 
               {detailNews.status === "rejected" && (

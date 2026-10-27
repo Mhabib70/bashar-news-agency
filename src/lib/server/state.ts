@@ -28,6 +28,15 @@ export type AppUser = {
   createdAt: string
 }
 
+export type NewsEventDTO = {
+  stage: string
+  action: string
+  actorName: string
+  actorRole: string
+  note: string
+  at: string
+}
+
 export type NewsDTO = {
   id: number
   code: string
@@ -48,6 +57,7 @@ export type NewsDTO = {
   challengeId: number | null
   durationMin: number
   createdAt: string
+  events: NewsEventDTO[]
 }
 
 export type ChallengeDTO = {
@@ -87,6 +97,7 @@ export type AppState = {
   notifications: { id: string; kind: string; title: string; body: string; at: string }[]
   notifSettings: { approvals: boolean; challenges: boolean; broadcast: boolean; rejections: boolean; quietStart: string; quietEnd: string }
   pendingUsersCount: number
+  staffCounts: { district: number; specialist: number; admin: number }
 }
 
 export type PeriodStat = { points: number; newsCount: number; activeMin: number }
@@ -111,18 +122,35 @@ async function periodStat(userId: string, kind: "day" | "week" | "month"): Promi
   }
 }
 
-function toNewsDTO(n: {
-  id: number; code: string; reporterId: string; district: string; category: string; title: string; content: string
-  mediaType: string; mediaUrl: string; status: string; reviewStage: string; rejectReason: string; rejectNote: string; reviewedBy: string
-  challengeId: number | null; durationMin: number; createdAt: Date
-  reporter: { fullName: string; district: string }
-}): NewsDTO {
+function toNewsDTO(
+  n: {
+    id: number; code: string; reporterId: string; district: string; category: string; title: string; content: string
+    mediaType: string; mediaUrl: string; status: string; reviewStage: string; rejectReason: string; rejectNote: string; reviewedBy: string
+    challengeId: number | null; durationMin: number; createdAt: Date
+    reporter: { fullName: string; district: string }
+  },
+  events: NewsEventDTO[] = [],
+): NewsDTO {
   return {
     id: n.id, code: n.code, reporterId: n.reporterId, reporterName: n.reporter.fullName, reporterDistrict: n.reporter.district,
     district: n.district, category: n.category, title: n.title, content: n.content, mediaType: n.mediaType, mediaUrl: n.mediaUrl,
     status: n.status, reviewStage: n.reviewStage, rejectReason: n.rejectReason, rejectNote: n.rejectNote,
     reviewedBy: n.reviewedBy, challengeId: n.challengeId, durationMin: n.durationMin, createdAt: n.createdAt.toISOString(),
+    events,
   }
+}
+
+// رویدادهای چرخه برای دسته‌ای از اخبار (جلوگیری از N+1) — تایم‌لاین زنده هر خبر
+async function eventsForNews(newsIds: number[]): Promise<Map<number, NewsEventDTO[]>> {
+  const map = new Map<number, NewsEventDTO[]>()
+  if (newsIds.length === 0) return map
+  const rows = await db.newsEvent.findMany({ where: { newsId: { in: newsIds } }, orderBy: { createdAt: "asc" } })
+  for (const e of rows) {
+    const list = map.get(e.newsId) ?? []
+    list.push({ stage: e.stage, action: e.action, actorName: e.actorName, actorRole: e.actorRole, note: e.note, at: e.createdAt.toISOString() })
+    map.set(e.newsId, list)
+  }
+  return map
 }
 
 const newsInclude = { reporter: { select: { fullName: true, district: true } } } satisfies Prisma.NewsItemInclude
@@ -168,6 +196,18 @@ export async function getAppState(userId: string): Promise<AppState | null> {
   const leaderboard: LeaderRow[] = reporters.slice(0, 10).map((r, i) => ({
     id: r.id, fullName: r.fullName, points: r.points, levelKey: r.levelKey, district: r.district, rank: i + 1, isMe: r.id === userId,
   }))
+
+  // رویدادهای چرخه هر خبر (تایم‌لاین زنده) + شمارش نیروهای ارزیاب هر مرحله
+  const [ownEvents, queueEvents, staffCounts] = await Promise.all([
+    eventsForNews(ownNews.map((n) => n.id)),
+    eventsForNews(queue.map((n) => n.id)),
+    Promise.all([
+      db.user.count({ where: { role: "district_manager", status: "active" } }),
+      db.user.count({ where: { role: "specialist", status: "active" } }),
+      db.user.count({ where: { role: "admin", status: "active" } }),
+    ]),
+  ])
+  const staff = { district: staffCounts[0], specialist: staffCounts[1], admin: staffCounts[2] }
 
   // سری هفتگی امتیاز (۷ روز — کلید روز به وقت تهران)
   const weekSeries: { day: string; points: number }[] = []
@@ -239,8 +279,8 @@ export async function getAppState(userId: string): Promise<AppState | null> {
   return {
     user: appUser,
     stats: { day, week, month, totalApproved: approved, totalRejected: rejected, approveRate, weekSeries, rank: rank >= 0 ? rank + 1 : 0, totalReporters: reporters.length },
-    news: ownNews.map(toNewsDTO),
-    reviewQueue: queue.map(toNewsDTO),
+    news: ownNews.map((n) => toNewsDTO(n, ownEvents.get(n.id) ?? [])),
+    reviewQueue: queue.map((n) => toNewsDTO(n, queueEvents.get(n.id) ?? [])),
     challenges: challengeDTOs,
     leaderboard,
     badges: Object.entries(BADGES).map(([key, b]) => ({
@@ -255,6 +295,7 @@ export async function getAppState(userId: string): Promise<AppState | null> {
       quietStart: u.notifSetting?.quietStart ?? "22:00", quietEnd: u.notifSetting?.quietEnd ?? "08:00",
     },
     pendingUsersCount,
+    staffCounts: staff,
   }
 }
 

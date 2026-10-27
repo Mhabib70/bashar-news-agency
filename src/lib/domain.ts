@@ -103,6 +103,22 @@ export function nextReviewStage(key: string): string {
   return order[i + 1]
 }
 
+// برچسب و آیکون رویدادهای چرخه خبر (جدول NewsEvent) — پیش‌نمایش آنلاین مراحل
+export const NEWS_EVENT_META: Record<string, { label: string; emoji: string }> = {
+  submitted: { label: "خبر وارد چرخه شد", emoji: "📰" },
+  advanced: { label: "تایید و ارجاع به مرحله بعد", emoji: "✅" },
+  final_approved: { label: "تایید نهایی و انتشار", emoji: "🎉" },
+  rejected: { label: "رد شد", emoji: "❌" },
+  resubmitted: { label: "ویرایش و ارسال مجدد", emoji: "🔄" },
+}
+
+// نقش‌های ارزیاب به‌ترتیب چرخه برای نمایش مراحل
+export const STAGE_ROLE_ICON: Record<string, string> = {
+  district: "🏛️",
+  specialist: "🔍",
+  admin: "👑",
+}
+
 // نقش کاربر در کدام مرحله بررسی نقش دارد
 export const ROLE_STAGE: Record<string, string> = {
   district_manager: "district",
