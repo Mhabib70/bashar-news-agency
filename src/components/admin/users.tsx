@@ -297,26 +297,24 @@ function UserDetailDialog({ userId, onClose, onChanged }: { userId: string | nul
   const { fetchUserDetail, moderateUser, refresh } = useApp()
   const { toast } = useToast()
   const [detail, setDetail] = useState<AdminUserDetail | null>(null)
-  const [loading, setLoading] = useState(false)
+  const [loadedId, setLoadedId] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
 
   useEffect(() => {
-    if (!userId) {
-      setDetail(null)
-      return
-    }
+    if (!userId) return
     let cancelled = false
-    setLoading(true)
     fetchUserDetail(userId).then((d) => {
       if (!cancelled) {
         setDetail(d)
-        setLoading(false)
+        setLoadedId(userId)
       }
     })
     return () => {
       cancelled = true
     }
   }, [userId, fetchUserDetail])
+
+  const loading = userId !== null && loadedId !== userId
 
   const act = async (action: "approve" | "reject", reason?: string) => {
     if (!detail) return
@@ -338,17 +336,22 @@ function UserDetailDialog({ userId, onClose, onChanged }: { userId: string | nul
   return (
     <Dialog open={userId !== null} onOpenChange={(v) => !v && onClose()}>
       <DialogContent className="max-h-[88dvh] overflow-y-auto nice-scroll rounded-[28px] border-line bg-popover p-5 sm:max-w-2xl">
-        {loading || !detail || !u ? (
+        <DialogHeader className="text-right">
+          <DialogTitle className="text-ink">پرونده کاربر</DialogTitle>
+          <DialogDescription className="text-ink-muted">
+            {u ? `مشخصات کامل، کارنامه فعالیت و سوابق ${u.fullName}` : "در حال دریافت پرونده..."}
+          </DialogDescription>
+        </DialogHeader>
+
+        {loading ? (
           <div className="flex items-center justify-center gap-2 py-16 text-[13px] text-ink-muted">
             <Loader2 className="h-5 w-5 animate-spin" />
             در حال بارگذاری پرونده...
           </div>
+        ) : !detail || !u ? (
+          <p className="py-16 text-center text-[13px] text-ink-muted">پرونده کاربر یافت نشد — دوباره تلاش کنید.</p>
         ) : (
           <>
-            <DialogHeader className="text-right">
-              <DialogTitle className="text-ink">پرونده کاربر</DialogTitle>
-              <DialogDescription className="text-ink-muted">مشخصات کامل، کارنامه فعالیت و سوابق {u.fullName}</DialogDescription>
-            </DialogHeader>
 
             {/* هویت */}
             <div className="mt-2 flex flex-col items-center gap-3 rounded-[24px] border border-line bg-surface p-4 sm:flex-row sm:items-start">

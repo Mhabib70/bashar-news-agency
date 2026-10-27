@@ -22,8 +22,7 @@ export function AdminReviewSection() {
   const [note, setNote] = useState("")
   const [busy, setBusy] = useState<number | null>(null)
 
-  if (!state) return null
-  const queue = state.reviewQueue
+  const queue = state?.reviewQueue ?? []
 
   const filtered = useMemo(
     () =>
@@ -48,6 +47,8 @@ export function AdminReviewSection() {
       toast({ title: "خطا", description: res.message, variant: "destructive" })
     }
   }
+
+  if (!state) return null
 
   return (
     <div className="space-y-5">
@@ -126,7 +127,6 @@ export function AdminReviewSection() {
                 <p className="mt-2.5 text-[15px] font-bold leading-7 text-ink">{n.title}</p>
 
                 {n.mediaUrl && n.mediaType === "photo" && (
-                  // eslint-disable-next-line @next/next/no-img-element
                   <img src={n.mediaUrl} alt="رسانه خبر" className="mt-3 max-h-56 w-full rounded-2xl border border-line object-cover" />
                 )}
                 {n.mediaUrl && n.mediaType === "video" && (

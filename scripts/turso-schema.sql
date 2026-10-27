@@ -17,6 +17,7 @@ CREATE TABLE "User" (
     "lastActivityAt" DATETIME,
     "lastDemotionAt" DATETIME,
     "rejectReason" TEXT NOT NULL DEFAULT '',
+    "avatar" TEXT NOT NULL DEFAULT '',
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" DATETIME NOT NULL
 );

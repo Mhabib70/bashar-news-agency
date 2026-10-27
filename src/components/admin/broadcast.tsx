@@ -22,7 +22,13 @@ export function AdminBroadcastSection() {
     if (d) setHistory(d.recentBroadcasts)
   }
   useEffect(() => {
-    loadHistory()
+    let cancelled = false
+    fetchAdminOverview().then((d) => {
+      if (!cancelled && d) setHistory(d.recentBroadcasts)
+    })
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   const canSend = title.trim().length >= 3 && text.trim().length >= 5

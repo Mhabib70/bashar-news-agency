@@ -4,8 +4,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/theme-provider";
 
 export const metadata: Metadata = {
-  title: "خبرگزاری سازمان | اپ خبرنگاران",
-  description: "اپلیکیشن خبرگزاری سازمان — ارسال خبر، چرخه بررسی سه‌مرحله‌ای، امتیاز، سطح و چالش",
+  title: "خبرگزاری بشر | اپ خبرنگاران",
+  description: "اپلیکیشن خبرگزاری بشر — ارسال خبر، چرخه بررسی سه‌مرحله‌ای، امتیاز، سطح و چالش",
   icons: { icon: "https://z-cdn.chatglm.cn/z-ai/static/logo.svg" },
 };
 

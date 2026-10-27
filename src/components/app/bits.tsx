@@ -149,7 +149,6 @@ export function StatCard({
 export function Avatar({ name, size = 44, tone = "neon", src }: { name: string; size?: number; tone?: "neon" | "dark"; src?: string }) {
   if (src) {
     return (
-      // eslint-disable-next-line @next/next/no-img-element
       <img
         src={src}
         alt={name}
@@ -184,7 +183,6 @@ export function NeonAvatar({ name, src, size = 56, className }: { name: string; 
       aria-label={`عکس ${name}`}
     >
       {src ? (
-        // eslint-disable-next-line @next/next/no-img-element
         <img src={src} alt="" className="h-full w-full object-cover" />
       ) : (
         <span
