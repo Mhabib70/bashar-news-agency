@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">خبرگزاری بشر</string>
+    <!-- آدرس پیش‌فرض سرور — هنگام استقرار سرور خودتان این را تغییر دهید -->
+    <string name="default_server_url">https://preview-701e51da.space-z.ai/</string>
+    <string name="error_title">اتصال به سرور برقرار نشد</string>
+    <string name="error_body">اینترنت خود را بررسی کنید یا آدرس سرور خبرگزاری را وارد کنید:</string>
+    <string name="url_hint">https://your-server-address/</string>
+    <string name="connect_btn">اتصال</string>
+</resources>

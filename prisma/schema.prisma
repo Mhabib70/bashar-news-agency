@@ -1,0 +1,130 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// نقش‌ها: reporter (خبرنگار) | district_manager (مدیر حوزه) | specialist (کارشناس) | admin (ادمین کل)
+model User {
+  id              String    @id @default(cuid())
+  username        String    @unique
+  fullName        String
+  role            String    @default("reporter")
+  status          String    @default("active") // active | pending | rejected
+  district        String    @default("") // b1..b6, s1..s6
+  base            String    @default("")
+  phone           String    @default("")
+  age             String    @default("")
+  education       String    @default("")
+  points          Int       @default(0)
+  levelKey        String    @default("rookie") // rookie | follower | active | pro | expert
+  currentStreak   Int       @default(0)
+  bestStreak      Int       @default(0)
+  lastActivityAt  DateTime?
+  lastDemotionAt  DateTime?
+  rejectReason    String    @default("")
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  news            NewsItem[]
+  badges          UserBadge[]
+  pointsLogs      PointsLog[]
+  drafts          Draft[]
+  notifSetting    NotifSetting?
+  participations  ChallengeParticipation[]
+}
+
+// اخبار با چرخه بررسی سه‌مرحله‌ای: district → specialist → admin
+model NewsItem {
+  id           Int       @id @default(autoincrement())
+  code         String    @default("") // کد پیگیری مثل N-1042
+  reporterId   String
+  reporter     User      @relation(fields: [reporterId], references: [id])
+  district     String    @default("")
+  category     String    @default("none")
+  title        String
+  content      String    @default("")
+  mediaType    String    @default("none") // none | photo | video
+  status       String    @default("pending") // pending | approved | rejected
+  reviewStage  String    @default("district") // district | specialist | admin | "" (پایان)
+  rejectReason String    @default("")
+  rejectNote   String    @default("")
+  reviewedBy   String    @default("")
+  reviewedAt   DateTime?
+  challengeId  Int?
+  durationMin  Int       @default(0) // زمان صرف‌شده برای تهیه خبر (دقیقه)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model Challenge {
+  id          Int       @id @default(autoincrement())
+  code        String    @default("")
+  title       String
+  description String    @default("")
+  deadlineAt  DateTime
+  endAt       DateTime
+  reward      String    @default("")
+  status      String    @default("active") // active | finished
+  createdBy   String    @default("")
+  createdAt   DateTime  @default(now())
+  finishedAt  DateTime?
+  participations ChallengeParticipation[]
+}
+
+model ChallengeParticipation {
+  id          Int       @id @default(autoincrement())
+  challengeId Int
+  challenge   Challenge @relation(fields: [challengeId], references: [id])
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+  count       Int       @default(0)
+  joinedAt    DateTime  @default(now())
+
+  @@unique([challengeId, userId])
+}
+
+model UserBadge {
+  id        Int      @id @default(autoincrement())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  badgeKey  String // first_news | prolific | quality | streak7 | professional | champion
+  awardedAt DateTime @default(now())
+
+  @@unique([userId, badgeKey])
+}
+
+model PointsLog {
+  id        Int      @id @default(autoincrement())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  amount    Int
+  reason    String   @default("")
+  ref       String   @default("")
+  createdAt DateTime @default(now())
+}
+
+model Draft {
+  id       Int      @id @default(autoincrement())
+  userId   String
+  user     User     @relation(fields: [userId], references: [id])
+  category String   @default("none")
+  title    String   @default("")
+  content  String   @default("")
+  savedAt  DateTime @default(now())
+}
+
+model NotifSetting {
+  userId    String   @id
+  user      User     @relation(fields: [userId], references: [id])
+  approvals Boolean  @default(true)
+  challenges Boolean @default(true)
+  broadcast Boolean  @default(true)
+  rejections Boolean @default(true)
+  quietStart String  @default("22:00")
+  quietEnd   String  @default("08:00")
+  updatedAt DateTime @updatedAt
+}
