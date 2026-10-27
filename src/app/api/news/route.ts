@@ -7,7 +7,7 @@ import { POINTS, CATEGORY_LABELS } from "@/lib/domain"
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { userId, category, title, content, mediaType, durationMin, challengeId } = body ?? {}
+    const { userId, category, title, content, mediaType, mediaUrl, durationMin, challengeId } = body ?? {}
     if (!userId || !title || !content) {
       return NextResponse.json({ error: "عنوان و متن خبر الزامی است" }, { status: 400 })
     }
@@ -24,6 +24,7 @@ export async function POST(req: NextRequest) {
         title: String(title).slice(0, 200),
         content: String(content),
         mediaType: ["photo", "video"].includes(mediaType) ? mediaType : "none",
+        mediaUrl: typeof mediaUrl === "string" && mediaUrl.startsWith("/uploads/") ? mediaUrl.slice(0, 300) : "",
         durationMin: Math.max(1, Math.min(600, Number(durationMin) || 30)),
         status: "pending",
         reviewStage: "district",

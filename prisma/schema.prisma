@@ -35,6 +35,7 @@ model User {
   drafts          Draft[]
   notifSetting    NotifSetting?
   participations  ChallengeParticipation[]
+  notifications   Notification[]
 }
 
 // اخبار با چرخه بررسی سه‌مرحله‌ای: district → specialist → admin
@@ -55,9 +56,24 @@ model NewsItem {
   reviewedBy   String    @default("")
   reviewedAt   DateTime?
   challengeId  Int?
+  mediaUrl     String    @default("") // آدرس فایل رسانه واقعی (عکس/ویدیو)
   durationMin  Int       @default(0) // زمان صرف‌شده برای تهیه خبر (دقیقه)
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
+}
+
+// اعلان‌های سیستمی (اطلاع‌رسانی، چالش، یادآوری، افت سطح، درخواست عضویت)
+model Notification {
+  id        Int      @id @default(autoincrement())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  kind      String // broadcast | challenge_new | rank_update | reminder | system | pending_user
+  title     String
+  body      String   @default("")
+  ref       String   @default("") // کلید یکتا برای جلوگیری از تکرار (مثلاً یادآوری)
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
 }
 
 model Challenge {

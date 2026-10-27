@@ -1,9 +1,12 @@
 import { NextResponse } from "next/server"
 import { db } from "@/lib/db"
+import { runUpkeep } from "@/lib/server/upkeep"
 
 // آمار تجمیعی سازمان برای صفحه خوش‌آمد (پیشرفت امروز) — بدون نیاز به ورود
 export async function GET() {
   try {
+    // نگهداری دوره‌ای (زمان‌بند ربات) — با محافظ فاصله زمانی، سبک است
+    await runUpkeep().catch(() => {})
     const now = new Date()
     const todayStart = new Date(now)
     todayStart.setHours(0, 0, 0, 0)

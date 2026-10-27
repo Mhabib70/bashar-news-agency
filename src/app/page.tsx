@@ -9,16 +9,26 @@ import { NewsScreen } from "@/components/app/news-tab"
 import { ProfileScreen } from "@/components/app/profile"
 import { ReviewScreen } from "@/components/app/review-tab"
 import { SubmitFlow } from "@/components/app/submit-flow"
-import { NotificationsSheet, ChallengesSheet } from "@/components/app/sheets"
+import {
+  NotificationsSheet,
+  ChallengesSheet,
+  CreateChallengeSheet,
+  BroadcastSheet,
+  UsersSheet,
+} from "@/components/app/sheets"
 import { BottomNav } from "@/components/app/bottom-nav"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Hourglass, ShieldX, LogOut } from "lucide-react"
 
 export default function Page() {
   const { userId, state, booted, tab, setTab, login, refresh } = useApp()
   const [submitOpen, setSubmitOpen] = useState(false)
   const [notifOpen, setNotifOpen] = useState(false)
   const [challengesOpen, setChallengesOpen] = useState(false)
+  const [createChallengeOpen, setCreateChallengeOpen] = useState(false)
+  const [broadcastOpen, setBroadcastOpen] = useState(false)
+  const [usersOpen, setUsersOpen] = useState(false)
   const [submitPreset, setSubmitPreset] = useState<null | { category?: string; title?: string; content?: string; draftId?: number | null }>(null)
   const [switchOpen, setSwitchOpen] = useState(false)
 
@@ -62,6 +72,8 @@ export default function Page() {
           </div>
         ) : !userId || !state ? (
           <Welcome />
+        ) : state.user.status !== "active" ? (
+          <AccountGate />
         ) : (
           <>
             <div key={tab} className="nice-scroll flex-1 overflow-y-auto">
@@ -73,6 +85,9 @@ export default function Page() {
                   onOpenNews={() => setTab("news")}
                   onGotoActivity={() => setTab("activity")}
                   onGotoReview={() => setTab("review")}
+                  onOpenUsers={() => setUsersOpen(true)}
+                  onOpenCreateChallenge={() => setCreateChallengeOpen(true)}
+                  onOpenBroadcast={() => setBroadcastOpen(true)}
                 />
               )}
               {tab === "news" && <NewsScreen onQuickSubmit={() => openSubmit()} draftsView />}
@@ -87,10 +102,42 @@ export default function Page() {
         {/* شیت‌ها */}
         <SubmitFlow open={submitOpen} onClose={() => setSubmitOpen(false)} preset={submitPreset} />
         <NotificationsSheet open={notifOpen} onClose={() => setNotifOpen(false)} />
-        <ChallengesSheet open={challengesOpen} onClose={() => setChallengesOpen(false)} />
+        <ChallengesSheet open={challengesOpen} onClose={() => setChallengesOpen(false)} onOpenCreate={() => setCreateChallengeOpen(true)} />
+        <CreateChallengeSheet open={createChallengeOpen} onClose={() => setCreateChallengeOpen(false)} />
+        <BroadcastSheet open={broadcastOpen} onClose={() => setBroadcastOpen(false)} />
+        <UsersSheet open={usersOpen} onClose={() => setUsersOpen(false)} />
         <SwitchAccountSheet open={switchOpen} onClose={() => setSwitchOpen(false)} />
       </div>
     </main>
+  )
+}
+
+// دروازه حساب غیرفعال (در انتظار تایید / رد شده)
+function AccountGate() {
+  const { state, logout } = useApp()
+  if (!state) return null
+  const pending = state.user.status === "pending"
+  return (
+    <div className="flex flex-1 flex-col items-center justify-center gap-4 px-8 text-center">
+      <span className={`flex h-20 w-20 items-center justify-center rounded-full ${pending ? "bg-warn/12 text-warn" : "bg-[#ff5c5c]/12 text-[#ff8484]"}`}>
+        {pending ? <Hourglass className="h-10 w-10" /> : <ShieldX className="h-10 w-10" />}
+      </span>
+      <h2 className="text-[19px] font-black text-ink">{pending ? "در انتظار تایید مدیر" : "درخواست شما رد شد"}</h2>
+      <p className="max-w-[280px] text-[12.5px] leading-6 text-ink-muted">
+        {pending
+          ? "حساب شما ساخته شده و پس از تایید ادمین فعال می‌شود. بعداً دوباره وارد شوید."
+          : state.user.rejectReason
+            ? `دلیل: ${state.user.rejectReason} — می‌توانید با ثبت‌نام مجدد دوباره تلاش کنید.`
+            : "می‌توانید با ثبت‌نام مجدد دوباره تلاش کنید."}
+      </p>
+      <button
+        onClick={logout}
+        className="mt-2 flex items-center gap-2 rounded-full border border-line bg-surface px-6 py-3 text-[13.5px] font-bold text-ink transition-colors hover:bg-surface-2"
+      >
+        <LogOut className="h-4 w-4" />
+        بازگشت به صفحه ورود
+      </button>
+    </div>
   )
 }
 

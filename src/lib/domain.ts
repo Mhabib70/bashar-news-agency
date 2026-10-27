@@ -142,7 +142,23 @@ export const POINTS = {
   PROLIFIC: 50,
   PROFESSIONAL: 40,
   CHALLENGE_WIN: 60,
+  // جایزه مقام‌های اول تا سوم چالش (POINTS_CHALLENGE ربات)
+  CHALLENGE_PRIZES: [60, 40, 20],
 }
+
+// دلیل‌های رد عضویت (USER_REJECT_REASONS ربات — بدون expired سیستمی)
+export const USER_REJECT_PRESETS: { key: string; label: string }[] = [
+  { key: "incomplete", label: "اطلاعات ناقص" },
+  { key: "wrong_base", label: "حوزه/پایگاه نامعتبر" },
+  { key: "duplicate", label: "درخواست تکراری" },
+  { key: "other", label: "دلیل دلخواه" },
+]
+
+// مهلت‌ها (config.py ربات)
+export const PENDING_EXPIRE_HOURS = 72
+export const PENDING_NUDGE_HOURS = 24
+export const REMINDER_WINDOW_HOURS = 3
+export const DEMOTE_INACTIVITY_DAYS = 7
 
 export function toFa(n: number | string): string {
   return String(n).replace(/[0-9]/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[Number(d)])

@@ -79,3 +79,6 @@ android/keystore-release.jks
 
 # اجازه انتشار فایل نمونه env (بدون مقادیر واقعی)
 !.env.example
+
+# فایل‌های رسانه آپلودی کاربران
+/public/uploads

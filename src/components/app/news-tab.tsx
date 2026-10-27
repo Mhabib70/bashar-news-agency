@@ -2,7 +2,7 @@
 
 import Image from "next/image"
 import { useMemo, useState } from "react"
-import { Plus, PencilLine, X, FileText } from "lucide-react"
+import { Plus, PencilLine, X, FileText, Search, ImageIcon, Video } from "lucide-react"
 import { useApp } from "@/lib/store"
 import { SectionHeader, StatusChip, StageDots } from "@/components/app/bits"
 import { fa, durFmt, relTime, jalali } from "@/lib/format"
@@ -21,10 +21,21 @@ export function NewsScreen({ onQuickSubmit, draftsView }: { onQuickSubmit: () =>
   const { state } = useApp()
   const [filter, setFilter] = useState<(typeof FILTERS)[number]["key"]>("all")
   const [detail, setDetail] = useState<number | null>(null)
-  const list = useMemo(
-    () => (state ? (filter === "all" ? state.news : state.news.filter((n) => n.status === filter)) : []),
-    [state, filter],
-  )
+  const [q, setQ] = useState("")
+  const list = useMemo(() => {
+    if (!state) return []
+    const term = q.trim().toLowerCase()
+    return state.news
+      .filter((n) => (filter === "all" ? true : n.status === filter))
+      .filter((n) =>
+        term
+          ? n.title.toLowerCase().includes(term) ||
+            n.content.toLowerCase().includes(term) ||
+            n.code.toLowerCase().includes(term) ||
+            n.reporterName.toLowerCase().includes(term)
+          : true,
+      )
+  }, [state, filter, q])
   if (!state) return null
   const detailNews = state.news.find((n) => n.id === detail)
 
@@ -58,6 +69,22 @@ export function NewsScreen({ onQuickSubmit, draftsView }: { onQuickSubmit: () =>
             </button>
           )
         })}
+      </div>
+
+      {/* جستجو (سناریوی جستجوی ربات) */}
+      <div className="relative">
+        <Search className="absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-muted" />
+        <input
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="جستجو در عنوان، متن، کد پیگیری..."
+          className="w-full rounded-full border border-line bg-surface py-3 pl-4 pr-11 text-[13px] text-ink placeholder:text-ink-muted/60 outline-none transition-colors focus:border-neon/50"
+        />
+        {q && (
+          <button onClick={() => setQ("")} className="absolute left-3 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full bg-surface-2 text-ink-muted" aria-label="پاک کردن">
+            <X className="h-3.5 w-3.5" />
+          </button>
+        )}
       </div>
 
       {/* پیش‌نویس‌ها */}
@@ -94,7 +121,15 @@ export function NewsScreen({ onQuickSubmit, draftsView }: { onQuickSubmit: () =>
           <button key={n.id} onClick={() => setDetail(n.id)} className="w-full rounded-[26px] border border-line bg-surface p-4 text-right transition-colors hover:bg-surface-2">
             <div className="flex items-start gap-3">
               <span className="relative h-16 w-16 shrink-0 overflow-hidden rounded-2xl">
-                <Image src={`/img/cat-${n.category === "none" ? "local" : n.category}.png`} alt="" fill sizes="64px" className="object-cover" />
+                {n.mediaUrl && n.mediaType === "photo" ? (
+                  <Image src={n.mediaUrl} alt="" fill sizes="64px" className="object-cover" />
+                ) : n.mediaUrl && n.mediaType === "video" ? (
+                  <span className="flex h-full w-full items-center justify-center bg-neon/10 text-neon">
+                    <Video className="h-5 w-5" />
+                  </span>
+                ) : (
+                  <Image src={`/img/cat-${n.category === "none" ? "local" : n.category}.png`} alt="" fill sizes="64px" className="object-cover" />
+                )}
               </span>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-between gap-2">
@@ -102,8 +137,10 @@ export function NewsScreen({ onQuickSubmit, draftsView }: { onQuickSubmit: () =>
                   <StatusChip status={n.status} small />
                 </div>
                 <p className="mt-1.5 line-clamp-2 text-[13.5px] font-bold leading-6 text-ink">{n.title}</p>
-                <p className="mt-1 text-[10.5px] text-ink-muted">
+                <p className="mt-1 flex items-center gap-1.5 text-[10.5px] text-ink-muted">
                   {n.code} · {jalali(n.createdAt)} · {durFmt(n.durationMin)}
+                  {n.mediaUrl && n.mediaType === "photo" && <ImageIcon className="h-3 w-3" />}
+                  {n.mediaUrl && n.mediaType === "video" && <Video className="h-3 w-3" />}
                 </p>
               </div>
             </div>
@@ -132,6 +169,14 @@ export function NewsScreen({ onQuickSubmit, draftsView }: { onQuickSubmit: () =>
                   {detailNews.code} · {jalali(detailNews.createdAt, true)} · {DISTRICT_LABELS[detailNews.district]}
                 </DialogDescription>
               </DialogHeader>
+              {detailNews.mediaUrl && detailNews.mediaType === "photo" && (
+                <div className="relative mt-1 aspect-video w-full overflow-hidden rounded-2xl border border-line">
+                  <Image src={detailNews.mediaUrl} alt={detailNews.title} fill sizes="(max-width: 420px) 100vw, 380px" className="object-cover" />
+                </div>
+              )}
+              {detailNews.mediaUrl && detailNews.mediaType === "video" && (
+                <video src={detailNews.mediaUrl} controls className="mt-1 aspect-video w-full rounded-2xl border border-line bg-black" />
+              )}
               <p className="mt-1 whitespace-pre-line text-[13.5px] leading-7 text-ink/90">{detailNews.content}</p>
 
               {detailNews.status === "rejected" && (

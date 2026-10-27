@@ -146,6 +146,7 @@ export function Welcome() {
             <DialogTitle className="text-ink">ورود به حساب</DialogTitle>
             <DialogDescription className="text-ink-muted">
               اگر حساب داری وارد شو، یا با ثبت‌نام جدید سازمانت را راه بنداز.
+              {users && users.length > 0 ? " حساب‌های فعال:" : ""}
             </DialogDescription>
           </DialogHeader>
           <div className="mt-4 space-y-2">
@@ -229,7 +230,12 @@ function RegisterDialog({
     const r = await register(f)
     if (r.ok && r.userId) {
       onOpenChange(false)
-      onDone(r.userId, r.message ?? "ثبت‌نام شد")
+      if (r.status === "pending") {
+        // مطابق ربات: حساب تا تایید مدیر غیرفعال می‌ماند
+        toast({ title: "ثبت‌نام ثبت شد", description: r.message ?? "حساب شما پس از تایید مدیر فعال می‌شود." })
+      } else {
+        onDone(r.userId, r.message ?? "ثبت‌نام شد")
+      }
       setStep(0)
       setF({ fullName: "", phone: "", age: "", education: "bachelor", district: "b1", base: "" })
     } else {

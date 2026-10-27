@@ -1,7 +1,7 @@
 "use client"
 
-import { useMemo, useState } from "react"
-import { ArrowLeft, ArrowRight, Save, CheckCircle2, PartyPopper, ImageIcon, Video, ImageOff } from "lucide-react"
+import { useMemo, useRef, useState } from "react"
+import { ArrowLeft, ArrowRight, Save, CheckCircle2, PartyPopper, ImageIcon, Video, ImageOff, UploadCloud, X } from "lucide-react"
 import { useApp } from "@/lib/store"
 import { fa, toFa } from "@/lib/format"
 import { NEWS_CATEGORIES, CATEGORY_LABELS } from "@/lib/domain"
@@ -25,11 +25,15 @@ export function SubmitFlow({
 }) {
   const { state, submitNews, saveDraft } = useApp()
   const { toast } = useToast()
+  const fileRef = useRef<HTMLInputElement>(null)
   const [step, setStep] = useState(0)
   const [category, setCategory] = useState(preset?.category ?? "local")
   const [title, setTitle] = useState(preset?.title ?? "")
   const [content, setContent] = useState(preset?.content ?? "")
   const [mediaType, setMediaType] = useState("none")
+  const [file, setFile] = useState<File | null>(null)
+  const [mediaPreview, setMediaPreview] = useState<string | null>(null)
+  const [uploading, setUploading] = useState(false)
   const [duration, setDuration] = useState(30)
   const [challengeId, setChallengeId] = useState<number | null>(null)
   const [busy, setBusy] = useState(false)
@@ -37,6 +41,22 @@ export function SubmitFlow({
 
   const activeChallenges = useMemo(() => (state?.challenges ?? []).filter((c) => c.status === "active"), [state])
   const canNext = step === 0 ? !!category : step === 1 ? title.trim().length >= 8 && content.trim().length >= 30 : true
+
+  const pickFile = (f: File | null) => {
+    if (!f) return
+    if (f.size > 5 * 1024 * 1024) {
+      toast({ title: "حجم زیاد", description: "حداکثر حجم فایل ۵ مگابایت است", variant: "destructive" })
+      return
+    }
+    setFile(f)
+    setMediaPreview(URL.createObjectURL(f))
+  }
+
+  const clearFile = () => {
+    setFile(null)
+    setMediaPreview(null)
+    if (fileRef.current) fileRef.current.value = ""
+  }
 
   const close = () => {
     onClose()
@@ -49,18 +69,44 @@ export function SubmitFlow({
         setContent("")
       }
       setMediaType("none")
+      clearFile()
       setDuration(30)
       setChallengeId(null)
     }, 250)
   }
 
+  const uploadMedia = async (): Promise<string | null> => {
+    if (!file || mediaType === "none") return null
+    setUploading(true)
+    try {
+      const fd = new FormData()
+      fd.append("userId", state?.user.id ?? "")
+      fd.append("file", file)
+      const res = await fetch("/api/upload", { method: "POST", body: fd })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? "آپلود ناموفق بود")
+      return data.url as string
+    } catch (e) {
+      toast({ title: "خطا در آپلود رسانه", description: (e as Error).message, variant: "destructive" })
+      return null
+    } finally {
+      setUploading(false)
+    }
+  }
+
   const submit = async () => {
     setBusy(true)
+    const uploadedUrl = await uploadMedia()
+    if (file && mediaType !== "none" && !uploadedUrl) {
+      setBusy(false)
+      return
+    }
     const r = await submitNews({
       category,
       title: title.trim(),
       content: content.trim(),
       mediaType,
+      mediaUrl: uploadedUrl,
       durationMin: duration,
       challengeId,
       draftId: preset?.draftId ?? null,
@@ -195,6 +241,46 @@ export function SubmitFlow({
                     </button>
                   ))}
 
+                  {mediaType !== "none" && (
+                    <div className="rounded-2xl border border-line bg-surface p-3">
+                      <input
+                        ref={fileRef}
+                        type="file"
+                        accept={mediaType === "photo" ? "image/*" : "video/*"}
+                        className="hidden"
+                        onChange={(e) => pickFile(e.target.files?.[0] ?? null)}
+                      />
+                      {!file ? (
+                        <button
+                          type="button"
+                          onClick={() => fileRef.current?.click()}
+                          className="flex w-full flex-col items-center gap-1.5 rounded-xl border border-dashed border-line py-5 text-ink-muted transition-colors hover:border-neon/40 hover:text-neon"
+                        >
+                          <UploadCloud className="h-6 w-6" />
+                          <span className="text-[12px] font-bold">{mediaType === "photo" ? "انتخاب عکس از دستگاه" : "انتخاب ویدیو از دستگاه"}</span>
+                          <span className="text-[10px]">حداکثر ۵ مگابایت — {mediaType === "photo" ? "JPG، PNG، WebP" : "MP4، MOV، WebM"}</span>
+                        </button>
+                      ) : (
+                        <div className="flex items-center gap-3">
+                          <span className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-surface-2">
+                            {mediaType === "photo" && mediaPreview ? (
+                              <img src={mediaPreview} alt="پیش‌نمایش" className="h-full w-full object-cover" />
+                            ) : (
+                              <span className="flex h-full w-full items-center justify-center text-[9px] font-bold text-ink-muted">ویدیو</span>
+                            )}
+                          </span>
+                          <span className="min-w-0 flex-1">
+                            <span className="block truncate text-[12px] font-bold text-ink">{file.name}</span>
+                            <span className="block text-[10px] text-ink-muted">{fa(Math.round(file.size / 1024))} کیلوبایت</span>
+                          </span>
+                          <button type="button" onClick={clearFile} className="flex h-8 w-8 items-center justify-center rounded-full bg-surface-2 text-ink-muted hover:text-[#ff8484]" aria-label="حذف فایل">
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                   {activeChallenges.length > 0 && (
                     <div className="pt-2">
                       <p className="mb-2 text-[12px] font-semibold text-ink-muted">ثبت در چالش (اختیاری)</p>
@@ -251,8 +337,8 @@ export function SubmitFlow({
                   <ArrowLeft className="h-4 w-4" />
                 </button>
               ) : (
-                <button onClick={submit} disabled={busy} className="flex flex-1 items-center justify-center gap-2 rounded-full bg-neon py-3 text-[14px] font-bold text-neon-foreground disabled:opacity-50">
-                  {busy ? "در حال ارسال..." : "ثبت نهایی خبر"}
+                <button onClick={submit} disabled={busy || uploading} className="flex flex-1 items-center justify-center gap-2 rounded-full bg-neon py-3 text-[14px] font-bold text-neon-foreground disabled:opacity-50">
+                  {uploading ? "آپلود رسانه..." : busy ? "در حال ارسال..." : "ثبت نهایی خبر"}
                   <ArrowLeft className="h-4 w-4" />
                 </button>
               )}

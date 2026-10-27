@@ -10,6 +10,7 @@ type SubmitPayload = {
   title: string
   content: string
   mediaType: string
+  mediaUrl?: string | null
   durationMin: number
   challengeId?: number | null
   draftId?: number | null
@@ -34,7 +35,11 @@ type Store = {
   saveDraft: (p: { category: string; title: string; content: string; draftId?: number | null }) => Promise<Result>
   deleteDraft: (id: number) => Promise<Result>
   saveSettings: (p: Partial<AppState["notifSettings"]>) => Promise<Result>
-  register: (p: { fullName: string; phone: string; age: string; education: string; district: string; base: string }) => Promise<{ ok: boolean; userId?: string; message?: string }>
+  register: (p: { fullName: string; phone: string; age: string; education: string; district: string; base: string }) => Promise<{ ok: boolean; userId?: string; status?: string; message?: string }>
+  createChallenge: (p: { title: string; description: string; deadlineAt: string; endAt: string; reward: string }) => Promise<Result>
+  finishChallenge: (challengeId: number) => Promise<Result>
+  broadcast: (text: string) => Promise<Result>
+  decideUser: (targetId: string, action: "approve" | "reject", reason?: string) => Promise<Result>
 }
 
 async function api<T>(url: string, init?: RequestInit): Promise<T> {
@@ -187,11 +192,71 @@ export const useApp = create<Store>((set, get) => ({
 
   register: async (p) => {
     try {
-      const r = await api<{ ok: boolean; userId: string; message: string }>("/api/register", {
+      const r = await api<{ ok: boolean; userId: string; status: string; message: string }>("/api/register", {
         method: "POST",
         body: JSON.stringify(p),
       })
-      return { ok: true, userId: r.userId, message: r.message }
+      return { ok: true, userId: r.userId, status: r.status, message: r.message }
+    } catch (e) {
+      return { ok: false, message: (e as Error).message }
+    }
+  },
+
+  createChallenge: async (p) => {
+    const uid = get().userId
+    if (!uid) return { ok: false }
+    try {
+      const r = await api<Result & { message: string }>("/api/challenges", {
+        method: "POST",
+        body: JSON.stringify({ userId: uid, ...p }),
+      })
+      await get().refresh()
+      return { ok: true, message: r.message }
+    } catch (e) {
+      return { ok: false, message: (e as Error).message }
+    }
+  },
+
+  finishChallenge: async (challengeId) => {
+    const uid = get().userId
+    if (!uid) return { ok: false }
+    try {
+      const r = await api<Result & { message: string }>("/api/challenges/finish", {
+        method: "POST",
+        body: JSON.stringify({ userId: uid, challengeId }),
+      })
+      await get().refresh()
+      return { ok: true, message: r.message }
+    } catch (e) {
+      return { ok: false, message: (e as Error).message }
+    }
+  },
+
+  broadcast: async (text) => {
+    const uid = get().userId
+    if (!uid) return { ok: false }
+    try {
+      const r = await api<Result & { message: string }>("/api/broadcast", {
+        method: "POST",
+        body: JSON.stringify({ userId: uid, text }),
+      })
+      await get().refresh()
+      return { ok: true, message: r.message }
+    } catch (e) {
+      return { ok: false, message: (e as Error).message }
+    }
+  },
+
+  decideUser: async (targetId, action, reason) => {
+    const uid = get().userId
+    if (!uid) return { ok: false }
+    try {
+      const r = await api<Result & { message: string }>("/api/users/decide", {
+        method: "POST",
+        body: JSON.stringify({ userId: uid, targetId, action, reason }),
+      })
+      await get().refresh()
+      return { ok: true, message: r.message }
     } catch (e) {
       return { ok: false, message: (e as Error).message }
     }

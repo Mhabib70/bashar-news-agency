@@ -1,7 +1,7 @@
 "use client"
 
 import Image from "next/image"
-import { Bell, Plus, Megaphone, FileCheck2, ArrowLeft, ClipboardList, Flame, Newspaper, Timer, ChevronLeft } from "lucide-react"
+import { Bell, Plus, Megaphone, FileCheck2, ArrowLeft, ClipboardList, Flame, Newspaper, Timer, ChevronLeft, Users2, Radio, Trophy, FileDown } from "lucide-react"
 import { useApp } from "@/lib/store"
 import { SectionHeader, CountUp, Avatar } from "@/components/app/bits"
 import { faNum, fa, durFmt, untilFmt } from "@/lib/format"
@@ -15,6 +15,9 @@ export function HomeScreen({
   onOpenNews,
   onGotoActivity,
   onGotoReview,
+  onOpenUsers,
+  onOpenCreateChallenge,
+  onOpenBroadcast,
 }: {
   onOpenNotifications: () => void
   onQuickSubmit: () => void
@@ -22,10 +25,16 @@ export function HomeScreen({
   onOpenNews: () => void
   onGotoActivity: () => void
   onGotoReview: () => void
+  onOpenUsers: () => void
+  onOpenCreateChallenge: () => void
+  onOpenBroadcast: () => void
 }) {
   const { state, setTab } = useApp()
   if (!state) return null
   const { user, stats, challenges, reviewQueue } = state
+  const userId = user.id
+  const isAdmin = user.role === "admin"
+  const isManager = user.role === "admin" || user.role === "district_manager"
 
   const activeChallenge = challenges.find((c) => c.status === "active" && c.joined) ?? challenges.find((c) => c.status === "active")
   const week = stats.week
@@ -146,6 +155,48 @@ export function HomeScreen({
         </div>
       </div>
 
+      {/* پنل مدیریت (ادمین کل / مدیر حوزه) */}
+      {isManager && (
+        <div>
+          <div className="mb-2 flex items-center justify-between">
+            <p className="text-[15px] font-bold text-ink">مدیریت</p>
+            {state.pendingUsersCount > 0 && (
+              <span className="rounded-full bg-warn/12 px-2.5 py-1 text-[10px] font-bold text-warn">
+                {fa(state.pendingUsersCount)} درخواست عضویت در انتظار
+              </span>
+            )}
+          </div>
+          <div className="grid grid-cols-4 gap-2 rounded-[26px] border border-line bg-surface p-3">
+            <ManagerBtn icon={<Users2 className="h-4.5 w-4.5" />} label="کاربران" badge={state.pendingUsersCount} onClick={onOpenUsers} />
+            {isAdmin ? (
+              <>
+                <ManagerBtn icon={<Trophy className="h-4.5 w-4.5" />} label="چالش جدید" onClick={onOpenCreateChallenge} />
+                <ManagerBtn icon={<Radio className="h-4.5 w-4.5" />} label="اطلاع‌رسانی" onClick={onOpenBroadcast} />
+                <a
+                  href={`/api/export?userId=${encodeURIComponent(userId)}&type=users`}
+                  className="flex flex-col items-center gap-1 rounded-2xl py-1.5 transition-colors hover:bg-surface-2"
+                >
+                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-neon/12 text-neon">
+                    <FileDown className="h-4.5 w-4.5" />
+                  </span>
+                  <span className="text-[10.5px] font-bold text-ink">CSV کاربران</span>
+                </a>
+              </>
+            ) : (
+              <a
+                href={`/api/export?userId=${encodeURIComponent(userId)}&type=news`}
+                className="col-span-3 flex flex-col items-center gap-1 rounded-2xl py-1.5 transition-colors hover:bg-surface-2"
+              >
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-neon/12 text-neon">
+                  <FileDown className="h-4.5 w-4.5" />
+                </span>
+                <span className="text-[10.5px] font-bold text-ink">گزارش حوزه (CSV)</span>
+              </a>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* فعالیت من */}
       <div>
         <SectionHeader title="فعالیت من" action="مشاهده همه" onAction={onGotoActivity} />
@@ -185,6 +236,32 @@ export function HomeScreen({
         </div>
       </div>
     </div>
+  )
+}
+
+function ManagerBtn({
+  icon,
+  label,
+  badge,
+  onClick,
+}: {
+  icon: React.ReactNode
+  label: string
+  badge?: number
+  onClick: () => void
+}) {
+  return (
+    <button onClick={onClick} className="relative flex flex-col items-center gap-1 rounded-2xl py-1.5 transition-colors hover:bg-surface-2">
+      <span className="relative flex h-9 w-9 items-center justify-center rounded-full bg-neon/12 text-neon">
+        {icon}
+        {!!badge && badge > 0 && (
+          <span className="absolute -right-1 -top-1 flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-[#ff5c5c] px-1 text-[9px] font-black text-white">
+            {fa(badge)}
+          </span>
+        )}
+      </span>
+      <span className="text-[10.5px] font-bold text-ink">{label}</span>
+    </button>
   )
 }
 

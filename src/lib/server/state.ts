@@ -1,5 +1,6 @@
 import { db } from "@/lib/db"
 import { LEVELS, levelFor, levelIndex, nextLevel, BADGES, POINTS, ROLE_STAGE } from "@/lib/domain"
+import { inQuiet, kindAllowed, type NotifFlags } from "@/lib/server/notif-utils"
 import type { Prisma } from "@prisma/client"
 
 export type AppUser = {
@@ -8,6 +9,7 @@ export type AppUser = {
   username: string
   role: string
   status: string
+  rejectReason: string
   district: string
   base: string
   phone: string
@@ -40,6 +42,7 @@ export type NewsDTO = {
   rejectNote: string
   reviewedBy: string
   challengeId: number | null
+  mediaUrl: string
   durationMin: number
   createdAt: string
 }
@@ -57,6 +60,7 @@ export type ChallengeDTO = {
   myCount: number
   totalParticipants: number
   myRank: number | null
+  results: { rank: number; userId: string; fullName: string; n: number }[]
 }
 
 export type LeaderRow = { id: string; fullName: string; points: number; levelKey: string; district: string; rank: number; isMe: boolean }
@@ -76,6 +80,7 @@ export type AppState = {
   badges: { key: string; emoji: string; title: string; desc: string; unlocked: boolean; awardedAt: string | null }[]
   drafts: { id: number; category: string; title: string; content: string; savedAt: string }[]
   notifications: { id: string; kind: string; title: string; body: string; at: string }[]
+  pendingUsersCount: number
   notifSettings: { approvals: boolean; challenges: boolean; broadcast: boolean; rejections: boolean; quietStart: string; quietEnd: string }
 }
 
@@ -105,14 +110,14 @@ async function periodStat(userId: string, kind: "day" | "week" | "month"): Promi
 function toNewsDTO(n: {
   id: number; code: string; reporterId: string; district: string; category: string; title: string; content: string
   mediaType: string; status: string; reviewStage: string; rejectReason: string; rejectNote: string; reviewedBy: string
-  challengeId: number | null; durationMin: number; createdAt: Date
+  challengeId: number | null; mediaUrl: string; durationMin: number; createdAt: Date
   reporter: { fullName: string; district: string }
 }): NewsDTO {
   return {
     id: n.id, code: n.code, reporterId: n.reporterId, reporterName: n.reporter.fullName, reporterDistrict: n.reporter.district,
     district: n.district, category: n.category, title: n.title, content: n.content, mediaType: n.mediaType,
     status: n.status, reviewStage: n.reviewStage, rejectReason: n.rejectReason, rejectNote: n.rejectNote,
-    reviewedBy: n.reviewedBy, challengeId: n.challengeId, durationMin: n.durationMin, createdAt: n.createdAt.toISOString(),
+    reviewedBy: n.reviewedBy, challengeId: n.challengeId, mediaUrl: n.mediaUrl, durationMin: n.durationMin, createdAt: n.createdAt.toISOString(),
   }
 }
 
@@ -180,11 +185,41 @@ export async function getAppState(userId: string): Promise<AppState | null> {
   const badgeKeys = new Set(allBadges.map((b) => b.badgeKey))
 
   const appUser: AppUser = {
-    id: u.id, fullName: u.fullName, username: u.username, role: u.role, status: u.status,
+    id: u.id, fullName: u.fullName, username: u.username, role: u.role, status: u.status, rejectReason: u.rejectReason,
     district: u.district, base: u.base, phone: u.phone, age: u.age, education: u.education,
     points: u.points, levelKey: u.levelKey, levelTitle: lv.title, levelEmoji: lv.emoji,
     nextLevelTitle: nx?.title ?? null, nextLevelMin: nx?.min ?? null,
     currentStreak: u.currentStreak, bestStreak: u.bestStreak,
+  }
+
+  // نتایج چالش‌های تمام‌شده (سکوی قهرمانی از اخبار تاییدشده)
+  const finishedIds = challenges.filter((c) => c.status === "finished").map((c) => c.id)
+  const finishedNews = finishedIds.length
+    ? await db.newsItem.findMany({
+        where: { challengeId: { in: finishedIds }, status: "approved" },
+        select: { challengeId: true, reporterId: true, createdAt: true, reporter: { select: { fullName: true } } },
+      })
+    : []
+  const resultsByChallenge = new Map<number, { rank: number; userId: string; fullName: string; n: number }[]>()
+  for (const cid of finishedIds) {
+    const rows = new Map<string, { fullName: string; n: number; first: Date }>()
+    for (const r of finishedNews) {
+      if (r.challengeId !== cid) continue
+      const cur = rows.get(r.reporterId)
+      if (cur) {
+        cur.n += 1
+        if (r.createdAt < cur.first) cur.first = r.createdAt
+      } else {
+        rows.set(r.reporterId, { fullName: r.reporter.fullName, n: 1, first: r.createdAt })
+      }
+    }
+    resultsByChallenge.set(
+      cid,
+      [...rows.entries()]
+        .sort((a, b) => b[1].n - a[1].n || a[1].first.getTime() - b[1].first.getTime())
+        .slice(0, 3)
+        .map(([uid, v], i) => ({ rank: i + 1, userId: uid, fullName: v.fullName, n: v.n })),
+    )
   }
 
   const challengeDTOs: ChallengeDTO[] = challenges.map((c) => {
@@ -195,12 +230,28 @@ export async function getAppState(userId: string): Promise<AppState | null> {
       id: c.id, code: c.code, title: c.title, description: c.description,
       deadlineAt: c.deadlineAt.toISOString(), endAt: c.endAt.toISOString(), reward: c.reward, status: c.status,
       joined: !!mine, myCount: mine?.count ?? 0, totalParticipants: c.participations.length, myRank,
+      results: resultsByChallenge.get(c.id) ?? [],
     }
   })
 
-  // اعلان‌ها (مشتق از لاگ امتیاز + وضعیت اخبار)
+  // اعلان‌ها: اعلان‌های سیستمی دیتابیس + مشتق از لاگ امتیاز و وضعیت اخبار
+  // (فیلتر با پرچم‌های تنظیمات و ساعت سکوت — معادل _can_push ربات)
+  const flags: NotifFlags = {
+    approvals: u.notifSetting?.approvals ?? true, rejections: u.notifSetting?.rejections ?? true,
+    challenges: u.notifSetting?.challenges ?? true, broadcast: u.notifSetting?.broadcast ?? true,
+    quietStart: u.notifSetting?.quietStart ?? "22:00", quietEnd: u.notifSetting?.quietEnd ?? "08:00",
+  }
+  const quiet = inQuiet(flags)
+  const dbNotifs = await db.notification.findMany({ where: { userId }, orderBy: { createdAt: "desc" }, take: 12 })
   const notifications: AppState["notifications"] = []
+  for (const n of dbNotifs) {
+    if (!kindAllowed(n.kind, flags) || (n.kind === "broadcast" && quiet)) continue
+    notifications.push({
+      id: `db-${n.id}`, kind: n.kind, title: n.title, body: n.body, at: n.createdAt.toISOString(),
+    })
+  }
   for (const l of logs.slice(0, 8)) {
+    if (!kindAllowed("points", flags)) break
     notifications.push({
       id: `p-${l.id}`, kind: "points", title: `+${l.amount} امتیاز`,
       body: l.reason || "امتیاز جدید", at: l.createdAt.toISOString(),
@@ -211,13 +262,20 @@ export async function getAppState(userId: string): Promise<AppState | null> {
     orderBy: { reviewedAt: "desc" }, take: 6,
   })
   for (const n of recentReviewed) {
+    const kind = n.status === "approved" ? "approved" : "rejected"
+    if (!kindAllowed(kind, flags)) continue
     notifications.push({
-      id: `n-${n.id}`, kind: n.status === "approved" ? "approved" : "rejected",
+      id: `n-${n.id}`, kind,
       title: n.status === "approved" ? "خبر شما تایید شد" : "خبر شما رد شد",
       body: n.title, at: (n.reviewedAt ?? n.createdAt).toISOString(),
     })
   }
   notifications.sort((a, b) => b.at.localeCompare(a.at))
+
+  // شمار درخواست‌های عضویت در انتظار (برای نشان پنل مدیریت)
+  const pendingUsersCount = await db.user.count({
+    where: { status: "pending", ...(u.role === "district_manager" ? { district: u.district, role: "reporter" } : {}) },
+  })
 
   return {
     user: appUser,
@@ -231,7 +289,8 @@ export async function getAppState(userId: string): Promise<AppState | null> {
       awardedAt: allBadges.find((x) => x.badgeKey === key)?.awardedAt.toISOString() ?? null,
     })),
     drafts: drafts.map((d) => ({ id: d.id, category: d.category, title: d.title, content: d.content, savedAt: d.savedAt.toISOString() })),
-    notifications: notifications.slice(0, 12),
+    notifications: notifications.slice(0, 14),
+    pendingUsersCount,
     notifSettings: {
       approvals: u.notifSetting?.approvals ?? true, challenges: u.notifSetting?.challenges ?? true,
       broadcast: u.notifSetting?.broadcast ?? true, rejections: u.notifSetting?.rejections ?? true,

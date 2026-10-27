@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { LogOut, SwitchCamera, Zap, Trophy, Flame, BellRing, ShieldCheck, Users2, Timer, Award, ChevronDown } from "lucide-react"
+import { LogOut, SwitchCamera, Zap, Trophy, Flame, BellRing, ShieldCheck, Users2, Timer, Award, ChevronDown, FileDown } from "lucide-react"
 import { useApp } from "@/lib/store"
 import { Ring, SectionHeader, Avatar } from "@/components/app/bits"
 import { fa, faNum } from "@/lib/format"
@@ -98,6 +98,13 @@ export function ProfileScreen({ onSwitchAccount }: { onSwitchAccount: () => void
               <span className="text-[12.5px] font-bold text-ink">{EDUCATION_LABELS[user.education] ?? "—"}</span>
             </div>
           )}
+          <a
+            href={`/api/export?userId=${encodeURIComponent(user.id)}&type=report`}
+            className="mt-4 flex w-full items-center justify-center gap-2 rounded-full border border-neon/30 bg-neon/8 py-3 text-[13px] font-bold text-neon transition-colors hover:bg-neon/14"
+          >
+            <FileDown className="h-4.5 w-4.5" />
+            دانلود کارنامه من (CSV)
+          </a>
         </div>
       </div>
 
