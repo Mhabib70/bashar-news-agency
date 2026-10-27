@@ -73,3 +73,6 @@ android/keystore-release.jks
 /android/base.apk
 /android/aligned.apk
 /android/debug.keystore
+/jdk/
+/download/
+/worklog.md
