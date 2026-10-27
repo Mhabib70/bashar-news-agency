@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 import { useApp } from "@/lib/store"
 import { Welcome } from "@/components/app/welcome"
 import { HomeScreen } from "@/components/app/home"
@@ -10,7 +11,6 @@ import { ProfileScreen } from "@/components/app/profile"
 import { ReviewScreen } from "@/components/app/review-tab"
 import { SubmitFlow } from "@/components/app/submit-flow"
 import { NotificationsSheet, ChallengesSheet } from "@/components/app/sheets"
-import { AdminSheet } from "@/components/app/admin-sheet"
 import { BottomNav } from "@/components/app/bottom-nav"
 import { USER_REJECT_TITLES } from "@/lib/domain"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
@@ -18,13 +18,15 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Hourglass, ShieldX, LogOut } from "lucide-react"
 
 export default function Page() {
+  const router = useRouter()
   const { userId, state, booted, tab, setTab, login, logout, refresh } = useApp()
   const [submitOpen, setSubmitOpen] = useState(false)
   const [notifOpen, setNotifOpen] = useState(false)
   const [challengesOpen, setChallengesOpen] = useState(false)
-  const [adminOpen, setAdminOpen] = useState(false)
   const [submitPreset, setSubmitPreset] = useState<null | { category?: string; title?: string; content?: string; draftId?: number | null }>(null)
   const [switchOpen, setSwitchOpen] = useState(false)
+
+  const openAdmin = () => router.push("/admin")
 
   // راه‌اندازی: بازیابی نشست قبلی
   useEffect(() => {
@@ -51,7 +53,7 @@ export default function Page() {
   const user = state?.user
 
   return (
-    <main className="flex min-h-dvh items-center justify-center bg-[#060704] sm:p-6">
+    <main className="flex min-h-dvh items-center justify-center bg-[var(--page)] sm:p-6">
       {/* پس‌زمینه دسکتاپ */}
       <div className="pointer-events-none fixed inset-0 hidden sm:block" aria-hidden>
         <div className="absolute left-1/2 top-1/2 h-[560px] w-[560px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-neon/6 blur-[140px]" />
@@ -59,7 +61,7 @@ export default function Page() {
       </div>
 
       {/* قاب موبایل */}
-      <div className="relative flex h-dvh w-full flex-col overflow-hidden bg-background sm:h-[860px] sm:max-h-[92dvh] sm:w-[420px] sm:rounded-[44px] sm:border sm:border-[#2a2e1d] sm:shadow-[0_40px_120px_-30px_rgba(0,0,0,0.9),0_0_80px_-40px_rgba(201,247,58,0.25)]">
+      <div className="relative flex h-dvh w-full flex-col overflow-hidden bg-background sm:h-[860px] sm:max-h-[92dvh] sm:w-[420px] sm:rounded-[44px] sm:border sm:border-[var(--frame-border)] sm:shadow-[0_40px_120px_-30px_rgba(0,0,0,0.9),0_0_80px_-40px_rgba(201,247,58,0.25)]">
         {!booted ? (
           <div className="flex flex-1 flex-col gap-6 p-6">
             <Skeleton className="h-[54%] w-full rounded-[28px] bg-surface" />
@@ -76,7 +78,7 @@ export default function Page() {
           />
         ) : user?.status === "rejected" ? (
           <GateScreen
-            icon={<ShieldX className="h-10 w-10 text-[#ff8484]" />}
+            icon={<ShieldX className="h-10 w-10 text-danger-soft" />}
             title="درخواست عضویت شما تایید نشد"
             body={user.rejectReason ? `دلیل: ${USER_REJECT_TITLES[user.rejectReason] ?? user.rejectReason}` : "درخواست شما رد شده است."}
             action={
@@ -100,12 +102,12 @@ export default function Page() {
                   onOpenNews={() => setTab("news")}
                   onGotoActivity={() => setTab("activity")}
                   onGotoReview={() => setTab("review")}
-                  onOpenAdmin={() => setAdminOpen(true)}
+                  onOpenAdmin={openAdmin}
                 />
               )}
               {tab === "news" && <NewsScreen onQuickSubmit={() => openSubmit()} draftsView />}
               {tab === "activity" && <ActivityScreen />}
-              {tab === "profile" && <ProfileScreen onSwitchAccount={() => setSwitchOpen(true)} onOpenAdmin={() => setAdminOpen(true)} />}
+              {tab === "profile" && <ProfileScreen onSwitchAccount={() => setSwitchOpen(true)} onOpenAdmin={openAdmin} />}
               {tab === "review" && <ReviewScreen />}
             </div>
             <BottomNav onReview={() => setTab("review")} />
@@ -116,7 +118,6 @@ export default function Page() {
         <SubmitFlow open={submitOpen} onClose={() => setSubmitOpen(false)} preset={submitPreset} />
         <NotificationsSheet open={notifOpen} onClose={() => setNotifOpen(false)} />
         <ChallengesSheet open={challengesOpen} onClose={() => setChallengesOpen(false)} />
-        <AdminSheet open={adminOpen} onClose={() => setAdminOpen(false)} />
         <SwitchAccountSheet open={switchOpen} onClose={() => setSwitchOpen(false)} />
       </div>
     </main>

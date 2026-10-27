@@ -24,6 +24,7 @@ export type AppUser = {
   nextLevelMin: number | null
   currentStreak: number
   bestStreak: number
+  avatar: string
   createdAt: string
 }
 
@@ -64,6 +65,7 @@ export type ChallengeDTO = {
   totalParticipants: number
   myRank: number | null
   winners: { fullName: string; count: number; prize: number }[]
+  roster: { fullName: string; count: number; isMe: boolean }[]
 }
 
 export type LeaderRow = { id: string; fullName: string; points: number; levelKey: string; district: string; rank: number; isMe: boolean }
@@ -196,7 +198,7 @@ export async function getAppState(userId: string): Promise<AppState | null> {
     district: u.district, base: u.base, phone: u.phone, age: u.age, education: u.education,
     points: u.points, levelKey: u.levelKey, levelTitle: lv.title, levelEmoji: lv.emoji,
     nextLevelTitle: nx?.title ?? null, nextLevelMin: nx?.min ?? null,
-    currentStreak: u.currentStreak, bestStreak: u.bestStreak, createdAt: u.createdAt.toISOString(),
+    currentStreak: u.currentStreak, bestStreak: u.bestStreak, avatar: u.avatar, createdAt: u.createdAt.toISOString(),
   }
 
   const challengeDTOs: ChallengeDTO[] = challenges.map((c) => {
@@ -208,11 +210,14 @@ export async function getAppState(userId: string): Promise<AppState | null> {
           fullName: p.user.fullName, count: p.count, prize: [30, 20, 10][i] ?? 0,
         }))
       : []
+    const roster = parts.filter((p) => p.count > 0 || c.status === "active").slice(0, 10).map((p) => ({
+      fullName: p.user.fullName, count: p.count, isMe: p.userId === userId,
+    }))
     return {
       id: c.id, code: c.code, title: c.title, description: c.description,
       deadlineAt: c.deadlineAt.toISOString(), endAt: c.endAt.toISOString(), reward: c.reward, status: c.status,
       finishedAt: c.finishedAt?.toISOString() ?? null,
-      joined: !!mine, myCount: mine?.count ?? 0, totalParticipants: c.participations.length, myRank, winners,
+      joined: !!mine, myCount: mine?.count ?? 0, totalParticipants: c.participations.length, myRank, winners, roster,
     }
   })
 

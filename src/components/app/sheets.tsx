@@ -16,7 +16,7 @@ export function NotificationsSheet({ open, onClose }: { open: boolean; onClose: 
     kind === "approved" ? (
       <CheckCircle2 className="h-4.5 w-4.5 text-neon" />
     ) : kind === "rejected" ? (
-      <XCircle className="h-4.5 w-4.5 text-[#ff8484]" />
+      <XCircle className="h-4.5 w-4.5 text-danger-soft" />
     ) : (
       <Flame className="h-4.5 w-4.5 text-warn" />
     )

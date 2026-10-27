@@ -167,8 +167,8 @@ export function NewsScreen({ onQuickSubmit, draftsView }: { onQuickSubmit: () =>
               )}
 
               {detailNews.status === "rejected" && (
-                <div className="mt-3 rounded-2xl border border-[#ff5c5c]/30 bg-[#ff5c5c]/8 p-4">
-                  <p className="text-[12.5px] font-bold text-[#ff8484]">
+                <div className="mt-3 rounded-2xl border border-danger/30 bg-danger/8 p-4">
+                  <p className="text-[12.5px] font-bold text-danger-soft">
                     دلیل رد: {REJECT_REASONS.find((r) => r.key === detailNews.rejectReason)?.label ?? "—"}
                   </p>
                   {detailNews.rejectNote && <p className="mt-1 text-[12px] leading-6 text-ink-muted">{detailNews.rejectNote}</p>}
@@ -184,7 +184,7 @@ export function NewsScreen({ onQuickSubmit, draftsView }: { onQuickSubmit: () =>
                     const failed = detailNews.status === "rejected"
                     return (
                       <div key={s} className="flex items-center gap-2.5">
-                        <span className={cn("flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-black", done ? "bg-neon text-neon-foreground" : current ? "bg-[#ffc24b] text-black" : failed ? "bg-[#ff5c5c]/20 text-[#ff8484]" : "bg-surface-2 text-ink-muted")}>
+                        <span className={cn("flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-black", done ? "bg-neon text-neon-foreground" : current ? "bg-warn text-black" : failed ? "bg-danger/20 text-danger-soft" : "bg-surface-2 text-ink-muted")}>
                           {fa(i + 1)}
                         </span>
                         <span className={cn("text-[12px] font-semibold", done || current ? "text-ink" : "text-ink-muted")}>

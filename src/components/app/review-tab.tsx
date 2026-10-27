@@ -108,7 +108,7 @@ export function ReviewScreen() {
                       setReason("insufficient")
                     }}
                     disabled={busy !== null}
-                    className="flex flex-1 items-center justify-center gap-1.5 rounded-full border border-[#ff5c5c]/40 py-3 text-[13px] font-bold text-[#ff8484] transition-colors hover:bg-[#ff5c5c]/8 disabled:opacity-50"
+                    className="flex flex-1 items-center justify-center gap-1.5 rounded-full border border-danger/40 py-3 text-[13px] font-bold text-danger-soft transition-colors hover:bg-danger/8 disabled:opacity-50"
                   >
                     <X className="h-4 w-4" />
                     رد با دلیل
@@ -136,10 +136,10 @@ export function ReviewScreen() {
                 onClick={() => setReason(r.key)}
                 className={cn(
                   "flex w-full items-start gap-3 rounded-2xl border px-4 py-3 text-right transition-colors",
-                  reason === r.key ? "border-[#ff5c5c]/50 bg-[#ff5c5c]/8" : "border-line bg-surface hover:bg-surface-2",
+                  reason === r.key ? "border-danger/50 bg-danger/8" : "border-line bg-surface hover:bg-surface-2",
                 )}
               >
-                <span className={cn("mt-0.5 flex h-5 w-5 items-center justify-center rounded-full border", reason === r.key ? "border-[#ff5c5c] bg-[#ff5c5c] text-white" : "border-line")}>
+                <span className={cn("mt-0.5 flex h-5 w-5 items-center justify-center rounded-full border", reason === r.key ? "border-danger bg-danger text-white" : "border-line")}>
                   {reason === r.key && <Check className="h-3 w-3" />}
                 </span>
                 <span>
@@ -153,7 +153,7 @@ export function ReviewScreen() {
           <button
             onClick={() => rejecting !== null && act(rejecting, "reject", reason, note)}
             disabled={busy !== null}
-            className="mt-4 w-full rounded-full bg-[#ff5c5c] py-3.5 text-[14px] font-bold text-white disabled:opacity-50"
+            className="mt-4 w-full rounded-full bg-danger py-3.5 text-[14px] font-bold text-white disabled:opacity-50"
           >
             {busy !== null ? "..." : "ثبت رد خبر"}
           </button>

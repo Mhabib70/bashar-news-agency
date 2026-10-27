@@ -86,6 +86,7 @@
   --color-line: var(--line);
   --color-warn: var(--warn);
   --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
 }
 
 :root {
@@ -131,6 +132,58 @@
   --line: #262a1b;
   --warn: #ffc24b;
   --danger: #ff5c5c;
+  --danger-soft: #ff8484;
+  --page: #060704;
+  --frame-border: #2a2e1d;
+  --nav-bg: #101208;
+}
+
+/* پالت روشن — همان هویت سبز لیمویی با خوانایی حرفه‌ای */
+html.light {
+  --background: #f2f4ea;
+  --foreground: #1d2612;
+  --card: #ffffff;
+  --card-foreground: #1d2612;
+  --popover: #ffffff;
+  --popover-foreground: #1d2612;
+  --primary: #4d7c0f;
+  --primary-foreground: #ffffff;
+  --secondary: #e9edd9;
+  --secondary-foreground: #2a331a;
+  --muted: #eaedde;
+  --muted-foreground: #5d684e;
+  --accent: #e4e9d1;
+  --accent-foreground: #2a331a;
+  --destructive: #dc2626;
+  --border: #dce1c9;
+  --input: #dce1c9;
+  --ring: #4d7c0f;
+  --chart-1: #4d7c0f;
+  --chart-2: #84cc16;
+  --chart-3: #a3d139;
+  --chart-4: #84916a;
+  --chart-5: #d7ddc4;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #1d2612;
+  --sidebar-primary: #4d7c0f;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #e4e9d1;
+  --sidebar-accent-foreground: #2a331a;
+  --sidebar-border: #dce1c9;
+  --sidebar-ring: #4d7c0f;
+  --neon: #4d7c0f;
+  --neon-foreground: #ffffff;
+  --surface: #ffffff;
+  --surface-2: #edf0e1;
+  --ink: #1d2612;
+  --ink-muted: #5d684e;
+  --line: #dce1c9;
+  --warn: #b45309;
+  --danger: #dc2626;
+  --danger-soft: #dc2626;
+  --page: #e7ebdb;
+  --frame-border: #d3d9bf;
+  --nav-bg: #fbfcf4;
 }
 
 * {
@@ -143,20 +196,20 @@ body {
 }
 
 body {
-  background: #060704;
+  background: var(--page);
   color: var(--foreground);
   font-family: "Vazirmatn", ui-sans-serif, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
 
-/* اسکرول‌بار ظریف تیره */
+/* اسکرول‌بار ظریف همرنگ تم */
 .nice-scroll::-webkit-scrollbar {
   width: 4px;
   height: 4px;
 }
 .nice-scroll::-webkit-scrollbar-thumb {
-  background: #2e3320;
+  background: var(--line);
   border-radius: 999px;
 }
 .nice-scroll::-webkit-scrollbar-track {
@@ -217,4 +270,55 @@ body {
 
 .safe-b {
   padding-bottom: max(env(safe-area-inset-bottom), 0px);
+}
+
+/* ---------- کادر آواتار حرفه‌ای: مربع کج با حاشیه قرمز نئونی ---------- */
+.avatar-neon {
+  position: relative;
+  border-radius: 14px;
+  border: 2px solid #ff2d55;
+  background: var(--surface);
+  box-shadow:
+    0 0 0 1px rgba(255, 45, 85, 0.28),
+    0 0 12px rgba(255, 45, 85, 0.55),
+    0 0 30px rgba(255, 45, 85, 0.25),
+    inset 0 0 10px rgba(255, 45, 85, 0.18);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.avatar-neon::before {
+  /* بازتاب مورب شیشه‌ای روی کادر */
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.22) 0%, transparent 38%);
+  pointer-events: none;
+  z-index: 2;
+}
+.avatar-neon::after {
+  /* نشان گوشه قرمز نئونی */
+  content: "";
+  position: absolute;
+  left: 4px;
+  bottom: 4px;
+  width: 7px;
+  height: 7px;
+  border-radius: 2px;
+  background: #ff2d55;
+  box-shadow: 0 0 8px rgba(255, 45, 85, 0.9);
+  z-index: 3;
+}
+.avatar-neon > * {
+  transform: rotate(6deg) scale(1.18);
+}
+
+/* در پنل ادمین: نسخه صاف و جمع‌وجور برای کارت‌ها */
+.avatar-photo {
+  position: relative;
+  border-radius: 12px;
+  border: 2px solid rgba(255, 45, 85, 0.55);
+  box-shadow: 0 0 8px rgba(255, 45, 85, 0.22);
+  overflow: hidden;
+  flex-shrink: 0;
+  background: var(--surface-2);
 }

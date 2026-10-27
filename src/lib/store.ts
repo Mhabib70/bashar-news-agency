@@ -18,10 +18,29 @@ type SubmitPayload = {
 
 type Result = { ok: boolean; message?: string; pointsEarned?: number; badgesAwarded?: string[] }
 
-type UserInfo = {
+export type UserInfo = {
   id: string; fullName: string; username: string; role: string; status: string; rejectReason: string
   district: string; base: string; phone: string; age: string; education: string
-  points: number; levelKey: string; currentStreak: number; createdAt: string
+  points: number; levelKey: string; currentStreak: number; bestStreak: number; avatar: string
+  lastActivityAt: string | null; createdAt: string
+}
+
+export type AdminUserDetail = {
+  user: UserInfo
+  stats: { newsTotal: number; approved: number; rejected: number; pending: number; approveRate: number; rank: number | null }
+  badges: { key: string; awardedAt: string }[]
+  pointsLog: { amount: number; reason: string; createdAt: string }[]
+  news: { id: number; code: string; title: string; status: string; category: string; createdAt: string }[]
+  participations: { challengeId: number; count: number; joinedAt: string; challengeTitle: string; challengeStatus: string }[]
+}
+
+export type AdminOverview = {
+  users: { active: number; pending: number; rejected: number; reporters: number }
+  news: { pendingTotal: number; stageDistrict: number; stageSpecialist: number; stageAdmin: number; approved: number; rejected: number; today: number; week: number; pointsToday: number }
+  challenges: { active: number }
+  recentUsers: { id: string; fullName: string; avatar: string; district: string; base: string; role: string; status: string; createdAt: string }[]
+  recentNews: { id: number; code: string; title: string; status: string; reviewStage: string; createdAt: string; reporter: { fullName: string } }[]
+  recentBroadcasts: { title: string; body: string; at: string; recipients: number }[]
 }
 
 type Store = {
@@ -44,6 +63,9 @@ type Store = {
   fetchUsers: () => Promise<UserInfo[]>
   moderateUser: (targetId: string, action: "approve" | "reject", reason?: string) => Promise<Result>
   uploadMedia: (file: File) => Promise<{ ok: boolean; url?: string; mediaType?: string; message?: string }>
+  uploadAvatar: (dataUrl: string) => Promise<Result>
+  fetchUserDetail: (targetId: string) => Promise<AdminUserDetail | null>
+  fetchAdminOverview: () => Promise<AdminOverview | null>
   saveDraft: (p: { category: string; title: string; content: string; draftId?: number | null }) => Promise<Result>
   deleteDraft: (id: number) => Promise<Result>
   saveSettings: (p: Partial<AppState["notifSettings"]>) => Promise<Result>
@@ -238,6 +260,42 @@ export const useApp = create<Store>((set, get) => ({
       return { ok: true, url: data.url, mediaType: data.mediaType, message: data.message }
     } catch (e) {
       return { ok: false, message: (e as Error).message }
+    }
+  },
+
+  uploadAvatar: async (dataUrl) => {
+    const uid = get().userId
+    if (!uid) return { ok: false }
+    try {
+      const r = await api<Result & { message: string }>("/api/user/avatar", {
+        method: "POST",
+        body: JSON.stringify({ userId: uid, avatar: dataUrl }),
+      })
+      await get().refresh()
+      return { ok: true, message: r.message }
+    } catch (e) {
+      return { ok: false, message: (e as Error).message }
+    }
+  },
+
+  fetchUserDetail: async (targetId) => {
+    const uid = get().userId
+    if (!uid) return null
+    try {
+      const r = await api<AdminUserDetail>(`/api/users?userId=${encodeURIComponent(uid)}&targetId=${encodeURIComponent(targetId)}`)
+      return r
+    } catch {
+      return null
+    }
+  },
+
+  fetchAdminOverview: async () => {
+    const uid = get().userId
+    if (!uid) return null
+    try {
+      return await api<AdminOverview>(`/api/admin/overview?userId=${encodeURIComponent(uid)}`)
+    } catch {
+      return null
     }
   },
 

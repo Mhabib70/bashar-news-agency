@@ -1,22 +1,50 @@
 "use client"
 
-import { useState } from "react"
-import { LogOut, SwitchCamera, Zap, Trophy, Flame, BellRing, ShieldCheck, Users2, Timer, Award, ChevronDown, BadgeCheck, Share2, FileDown } from "lucide-react"
+import { useRef, useState } from "react"
+import { LogOut, SwitchCamera, Zap, Trophy, Flame, BellRing, ShieldCheck, Users2, Timer, Award, ChevronDown, BadgeCheck, Share2, FileDown, Camera, Trash2, Loader2 } from "lucide-react"
 import { useApp } from "@/lib/store"
-import { Ring, SectionHeader, Avatar } from "@/components/app/bits"
+import { Ring, SectionHeader, Avatar, NeonAvatar } from "@/components/app/bits"
 import { fa, faNum, jalali } from "@/lib/format"
 import { ROLE_LABELS, DISTRICT_LABELS, EDUCATION_LABELS, LEVELS, levelIndex } from "@/lib/domain"
+import { fileToAvatarDataUrl } from "@/lib/image"
+import { ThemeToggle } from "@/components/app/theme-toggle"
 import { cn } from "@/lib/utils"
 import { Switch } from "@/components/ui/switch"
 import { useToast } from "@/hooks/use-toast"
 
 export function ProfileScreen({ onSwitchAccount, onOpenAdmin }: { onSwitchAccount: () => void; onOpenAdmin?: () => void }) {
-  const { state, saveSettings, logout } = useApp()
+  const { state, saveSettings, logout, uploadAvatar } = useApp()
   const { toast } = useToast()
   const [showSettings, setShowSettings] = useState(false)
   const [busy, setBusy] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const fileRef = useRef<HTMLInputElement>(null)
   if (!state) return null
   const { user, stats } = state
+
+  const pickAvatar = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0]
+    e.target.value = ""
+    if (!f) return
+    setUploading(true)
+    try {
+      const dataUrl = await fileToAvatarDataUrl(f)
+      const r = await uploadAvatar(dataUrl)
+      if (r.ok) toast({ title: "ثبت شد", description: "عکس پروفایل شما به‌روزرسانی شد" })
+      else toast({ title: "خطا", description: r.message, variant: "destructive" })
+    } catch (err) {
+      toast({ title: "خطا", description: (err as Error).message, variant: "destructive" })
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  const removeAvatar = async () => {
+    setUploading(true)
+    const r = await uploadAvatar("")
+    setUploading(false)
+    if (r.ok) toast({ title: "حذف شد", description: "عکس پروفایل حذف شد" })
+  }
 
   const lvIdx = levelIndex(user.levelKey)
   const lv = LEVELS[lvIdx]
@@ -49,7 +77,27 @@ export function ProfileScreen({ onSwitchAccount, onOpenAdmin }: { onSwitchAccoun
     <div className="stage-enter flex flex-col gap-5 px-5 pb-4 pt-6">
       {/* هدر پروفایل */}
       <div className="flex items-center gap-4">
-        <Avatar name={user.fullName} size={64} />
+        <div className="relative">
+          <NeonAvatar name={user.fullName} src={user.avatar} size={76} />
+          <button
+            onClick={() => fileRef.current?.click()}
+            disabled={uploading}
+            className="absolute -bottom-1.5 -left-1.5 flex h-8 w-8 items-center justify-center rounded-full bg-neon text-neon-foreground shadow-[0_4px_14px_-4px_rgba(0,0,0,0.5)] ring-2 ring-background transition-transform hover:scale-105 active:scale-95 disabled:opacity-60"
+            aria-label="تغییر عکس پروفایل"
+          >
+            {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}
+          </button>
+          {user.avatar && !uploading && (
+            <button
+              onClick={removeAvatar}
+              className="absolute -top-1.5 -left-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-danger text-white shadow-md ring-2 ring-background"
+              aria-label="حذف عکس پروفایل"
+            >
+              <Trash2 className="h-3 w-3" />
+            </button>
+          )}
+          <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={pickAvatar} />
+        </div>
         <div className="min-w-0 flex-1">
           <h1 className="truncate text-[20px] font-black text-ink">{user.fullName}</h1>
           <p className="mt-0.5 text-[11.5px] text-ink-muted">
@@ -75,7 +123,7 @@ export function ProfileScreen({ onSwitchAccount, onOpenAdmin }: { onSwitchAccoun
             </span>
           </div>
           <div className="mt-4 flex items-center gap-3.5">
-            <Avatar name={user.fullName} size={54} />
+            <Avatar name={user.fullName} src={user.avatar} size={54} />
             <div className="min-w-0 flex-1">
               <p className="truncate text-[17px] font-black text-ink">{user.fullName}</p>
               <p className="mt-0.5 text-[11px] font-semibold text-ink-muted">
@@ -157,7 +205,7 @@ export function ProfileScreen({ onSwitchAccount, onOpenAdmin }: { onSwitchAccoun
           <div className="mt-3 flex items-center justify-between">
             <span className="text-[12.5px] font-semibold text-ink-muted">خبر تاییدشده / ردشده</span>
             <span className="text-[13.5px] font-black text-ink">
-              <span className="text-neon">{fa(stats.totalApproved)}</span> / <span className="text-[#ff8484]">{fa(stats.totalRejected)}</span>
+              <span className="text-neon">{fa(stats.totalApproved)}</span> / <span className="text-danger-soft">{fa(stats.totalRejected)}</span>
             </span>
           </div>
           {user.education && (
@@ -186,6 +234,17 @@ export function ProfileScreen({ onSwitchAccount, onOpenAdmin }: { onSwitchAccoun
               <span className="text-[9px] leading-3.5 text-ink-muted">{b.desc}</span>
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* حالت نمایش */}
+      <div>
+        <SectionHeader title="حالت نمایش" />
+        <div className="rounded-[26px] border border-line bg-surface p-3">
+          <ThemeToggle />
+          <p className="mt-2 px-1 text-[10px] leading-4 text-ink-muted/70">
+            حالت انتخابی روی این دستگاه ذخیره می‌شود.
+          </p>
         </div>
       </div>
 
@@ -249,7 +308,7 @@ export function ProfileScreen({ onSwitchAccount, onOpenAdmin }: { onSwitchAccoun
         </button>
         <button
           onClick={logout}
-          className="flex flex-1 items-center justify-center gap-2 rounded-full border border-[#ff5c5c]/30 py-3.5 text-[13.5px] font-bold text-[#ff8484] transition-colors hover:bg-[#ff5c5c]/8"
+          className="flex flex-1 items-center justify-center gap-2 rounded-full border border-danger/30 py-3.5 text-[13.5px] font-bold text-danger-soft transition-colors hover:bg-danger/8"
         >
           <LogOut className="h-4.5 w-4.5" />
           خروج

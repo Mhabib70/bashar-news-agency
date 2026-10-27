@@ -18,7 +18,7 @@ export function BottomNav({ onReview }: { onReview: () => void }) {
   ]
 
   return (
-    <nav className="sticky bottom-0 z-30 mt-auto border-t border-line bg-[#101208]/95 px-2 pb-2 pt-1.5 backdrop-blur-lg" aria-label="ناوبری اصلی">
+    <nav className="sticky bottom-0 z-30 mt-auto border-t border-line bg-[var(--nav-bg)]/95 px-2 pb-2 pt-1.5 backdrop-blur-lg" aria-label="ناوبری اصلی">
       <div className={cn("flex items-end justify-around", isReviewer && "gap-0")}>
         {items.slice(0, 2).map((it) => (
           <NavBtn key={it.id} label={it.label} icon={it.icon} active={tab === it.id} onClick={() => setTab(it.id)} />
@@ -31,7 +31,7 @@ export function BottomNav({ onReview }: { onReview: () => void }) {
           >
             <ClipboardCheck className="h-6 w-6" />
             {state.reviewQueue.length > 0 && (
-              <span className="absolute -left-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#ff5c5c] px-1 text-[10px] font-black text-white">
+              <span className="absolute -left-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-danger px-1 text-[10px] font-black text-white">
                 {fa(state.reviewQueue.length)}
               </span>
             )}

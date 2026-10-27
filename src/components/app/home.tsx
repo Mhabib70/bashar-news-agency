@@ -3,7 +3,7 @@
 import Image from "next/image"
 import { Bell, Plus, Megaphone, FileCheck2, ArrowLeft, ClipboardList, Flame, Newspaper, Timer, ChevronLeft, ShieldCheck } from "lucide-react"
 import { useApp } from "@/lib/store"
-import { SectionHeader, CountUp, Avatar } from "@/components/app/bits"
+import { SectionHeader, CountUp, Avatar, NeonAvatar } from "@/components/app/bits"
 import { faNum, fa, durFmt, untilFmt } from "@/lib/format"
 import { ROLE_LABELS } from "@/lib/domain"
 import { cn } from "@/lib/utils"
@@ -35,15 +35,18 @@ export function HomeScreen({
   return (
     <div className="stage-enter flex flex-col gap-5 px-5 pb-4 pt-6">
       {/* سربرگ */}
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-[24px] font-black leading-8 text-ink">
-            سلام {user.fullName.split(" ")[0]} <span aria-hidden>👋</span>
-          </h1>
-          <p className="mt-1 text-[13px] leading-5 text-ink-muted">آماده‌ای امروز به هدفت برسی؟</p>
-          <p className="mt-1.5 text-[11px] font-semibold text-neon">
-            {ROLE_LABELS[user.role]} · {user.levelEmoji} سطح {user.levelTitle}
-          </p>
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex min-w-0 items-start gap-3.5">
+          <NeonAvatar name={user.fullName} src={user.avatar} size={58} className="mt-0.5" />
+          <div className="min-w-0">
+            <h1 className="truncate text-[22px] font-black leading-8 text-ink">
+              سلام {user.fullName.split(" ")[0]} <span aria-hidden>👋</span>
+            </h1>
+            <p className="mt-1 text-[13px] leading-5 text-ink-muted">آماده‌ای امروز به هدفت برسی؟</p>
+            <p className="mt-1.5 text-[11px] font-semibold text-neon">
+              {ROLE_LABELS[user.role]} · {user.levelEmoji} سطح {user.levelTitle}
+            </p>
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -70,7 +73,7 @@ export function HomeScreen({
             >
               <ClipboardList className="h-5 w-5" />
               {reviewQueue.length > 0 && (
-                <span className="absolute -left-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#ff5c5c] px-1 text-[10px] font-black text-white">
+                <span className="absolute -left-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-danger px-1 text-[10px] font-black text-white">
                   {fa(reviewQueue.length)}
                 </span>
               )}
@@ -99,7 +102,7 @@ export function HomeScreen({
           <span className="relative flex h-10 w-10 items-center justify-center rounded-full bg-neon text-neon-foreground">
             <ArrowLeft className="h-5 w-5" />
             {state.pendingUsersCount > 0 && (
-              <span className="absolute -left-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#ff5c5c] px-1 text-[10px] font-black text-white">
+              <span className="absolute -left-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-danger px-1 text-[10px] font-black text-white">
                 {fa(state.pendingUsersCount)}
               </span>
             )}
@@ -250,7 +253,7 @@ export function StatusDot({ status }: { status: string }) {
     <span
       className={cn(
         "flex h-7 w-7 shrink-0 items-center justify-center rounded-full",
-        status === "approved" ? "bg-neon text-neon-foreground" : status === "rejected" ? "bg-[#ff5c5c]/15 text-[#ff8484]" : "bg-[#ffc24b]/15 text-[#ffc24b]",
+        status === "approved" ? "bg-neon text-neon-foreground" : status === "rejected" ? "bg-danger/15 text-danger-soft" : "bg-warn/15 text-warn",
       )}
     >
       {status === "approved" ? (

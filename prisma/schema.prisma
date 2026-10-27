@@ -26,6 +26,7 @@ model User {
   lastActivityAt  DateTime?
   lastDemotionAt  DateTime?
   rejectReason    String    @default("")
+  avatar          String    @default("") // عکس پروفایل (data URL بعد از تغییر اندازه در سمت کلاینت)
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 

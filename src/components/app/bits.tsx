@@ -13,7 +13,7 @@ export function Ring({
   size = 168,
   stroke = 12,
   children,
-  trackClass = "stroke-[#2b2f1e]",
+  trackClass = "stroke-line",
   barClass = "stroke-neon",
 }: {
   value: number
@@ -73,8 +73,8 @@ export function SectionHeader({ title, action, onAction }: { title: string; acti
 export function StatusChip({ status, small }: { status: string; small?: boolean }) {
   const map = {
     approved: { label: "تایید شده", cls: "bg-neon/12 text-neon border-neon/25" },
-    rejected: { label: "رد شده", cls: "bg-[#ff5c5c]/10 text-[#ff8484] border-[#ff5c5c]/25" },
-    pending: { label: "در بررسی", cls: "bg-[#ffc24b]/10 text-[#ffc24b] border-[#ffc24b]/25" },
+    rejected: { label: "رد شده", cls: "bg-danger/10 text-danger-soft border-danger/25" },
+    pending: { label: "در بررسی", cls: "bg-warn/10 text-warn border-warn/25" },
   } as const
   const it = map[status as keyof typeof map] ?? map.pending
   return (
@@ -99,9 +99,9 @@ export function StageDots({ status, stage }: { status: string; stage: string }) 
   if (status === "rejected") {
     return (
       <div className="flex items-center gap-1.5">
-        <span className="h-1.5 w-6 rounded-full bg-[#ff5c5c]/70" />
-        <span className="h-1.5 w-6 rounded-full bg-[#2b2f1e]" />
-        <span className="h-1.5 w-6 rounded-full bg-[#2b2f1e]" />
+        <span className="h-1.5 w-6 rounded-full bg-danger/70" />
+        <span className="h-1.5 w-6 rounded-full bg-line" />
+        <span className="h-1.5 w-6 rounded-full bg-line" />
       </div>
     )
   }
@@ -111,7 +111,7 @@ export function StageDots({ status, stage }: { status: string; stage: string }) 
       {REVIEW_STAGES.map((s, i) => (
         <span
           key={s.key}
-          className={cn("h-1.5 w-6 rounded-full", i < idx ? "bg-neon/50" : i === idx ? "bg-[#ffc24b]" : "bg-[#2b2f1e]")}
+          className={cn("h-1.5 w-6 rounded-full", i < idx ? "bg-neon/50" : i === idx ? "bg-warn" : "bg-line")}
         />
       ))}
     </div>
@@ -145,8 +145,19 @@ export function StatCard({
   )
 }
 
-// ---------- آواتار حروف اول ----------
-export function Avatar({ name, size = 44, tone = "neon" }: { name: string; size?: number; tone?: "neon" | "dark" }) {
+// ---------- آواتار: عکس پروفایل یا حروف اول ----------
+export function Avatar({ name, size = 44, tone = "neon", src }: { name: string; size?: number; tone?: "neon" | "dark"; src?: string }) {
+  if (src) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={src}
+        alt={name}
+        className="shrink-0 rounded-full border border-line object-cover"
+        style={{ width: size, height: size }}
+      />
+    )
+  }
   const parts = name.trim().split(/\s+/).slice(0, 2).map((p) => p[0] ?? "").join("")
   return (
     <span
@@ -158,6 +169,32 @@ export function Avatar({ name, size = 44, tone = "neon" }: { name: string; size?
       aria-hidden
     >
       {parts}
+    </span>
+  )
+}
+
+// ---------- کادر آواتار نئونی: مربع کج با حاشیه قرمز نئونی (کادر حرفه‌ای) ----------
+export function NeonAvatar({ name, src, size = 56, className }: { name: string; src?: string; size?: number; className?: string }) {
+  const parts = name.trim().split(/\s+/).slice(0, 2).map((p) => p[0] ?? "").join("")
+  return (
+    <span
+      className={cn("avatar-neon inline-flex items-center justify-center", className)}
+      style={{ width: size, height: size }}
+      role="img"
+      aria-label={`عکس ${name}`}
+    >
+      {src ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={src} alt="" className="h-full w-full object-cover" />
+      ) : (
+        <span
+          className="flex h-full w-full items-center justify-center bg-neon/15 font-black text-neon"
+          style={{ fontSize: size * 0.32 }}
+          aria-hidden
+        >
+          {parts}
+        </span>
+      )}
     </span>
   )
 }
