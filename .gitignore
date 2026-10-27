@@ -76,3 +76,6 @@ android/keystore-release.jks
 /jdk/
 /download/
 /worklog.md
+
+# اجازه انتشار فایل نمونه env (بدون مقادیر واقعی)
+!.env.example
