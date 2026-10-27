@@ -64,6 +64,40 @@ bunx prisma db push && bun run scripts/seed.ts
 bun run build && bun run start
 ```
 
+## استقرار رایگان (Vercel + Turso) — بدون هزینه
+
+اپ با این ترکیب روی هاست رایگان دائمی اجرا می‌شود (هر دو سرویس، پلن رایگان بدون کارت بانکی دارند):
+
+### گام ۱ — دیتابیس رایگان Turso (سازگار با SQLite)
+
+1. به [turso.tech](https://turso.tech) بروید و با **GitHub** وارد شوید (رایگان)
+2. **Create Database** → نام دلخواه (مثلاً `bashar-news`) → Location نزدیک: **Frankfurt (fra)**
+3. بعد از ساخت، دو مقدار را کپی کنید:
+   - `Database URL` — شبیه `libsql://bashar-news-xxxx.turso.io`
+   - `Database Token` — از تب توکن‌ها بسازید
+
+### گام ۲ — ساخت جداول در Turso (یک بار، از کامپیوتر خودتان)
+
+```bash
+DATABASE_URL="file:./db/custom.db" bunx prisma generate   # یک بار
+DATABASE_URL="libsql://bashar-news-xxxx.turso.io?authToken=YOUR_TOKEN" bunx prisma db push
+```
+
+### گام ۳ — دیپلوی روی Vercel (رایگان)
+
+1. به [vercel.com/new](https://vercel.com/new) بروید و ریپو `bashar-news-agency` را Import کنید
+2. در بخش **Environment Variables** سه مقدار را اضافه کنید:
+   - `DATABASE_URL` = `file:./db/custom.db` (برای ساخت کلاینت — استفاده نمی‌شود)
+   - `TURSO_DATABASE_URL` = آدرس گام ۱
+   - `TURSO_AUTH_TOKEN` = توکن گام ۱
+3. **Deploy** را بزنید — بعد از یک دقیقه آدرس دائمی (مثل `https://bashar-news.vercel.app`) تحویل می‌گیرید
+
+### گام ۴ — اتصال اپ اندروید
+
+در APK، هنگام قطعی اتصال اول، آدرس سرور Vercel را در فیلد آدرس وارد و «اتصال» را بزنید — در دستگاه ذخیره می‌شود.
+
+> نکته: اپ برای تشخیص خودکار دیتابیس ابری طراحی شده — اگر `TURSO_DATABASE_URL` تنظیم باشد از Turso استفاده می‌کند، وگرنه از فایل SQLite محلی. پلن رایگان Vercel هر ۱۵ ثانیه آماده نگه می‌دارد و Turso پلن رایگان تا ۵۰۰ دیتابیس و ۹ گیگ خواندن در ماه می‌دهد.
+
 ## اپ اندروید
 
 فایل آماده نصب: **[`apk/BasharNews-v1.0.0.apk`](apk/BasharNews-v1.0.0.apk)** (همچنین در [Releases](../../releases) قابل دانلود است).
