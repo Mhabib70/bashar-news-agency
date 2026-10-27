@@ -1,5 +1,7 @@
 import { db } from "@/lib/db"
 import { LEVELS, levelFor, levelIndex, nextLevel, BADGES, POINTS, ROLE_STAGE } from "@/lib/domain"
+import { tehranDayKey, tehranDayStart } from "./tz"
+import { challengeHousekeeping, applyInactivityPolicy, registrationHousekeeping } from "./challenges"
 import type { Prisma } from "@prisma/client"
 
 export type AppUser = {
@@ -8,6 +10,7 @@ export type AppUser = {
   username: string
   role: string
   status: string
+  rejectReason: string
   district: string
   base: string
   phone: string
@@ -21,6 +24,7 @@ export type AppUser = {
   nextLevelMin: number | null
   currentStreak: number
   bestStreak: number
+  createdAt: string
 }
 
 export type NewsDTO = {
@@ -34,6 +38,7 @@ export type NewsDTO = {
   title: string
   content: string
   mediaType: string
+  mediaUrl: string
   status: string
   reviewStage: string
   rejectReason: string
@@ -53,10 +58,12 @@ export type ChallengeDTO = {
   endAt: string
   reward: string
   status: string
+  finishedAt: string | null
   joined: boolean
   myCount: number
   totalParticipants: number
   myRank: number | null
+  winners: { fullName: string; count: number; prize: number }[]
 }
 
 export type LeaderRow = { id: string; fullName: string; points: number; levelKey: string; district: string; rank: number; isMe: boolean }
@@ -77,16 +84,16 @@ export type AppState = {
   drafts: { id: number; category: string; title: string; content: string; savedAt: string }[]
   notifications: { id: string; kind: string; title: string; body: string; at: string }[]
   notifSettings: { approvals: boolean; challenges: boolean; broadcast: boolean; rejections: boolean; quietStart: string; quietEnd: string }
+  pendingUsersCount: number
 }
 
 export type PeriodStat = { points: number; newsCount: number; activeMin: number }
 
 function periodStart(kind: "day" | "week" | "month"): Date {
-  const d = new Date()
-  if (kind === "day") d.setHours(0, 0, 0, 0)
-  else if (kind === "week") d.setTime(Date.now() - 7 * 24 * 3600 * 1000)
-  else d.setTime(Date.now() - 30 * 24 * 3600 * 1000)
-  return d
+  const now = new Date()
+  if (kind === "day") return tehranDayStart(now) // نیمه‌شب تهران
+  if (kind === "week") return new Date(now.getTime() - 7 * 24 * 3600 * 1000)
+  return new Date(now.getTime() - 30 * 24 * 3600 * 1000)
 }
 
 async function periodStat(userId: string, kind: "day" | "week" | "month"): Promise<PeriodStat> {
@@ -104,13 +111,13 @@ async function periodStat(userId: string, kind: "day" | "week" | "month"): Promi
 
 function toNewsDTO(n: {
   id: number; code: string; reporterId: string; district: string; category: string; title: string; content: string
-  mediaType: string; status: string; reviewStage: string; rejectReason: string; rejectNote: string; reviewedBy: string
+  mediaType: string; mediaUrl: string; status: string; reviewStage: string; rejectReason: string; rejectNote: string; reviewedBy: string
   challengeId: number | null; durationMin: number; createdAt: Date
   reporter: { fullName: string; district: string }
 }): NewsDTO {
   return {
     id: n.id, code: n.code, reporterId: n.reporterId, reporterName: n.reporter.fullName, reporterDistrict: n.reporter.district,
-    district: n.district, category: n.category, title: n.title, content: n.content, mediaType: n.mediaType,
+    district: n.district, category: n.category, title: n.title, content: n.content, mediaType: n.mediaType, mediaUrl: n.mediaUrl,
     status: n.status, reviewStage: n.reviewStage, rejectReason: n.rejectReason, rejectNote: n.rejectNote,
     reviewedBy: n.reviewedBy, challengeId: n.challengeId, durationMin: n.durationMin, createdAt: n.createdAt.toISOString(),
   }
@@ -119,10 +126,15 @@ function toNewsDTO(n: {
 const newsInclude = { reporter: { select: { fullName: true, district: true } } } satisfies Prisma.NewsItemInclude
 
 export async function getAppState(userId: string): Promise<AppState | null> {
+  // نگهداری دوره‌ای lazy (معادل scheduler ربات): انقضای ثبت‌نام‌ها، پایان چالش‌ها، سقوط غیبت
+  await registrationHousekeeping().catch(() => {})
+  await challengeHousekeeping().catch(() => {})
+  await applyInactivityPolicy(userId).catch(() => {})
+
   const u = await db.user.findUnique({ where: { id: userId }, include: { notifSetting: true } })
   if (!u) return null
 
-  const [day, week, month, ownNews, queue, challenges, allBadges, drafts, logs] = await Promise.all([
+  const [day, week, month, ownNews, queue, challenges, allBadges, drafts] = await Promise.all([
     periodStat(userId, "day"),
     periodStat(userId, "week"),
     periodStat(userId, "month"),
@@ -141,12 +153,11 @@ export async function getAppState(userId: string): Promise<AppState | null> {
           orderBy: { createdAt: "asc" },
         }),
     db.challenge.findMany({
-      include: { participations: { include: { user: { select: { id: true } } }, orderBy: { count: "desc" } } },
+      include: { participations: { include: { user: { select: { id: true, fullName: true } } }, orderBy: { count: "desc" } } },
       orderBy: { createdAt: "desc" },
     }),
     db.userBadge.findMany({ where: { userId } }),
     db.draft.findMany({ where: { userId }, orderBy: { savedAt: "desc" } }),
-    db.pointsLog.findMany({ where: { userId }, orderBy: { createdAt: "desc" }, take: 12 }),
   ])
 
   // رتبه‌بندی
@@ -156,17 +167,17 @@ export async function getAppState(userId: string): Promise<AppState | null> {
     id: r.id, fullName: r.fullName, points: r.points, levelKey: r.levelKey, district: r.district, rank: i + 1, isMe: r.id === userId,
   }))
 
-  // سری هفتگی امتیاز (۷ روز)
+  // سری هفتگی امتیاز (۷ روز — کلید روز به وقت تهران)
   const weekSeries: { day: string; points: number }[] = []
   const fromWeek = new Date(Date.now() - 6 * 24 * 3600 * 1000); fromWeek.setHours(0, 0, 0, 0)
   const weekLogs = await db.pointsLog.findMany({ where: { userId, createdAt: { gte: fromWeek } }, select: { amount: true, createdAt: true } })
   for (let i = 0; i < 7; i++) {
     const d = new Date(fromWeek.getTime() + i * 24 * 3600 * 1000)
-    const key = d.toISOString().slice(0, 10)
+    const key = tehranDayKey(d)
     weekSeries.push({ day: key, points: 0 })
   }
   for (const l of weekLogs) {
-    const key = l.createdAt.toISOString().slice(0, 10)
+    const key = tehranDayKey(l.createdAt)
     const row = weekSeries.find((w) => w.day === key)
     if (row) row.points += l.amount
   }
@@ -181,43 +192,44 @@ export async function getAppState(userId: string): Promise<AppState | null> {
 
   const appUser: AppUser = {
     id: u.id, fullName: u.fullName, username: u.username, role: u.role, status: u.status,
+    rejectReason: u.rejectReason,
     district: u.district, base: u.base, phone: u.phone, age: u.age, education: u.education,
     points: u.points, levelKey: u.levelKey, levelTitle: lv.title, levelEmoji: lv.emoji,
     nextLevelTitle: nx?.title ?? null, nextLevelMin: nx?.min ?? null,
-    currentStreak: u.currentStreak, bestStreak: u.bestStreak,
+    currentStreak: u.currentStreak, bestStreak: u.bestStreak, createdAt: u.createdAt.toISOString(),
   }
 
   const challengeDTOs: ChallengeDTO[] = challenges.map((c) => {
     const parts = [...c.participations].sort((a, b) => b.count - a.count)
     const mine = c.participations.find((p) => p.userId === userId)
     const myRank = mine ? parts.findIndex((p) => p.userId === userId) + 1 : null
+    const winners = c.status === "finished"
+      ? parts.filter((p) => p.count > 0).slice(0, 3).map((p, i) => ({
+          fullName: p.user.fullName, count: p.count, prize: [30, 20, 10][i] ?? 0,
+        }))
+      : []
     return {
       id: c.id, code: c.code, title: c.title, description: c.description,
       deadlineAt: c.deadlineAt.toISOString(), endAt: c.endAt.toISOString(), reward: c.reward, status: c.status,
-      joined: !!mine, myCount: mine?.count ?? 0, totalParticipants: c.participations.length, myRank,
+      finishedAt: c.finishedAt?.toISOString() ?? null,
+      joined: !!mine, myCount: mine?.count ?? 0, totalParticipants: c.participations.length, myRank, winners,
     }
   })
 
-  // اعلان‌ها (مشتق از لاگ امتیاز + وضعیت اخبار)
-  const notifications: AppState["notifications"] = []
-  for (const l of logs.slice(0, 8)) {
-    notifications.push({
-      id: `p-${l.id}`, kind: "points", title: `+${l.amount} امتیاز`,
-      body: l.reason || "امتیاز جدید", at: l.createdAt.toISOString(),
-    })
-  }
-  const recentReviewed = await db.newsItem.findMany({
-    where: { reporterId: userId, status: { in: ["approved", "rejected"] }, reviewedAt: { not: null } },
-    orderBy: { reviewedAt: "desc" }, take: 6,
+  // اعلان‌های واقعی (جدول Notification — با احترام به تنظیمات و ساعت سکوت هنگام ایجاد)
+  const notifRows = await db.notification.findMany({
+    where: { userId, deliveredAt: { lte: new Date() } },
+    orderBy: { deliveredAt: "desc" },
+    take: 15,
   })
-  for (const n of recentReviewed) {
-    notifications.push({
-      id: `n-${n.id}`, kind: n.status === "approved" ? "approved" : "rejected",
-      title: n.status === "approved" ? "خبر شما تایید شد" : "خبر شما رد شد",
-      body: n.title, at: (n.reviewedAt ?? n.createdAt).toISOString(),
-    })
+  const notifications: AppState["notifications"] = notifRows.map((n) => ({
+    id: `notif-${n.id}`, kind: n.kind, title: n.title, body: n.body, at: n.deliveredAt.toISOString(),
+  }))
+
+  let pendingUsersCount = 0
+  if (u.role === "admin") {
+    pendingUsersCount = await db.user.count({ where: { status: "pending" } })
   }
-  notifications.sort((a, b) => b.at.localeCompare(a.at))
 
   return {
     user: appUser,
@@ -231,12 +243,13 @@ export async function getAppState(userId: string): Promise<AppState | null> {
       awardedAt: allBadges.find((x) => x.badgeKey === key)?.awardedAt.toISOString() ?? null,
     })),
     drafts: drafts.map((d) => ({ id: d.id, category: d.category, title: d.title, content: d.content, savedAt: d.savedAt.toISOString() })),
-    notifications: notifications.slice(0, 12),
+    notifications: notifications.slice(0, 15),
     notifSettings: {
       approvals: u.notifSetting?.approvals ?? true, challenges: u.notifSetting?.challenges ?? true,
       broadcast: u.notifSetting?.broadcast ?? true, rejections: u.notifSetting?.rejections ?? true,
       quietStart: u.notifSetting?.quietStart ?? "22:00", quietEnd: u.notifSetting?.quietEnd ?? "08:00",
     },
+    pendingUsersCount,
   }
 }
 
@@ -246,8 +259,9 @@ export async function addPoints(userId: string, amount: number, reason: string, 
   if (!user) return
   await db.pointsLog.create({ data: { userId, amount, reason, ref } })
   const newPoints = user.points + amount
-  const intended = levelFor(newPoints)
-  const levelKey = levelIndex(intended.key) > levelIndex(user.levelKey) ? intended.key : user.levelKey
+  // ارتقا فقط وقتی که آستانه سطحِ «بعدی» عبور شود — پس از سقوط غیبتی، ارتقای فوری رخ نمی‌دهد
+  const nx = nextLevel(user.levelKey)
+  const levelKey = nx && newPoints >= nx.min ? nx.key : user.levelKey
   await db.user.update({ where: { id: userId }, data: { points: newPoints, levelKey } })
 }
 
@@ -255,10 +269,10 @@ export async function recordActivity(userId: string) {
   const user = await db.user.findUnique({ where: { id: userId } })
   if (!user) return
   const now = new Date()
-  const today = now.toISOString().slice(0, 10)
-  const last = user.lastActivityAt?.toISOString().slice(0, 10)
+  const today = tehranDayKey(now)
+  const last = user.lastActivityAt ? tehranDayKey(user.lastActivityAt) : undefined
   if (last === today) return
-  const yday = new Date(now.getTime() - 24 * 3600 * 1000).toISOString().slice(0, 10)
+  const yday = tehranDayKey(new Date(now.getTime() - 24 * 3600 * 1000))
   const streak = last === yday ? user.currentStreak + 1 : 1
   await db.user.update({
     where: { id: userId },
@@ -305,4 +319,4 @@ export async function nextNewsCode(): Promise<string> {
   return `N-${1000 + (last?.id ?? 0) + 1}`
 }
 
-export { LEVELS }
+export { LEVELS, levelFor, levelIndex }

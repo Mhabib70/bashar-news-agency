@@ -1,7 +1,7 @@
 "use client"
 
 import Image from "next/image"
-import { Bell, Plus, Megaphone, FileCheck2, ArrowLeft, ClipboardList, Flame, Newspaper, Timer, ChevronLeft } from "lucide-react"
+import { Bell, Plus, Megaphone, FileCheck2, ArrowLeft, ClipboardList, Flame, Newspaper, Timer, ChevronLeft, ShieldCheck } from "lucide-react"
 import { useApp } from "@/lib/store"
 import { SectionHeader, CountUp, Avatar } from "@/components/app/bits"
 import { faNum, fa, durFmt, untilFmt } from "@/lib/format"
@@ -15,6 +15,7 @@ export function HomeScreen({
   onOpenNews,
   onGotoActivity,
   onGotoReview,
+  onOpenAdmin,
 }: {
   onOpenNotifications: () => void
   onQuickSubmit: () => void
@@ -22,6 +23,7 @@ export function HomeScreen({
   onOpenNews: () => void
   onGotoActivity: () => void
   onGotoReview: () => void
+  onOpenAdmin: () => void
 }) {
   const { state, setTab } = useApp()
   if (!state) return null
@@ -76,6 +78,34 @@ export function HomeScreen({
           )}
         </div>
       </div>
+
+      {/* پنل مدیریت (فقط ادمین) */}
+      {user.role === "admin" && (
+        <button
+          onClick={onOpenAdmin}
+          className="flex w-full items-center justify-between rounded-3xl border border-line bg-surface px-5 py-4 text-right transition-colors hover:bg-surface-2"
+        >
+          <span>
+            <span className="flex items-center gap-2 text-[14.5px] font-bold text-ink">
+              <ShieldCheck className="h-4.5 w-4.5 text-neon" />
+              پنل مدیریت
+            </span>
+            <span className="mt-0.5 block text-[11.5px] text-ink-muted">
+              {state.pendingUsersCount > 0
+                ? `${fa(state.pendingUsersCount)} درخواست عضویت در انتظار تایید`
+                : "کاربران · پیام همگانی · چالش · خروجی CSV"}
+            </span>
+          </span>
+          <span className="relative flex h-10 w-10 items-center justify-center rounded-full bg-neon text-neon-foreground">
+            <ArrowLeft className="h-5 w-5" />
+            {state.pendingUsersCount > 0 && (
+              <span className="absolute -left-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#ff5c5c] px-1 text-[10px] font-black text-white">
+                {fa(state.pendingUsersCount)}
+              </span>
+            )}
+          </span>
+        </button>
+      )}
 
       {/* صف بررسی برای نقش‌های ارزیاب */}
       {user.role !== "reporter" && reviewQueue.length > 0 && (

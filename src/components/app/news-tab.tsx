@@ -2,7 +2,7 @@
 
 import Image from "next/image"
 import { useMemo, useState } from "react"
-import { Plus, PencilLine, X, FileText } from "lucide-react"
+import { Plus, PencilLine, X, FileText, Search } from "lucide-react"
 import { useApp } from "@/lib/store"
 import { SectionHeader, StatusChip, StageDots } from "@/components/app/bits"
 import { fa, durFmt, relTime, jalali } from "@/lib/format"
@@ -21,10 +21,18 @@ export function NewsScreen({ onQuickSubmit, draftsView }: { onQuickSubmit: () =>
   const { state } = useApp()
   const [filter, setFilter] = useState<(typeof FILTERS)[number]["key"]>("all")
   const [detail, setDetail] = useState<number | null>(null)
-  const list = useMemo(
-    () => (state ? (filter === "all" ? state.news : state.news.filter((n) => n.status === filter)) : []),
-    [state, filter],
-  )
+  const [q, setQ] = useState("")
+  const searched = q.trim().length >= 2
+  const list = useMemo(() => {
+    if (!state) return []
+    let rows = state.news
+    if (filter !== "all") rows = rows.filter((n) => n.status === filter)
+    if (searched) {
+      const s = q.trim().toLowerCase()
+      rows = rows.filter((n) => n.title.toLowerCase().includes(s) || n.content.toLowerCase().includes(s) || n.code.toLowerCase().includes(s))
+    }
+    return rows
+  }, [state, filter, q, searched])
   if (!state) return null
   const detailNews = state.news.find((n) => n.id === detail)
 
@@ -39,6 +47,22 @@ export function NewsScreen({ onQuickSubmit, draftsView }: { onQuickSubmit: () =>
           <Plus className="h-4 w-4" />
           ارسال خبر
         </button>
+      </div>
+
+      {/* جستجوی اخبار */}
+      <div className="relative">
+        <Search className="absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-muted/60" />
+        <input
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="جستجو در تیتر، متن یا کد پیگیری..."
+          className="w-full rounded-full border border-line bg-surface py-3 pl-4 pr-11 text-[12.5px] text-ink outline-none transition-colors placeholder:text-ink-muted/50 focus:border-neon/50"
+        />
+        {searched && (
+          <button onClick={() => setQ("")} className="absolute left-3 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full bg-surface-2 text-ink-muted">
+            <X className="h-3.5 w-3.5" />
+          </button>
+        )}
       </div>
 
       {/* فیلترها */}
@@ -86,8 +110,8 @@ export function NewsScreen({ onQuickSubmit, draftsView }: { onQuickSubmit: () =>
         {list.length === 0 && (
           <div className="flex flex-col items-center gap-2 rounded-[26px] border border-dashed border-line py-12 text-center">
             <FileText className="h-8 w-8 text-ink-muted/50" />
-            <p className="text-[13.5px] font-bold text-ink-muted">خبری در این دسته نیست</p>
-            <p className="text-[11.5px] text-ink-muted/70">با دکمه سبز بالا اولین خبرت را بفرست</p>
+            <p className="text-[13.5px] font-bold text-ink-muted">{searched ? "نتیجه‌ای برای جستجو پیدا نشد" : "خبری در این دسته نیست"}</p>
+            {!searched && <p className="text-[11.5px] text-ink-muted/70">با دکمه سبز بالا اولین خبرت را بفرست</p>}
           </div>
         )}
         {list.map((n) => (
@@ -104,6 +128,7 @@ export function NewsScreen({ onQuickSubmit, draftsView }: { onQuickSubmit: () =>
                 <p className="mt-1.5 line-clamp-2 text-[13.5px] font-bold leading-6 text-ink">{n.title}</p>
                 <p className="mt-1 text-[10.5px] text-ink-muted">
                   {n.code} · {jalali(n.createdAt)} · {durFmt(n.durationMin)}
+                  {n.mediaUrl && n.mediaType === "photo" ? " · 📷" : n.mediaUrl && n.mediaType === "video" ? " · 🎬" : ""}
                 </p>
               </div>
             </div>
@@ -133,6 +158,13 @@ export function NewsScreen({ onQuickSubmit, draftsView }: { onQuickSubmit: () =>
                 </DialogDescription>
               </DialogHeader>
               <p className="mt-1 whitespace-pre-line text-[13.5px] leading-7 text-ink/90">{detailNews.content}</p>
+
+              {detailNews.mediaUrl && detailNews.mediaType === "photo" && (
+                <img src={detailNews.mediaUrl} alt="رسانه خبر" className="mt-3 max-h-64 w-full rounded-2xl border border-line object-cover" />
+              )}
+              {detailNews.mediaUrl && detailNews.mediaType === "video" && (
+                <video src={detailNews.mediaUrl} controls className="mt-3 max-h-64 w-full rounded-2xl border border-line bg-black" />
+              )}
 
               {detailNews.status === "rejected" && (
                 <div className="mt-3 rounded-2xl border border-[#ff5c5c]/30 bg-[#ff5c5c]/8 p-4">

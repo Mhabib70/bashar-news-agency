@@ -38,6 +38,7 @@ CREATE TABLE "NewsItem" (
     "reviewedBy" TEXT NOT NULL DEFAULT '',
     "reviewedAt" DATETIME,
     "challengeId" INTEGER,
+    "mediaUrl" TEXT NOT NULL DEFAULT '',
     "durationMin" INTEGER NOT NULL DEFAULT 0,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" DATETIME NOT NULL,
@@ -55,6 +56,7 @@ CREATE TABLE "Challenge" (
     "reward" TEXT NOT NULL DEFAULT '',
     "status" TEXT NOT NULL DEFAULT 'active',
     "createdBy" TEXT NOT NULL DEFAULT '',
+    "deadlineNotified" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "finishedAt" DATETIME
 );
@@ -114,6 +116,20 @@ CREATE TABLE "NotifSetting" (
     CONSTRAINT "NotifSetting_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
+-- CreateTable
+CREATE TABLE "Notification" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "userId" TEXT NOT NULL,
+    "kind" TEXT NOT NULL,
+    "title" TEXT NOT NULL,
+    "body" TEXT NOT NULL DEFAULT '',
+    "ref" TEXT NOT NULL DEFAULT '',
+    "deliveredAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "readAt" DATETIME,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "Notification_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "User_username_key" ON "User"("username");
 
@@ -122,4 +138,7 @@ CREATE UNIQUE INDEX "ChallengeParticipation_challengeId_userId_key" ON "Challeng
 
 -- CreateIndex
 CREATE UNIQUE INDEX "UserBadge_userId_badgeKey_key" ON "UserBadge"("userId", "badgeKey");
+
+-- CreateIndex
+CREATE INDEX "Notification_userId_deliveredAt_idx" ON "Notification"("userId", "deliveredAt");
 

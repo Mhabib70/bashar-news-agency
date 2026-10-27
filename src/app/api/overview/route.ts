@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server"
 import { db } from "@/lib/db"
+import { tehranDayStart } from "@/lib/server/tz"
 
 // آمار تجمیعی سازمان برای صفحه خوش‌آمد (پیشرفت امروز) — بدون نیاز به ورود
 export async function GET() {
   try {
     const now = new Date()
-    const todayStart = new Date(now)
-    todayStart.setHours(0, 0, 0, 0)
+    const todayStart = tehranDayStart(now) // نیمه‌شب تهران
     const weekStart = new Date(now.getTime() - 7 * 24 * 3600 * 1000)
 
     const [reporters, todayNews, weekNews, todayPoints, activeTodayUsers, topReporter] = await Promise.all([

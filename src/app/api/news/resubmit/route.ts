@@ -11,6 +11,8 @@ export async function POST(req: NextRequest) {
     if (!news) return NextResponse.json({ error: "خبر یافت نشد" }, { status: 404 })
     if (news.reporterId !== userId) return NextResponse.json({ error: "فقط خبرنگار خودش می‌تواند ویرایش کند" }, { status: 403 })
     if (news.status !== "rejected") return NextResponse.json({ error: "فقط خبر رد‌شده قابل ارسال مجدد است" }, { status: 409 })
+    if (title && String(title).trim().length < 8) return NextResponse.json({ error: "تیتر باید حداقل ۸ کاراکتر باشد" }, { status: 400 })
+    if (content && String(content).trim().length < 30) return NextResponse.json({ error: "متن خبر باید حداقل ۳۰ کاراکتر باشد" }, { status: 400 })
 
     await db.newsItem.update({
       where: { id: news.id },

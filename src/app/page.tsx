@@ -10,15 +10,19 @@ import { ProfileScreen } from "@/components/app/profile"
 import { ReviewScreen } from "@/components/app/review-tab"
 import { SubmitFlow } from "@/components/app/submit-flow"
 import { NotificationsSheet, ChallengesSheet } from "@/components/app/sheets"
+import { AdminSheet } from "@/components/app/admin-sheet"
 import { BottomNav } from "@/components/app/bottom-nav"
+import { USER_REJECT_TITLES } from "@/lib/domain"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Hourglass, ShieldX, LogOut } from "lucide-react"
 
 export default function Page() {
-  const { userId, state, booted, tab, setTab, login, refresh } = useApp()
+  const { userId, state, booted, tab, setTab, login, logout, refresh } = useApp()
   const [submitOpen, setSubmitOpen] = useState(false)
   const [notifOpen, setNotifOpen] = useState(false)
   const [challengesOpen, setChallengesOpen] = useState(false)
+  const [adminOpen, setAdminOpen] = useState(false)
   const [submitPreset, setSubmitPreset] = useState<null | { category?: string; title?: string; content?: string; draftId?: number | null }>(null)
   const [switchOpen, setSwitchOpen] = useState(false)
 
@@ -44,6 +48,8 @@ export default function Page() {
     setSubmitOpen(true)
   }
 
+  const user = state?.user
+
   return (
     <main className="flex min-h-dvh items-center justify-center bg-[#060704] sm:p-6">
       {/* پس‌زمینه دسکتاپ */}
@@ -62,6 +68,27 @@ export default function Page() {
           </div>
         ) : !userId || !state ? (
           <Welcome />
+        ) : user?.status === "pending" ? (
+          <GateScreen
+            icon={<Hourglass className="h-10 w-10 text-warn" />}
+            title="حساب شما در انتظار تایید است"
+            body="درخواست عضویت شما برای ادمین کل ارسال شد. به‌محض تایید، به‌صورت خودکار وارد محیط خبرگزاری می‌شوید. معمولاً بررسی کمتر از ۷۲ ساعت طول می‌کشد."
+          />
+        ) : user?.status === "rejected" ? (
+          <GateScreen
+            icon={<ShieldX className="h-10 w-10 text-[#ff8484]" />}
+            title="درخواست عضویت شما تایید نشد"
+            body={user.rejectReason ? `دلیل: ${USER_REJECT_TITLES[user.rejectReason] ?? user.rejectReason}` : "درخواست شما رد شده است."}
+            action={
+              <button
+                onClick={logout}
+                className="mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-neon py-3.5 text-[14px] font-bold text-neon-foreground"
+              >
+                <LogOut className="h-4.5 w-4.5" />
+                بازگشت و ثبت‌نام مجدد
+              </button>
+            }
+          />
         ) : (
           <>
             <div key={tab} className="nice-scroll flex-1 overflow-y-auto">
@@ -73,11 +100,12 @@ export default function Page() {
                   onOpenNews={() => setTab("news")}
                   onGotoActivity={() => setTab("activity")}
                   onGotoReview={() => setTab("review")}
+                  onOpenAdmin={() => setAdminOpen(true)}
                 />
               )}
               {tab === "news" && <NewsScreen onQuickSubmit={() => openSubmit()} draftsView />}
               {tab === "activity" && <ActivityScreen />}
-              {tab === "profile" && <ProfileScreen onSwitchAccount={() => setSwitchOpen(true)} />}
+              {tab === "profile" && <ProfileScreen onSwitchAccount={() => setSwitchOpen(true)} onOpenAdmin={() => setAdminOpen(true)} />}
               {tab === "review" && <ReviewScreen />}
             </div>
             <BottomNav onReview={() => setTab("review")} />
@@ -88,9 +116,22 @@ export default function Page() {
         <SubmitFlow open={submitOpen} onClose={() => setSubmitOpen(false)} preset={submitPreset} />
         <NotificationsSheet open={notifOpen} onClose={() => setNotifOpen(false)} />
         <ChallengesSheet open={challengesOpen} onClose={() => setChallengesOpen(false)} />
+        <AdminSheet open={adminOpen} onClose={() => setAdminOpen(false)} />
         <SwitchAccountSheet open={switchOpen} onClose={() => setSwitchOpen(false)} />
       </div>
     </main>
+  )
+}
+
+// صفحه انتظار/رد عضویت (سناریوی ۱ ربات)
+function GateScreen({ icon, title, body, action }: { icon: React.ReactNode; title: string; body: string; action?: React.ReactNode }) {
+  return (
+    <div className="flex flex-1 flex-col items-center justify-center gap-4 px-8 text-center stage-enter">
+      <span className="flex h-24 w-24 items-center justify-center rounded-full bg-surface border border-line">{icon}</span>
+      <h2 className="text-[19px] font-black text-ink">{title}</h2>
+      <p className="max-w-[280px] text-[12.5px] leading-6 text-ink-muted">{body}</p>
+      {action}
+    </div>
   )
 }
 

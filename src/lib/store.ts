@@ -10,12 +10,19 @@ type SubmitPayload = {
   title: string
   content: string
   mediaType: string
+  mediaUrl?: string
   durationMin: number
   challengeId?: number | null
   draftId?: number | null
 }
 
 type Result = { ok: boolean; message?: string; pointsEarned?: number; badgesAwarded?: string[] }
+
+type UserInfo = {
+  id: string; fullName: string; username: string; role: string; status: string; rejectReason: string
+  district: string; base: string; phone: string; age: string; education: string
+  points: number; levelKey: string; currentStreak: number; createdAt: string
+}
 
 type Store = {
   userId: string | null
@@ -31,10 +38,16 @@ type Store = {
   reviewNews: (newsId: number, action: "approve" | "reject", reason?: string, note?: string) => Promise<Result>
   resubmitNews: (newsId: number, title?: string, content?: string, category?: string) => Promise<Result>
   joinChallenge: (challengeId: number) => Promise<Result>
+  createChallenge: (p: { title: string; description: string; reward: string; deadlineAt: string }) => Promise<Result>
+  finishChallenge: (challengeId: number) => Promise<Result>
+  broadcast: (title: string, text: string) => Promise<Result>
+  fetchUsers: () => Promise<UserInfo[]>
+  moderateUser: (targetId: string, action: "approve" | "reject", reason?: string) => Promise<Result>
+  uploadMedia: (file: File) => Promise<{ ok: boolean; url?: string; mediaType?: string; message?: string }>
   saveDraft: (p: { category: string; title: string; content: string; draftId?: number | null }) => Promise<Result>
   deleteDraft: (id: number) => Promise<Result>
   saveSettings: (p: Partial<AppState["notifSettings"]>) => Promise<Result>
-  register: (p: { fullName: string; phone: string; age: string; education: string; district: string; base: string }) => Promise<{ ok: boolean; userId?: string; message?: string }>
+  register: (p: { fullName: string; phone: string; age: string; education: string; district: string; base: string }) => Promise<{ ok: boolean; userId?: string; status?: string; message?: string }>
 }
 
 async function api<T>(url: string, init?: RequestInit): Promise<T> {
@@ -143,6 +156,91 @@ export const useApp = create<Store>((set, get) => ({
     }
   },
 
+  createChallenge: async (p) => {
+    const uid = get().userId
+    if (!uid) return { ok: false }
+    try {
+      const r = await api<Result & { message: string }>("/api/challenges", {
+        method: "POST",
+        body: JSON.stringify({ userId: uid, ...p }),
+      })
+      await get().refresh()
+      return { ok: true, message: r.message }
+    } catch (e) {
+      return { ok: false, message: (e as Error).message }
+    }
+  },
+
+  finishChallenge: async (challengeId) => {
+    const uid = get().userId
+    if (!uid) return { ok: false }
+    try {
+      const r = await api<Result & { message: string }>("/api/challenges/finish", {
+        method: "POST",
+        body: JSON.stringify({ userId: uid, challengeId }),
+      })
+      await get().refresh()
+      return { ok: true, message: r.message }
+    } catch (e) {
+      return { ok: false, message: (e as Error).message }
+    }
+  },
+
+  broadcast: async (title, text) => {
+    const uid = get().userId
+    if (!uid) return { ok: false }
+    try {
+      const r = await api<Result & { message: string }>("/api/broadcast", {
+        method: "POST",
+        body: JSON.stringify({ userId: uid, title, text }),
+      })
+      return { ok: true, message: r.message }
+    } catch (e) {
+      return { ok: false, message: (e as Error).message }
+    }
+  },
+
+  fetchUsers: async () => {
+    const uid = get().userId
+    if (!uid) return []
+    try {
+      const r = await api<{ users: UserInfo[] }>(`/api/users?userId=${encodeURIComponent(uid)}`)
+      return r.users
+    } catch {
+      return []
+    }
+  },
+
+  moderateUser: async (targetId, action, reason) => {
+    const uid = get().userId
+    if (!uid) return { ok: false }
+    try {
+      const r = await api<Result & { message: string }>("/api/users", {
+        method: "POST",
+        body: JSON.stringify({ userId: uid, targetId, action, reason }),
+      })
+      return { ok: true, message: r.message }
+    } catch (e) {
+      return { ok: false, message: (e as Error).message }
+    }
+  },
+
+  uploadMedia: async (file) => {
+    const uid = get().userId
+    if (!uid) return { ok: false }
+    try {
+      const fd = new FormData()
+      fd.append("userId", uid)
+      fd.append("file", file)
+      const res = await fetch("/api/upload", { method: "POST", body: fd })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data.error ?? "بارگذاری ناموفق بود")
+      return { ok: true, url: data.url, mediaType: data.mediaType, message: data.message }
+    } catch (e) {
+      return { ok: false, message: (e as Error).message }
+    }
+  },
+
   saveDraft: async (p) => {
     const uid = get().userId
     if (!uid) return { ok: false }
@@ -187,11 +285,11 @@ export const useApp = create<Store>((set, get) => ({
 
   register: async (p) => {
     try {
-      const r = await api<{ ok: boolean; userId: string; message: string }>("/api/register", {
+      const r = await api<{ ok: boolean; userId: string; status: string; message: string }>("/api/register", {
         method: "POST",
         body: JSON.stringify(p),
       })
-      return { ok: true, userId: r.userId, message: r.message }
+      return { ok: true, userId: r.userId, status: r.status, message: r.message }
     } catch (e) {
       return { ok: false, message: (e as Error).message }
     }

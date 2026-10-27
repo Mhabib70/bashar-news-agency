@@ -78,6 +78,12 @@ export function ReviewScreen() {
                   </span>
                 </div>
                 <p className="mt-2 text-[14px] font-bold leading-6 text-ink">{n.title}</p>
+                {n.mediaUrl && n.mediaType === "photo" && (
+                  <img src={n.mediaUrl} alt="رسانه خبر" className="mt-2.5 max-h-44 w-full rounded-2xl border border-line object-cover" />
+                )}
+                {n.mediaUrl && n.mediaType === "video" && (
+                  <video src={n.mediaUrl} controls className="mt-2.5 max-h-44 w-full rounded-2xl border border-line bg-black" />
+                )}
                 <p className="mt-1.5 line-clamp-3 text-[12px] leading-6 text-ink-muted">{n.content}</p>
                 <div className="mt-3 flex items-center gap-2 border-t border-line pt-3">
                   <span className="flex h-8 w-8 items-center justify-center rounded-full bg-neon/12 text-[11px] font-black text-neon">

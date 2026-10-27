@@ -1,7 +1,7 @@
 "use client"
 
-import { useMemo, useState } from "react"
-import { ArrowLeft, ArrowRight, Save, CheckCircle2, PartyPopper, ImageIcon, Video, ImageOff } from "lucide-react"
+import { useMemo, useRef, useState } from "react"
+import { ArrowLeft, ArrowRight, Save, CheckCircle2, PartyPopper, ImageIcon, Video, ImageOff, UploadCloud, X, Loader2 } from "lucide-react"
 import { useApp } from "@/lib/store"
 import { fa, toFa } from "@/lib/format"
 import { NEWS_CATEGORIES, CATEGORY_LABELS } from "@/lib/domain"
@@ -23,13 +23,16 @@ export function SubmitFlow({
   onClose: () => void
   preset?: { category?: string; title?: string; content?: string; draftId?: number | null } | null
 }) {
-  const { state, submitNews, saveDraft } = useApp()
+  const { state, submitNews, saveDraft, deleteDraft, uploadMedia } = useApp()
   const { toast } = useToast()
+  const fileRef = useRef<HTMLInputElement>(null)
   const [step, setStep] = useState(0)
   const [category, setCategory] = useState(preset?.category ?? "local")
   const [title, setTitle] = useState(preset?.title ?? "")
   const [content, setContent] = useState(preset?.content ?? "")
   const [mediaType, setMediaType] = useState("none")
+  const [mediaUrl, setMediaUrl] = useState("")
+  const [uploading, setUploading] = useState(false)
   const [duration, setDuration] = useState(30)
   const [challengeId, setChallengeId] = useState<number | null>(null)
   const [busy, setBusy] = useState(false)
@@ -49,9 +52,41 @@ export function SubmitFlow({
         setContent("")
       }
       setMediaType("none")
+      setMediaUrl("")
       setDuration(30)
       setChallengeId(null)
     }, 250)
+  }
+
+  const onPickFile = async (file: File | undefined) => {
+    if (!file) return
+    const isPhoto = file.type.startsWith("image/")
+    const isVideo = file.type.startsWith("video/")
+    if (!isPhoto && !isVideo) {
+      toast({ title: "فرمت نامعتبر", description: "فقط عکس یا ویدیو انتخاب کنید", variant: "destructive" })
+      return
+    }
+    const max = isPhoto ? 5 * 1024 * 1024 : 25 * 1024 * 1024
+    if (file.size > max) {
+      toast({ title: "حجم زیاد", description: `حداکثر ${isPhoto ? "۵" : "۲۵"} مگابایت`, variant: "destructive" })
+      return
+    }
+    setUploading(true)
+    const r = await uploadMedia(file)
+    setUploading(false)
+    if (r.ok && r.url) {
+      setMediaType(r.mediaType ?? (isPhoto ? "photo" : "video"))
+      setMediaUrl(r.url)
+      toast({ title: "بارگذاری شد", description: r.message })
+    } else {
+      toast({ title: "خطا در بارگذاری", description: r.message, variant: "destructive" })
+    }
+  }
+
+  const clearMedia = () => {
+    setMediaType("none")
+    setMediaUrl("")
+    if (fileRef.current) fileRef.current.value = ""
   }
 
   const submit = async () => {
@@ -61,6 +96,7 @@ export function SubmitFlow({
       title: title.trim(),
       content: content.trim(),
       mediaType,
+      mediaUrl,
       durationMin: duration,
       challengeId,
       draftId: preset?.draftId ?? null,
@@ -68,7 +104,8 @@ export function SubmitFlow({
     setBusy(false)
     if (r.ok) {
       setDone({ points: r.pointsEarned ?? 10, message: r.message ?? "خبر ثبت شد", badges: r.badgesAwarded ?? [] })
-      if (preset?.draftId) await saveDraft({ category, title: title.trim(), content: "", draftId: preset.draftId })
+      // حذف پیش‌نویس پس از ارسال موفق (به‌جای خالی‌گذاشتن)
+      if (preset?.draftId) await deleteDraft(preset.draftId)
     } else {
       toast({ title: "خطا", description: r.message ?? "ارسال ناموفق بود", variant: "destructive" })
     }
@@ -173,6 +210,32 @@ export function SubmitFlow({
 
               {step === 2 && (
                 <div className="space-y-2.5">
+                  {["none", "photo", "video"].includes(mediaType) && mediaUrl && (
+                    <div className="relative overflow-hidden rounded-2xl border border-neon/30">
+                      {mediaType === "photo" ? (
+                        <img src={mediaUrl} alt="پیش‌نمایش" className="max-h-44 w-full object-cover" />
+                      ) : (
+                        <video src={mediaUrl} controls className="max-h-44 w-full bg-black" />
+                      )}
+                      <button onClick={clearMedia} className="absolute left-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/60 text-white">
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  )}
+
+                  {["none", "photo", "video"].includes(mediaType) && !mediaUrl && (
+                    <button
+                      onClick={() => fileRef.current?.click()}
+                      disabled={uploading}
+                      className="flex w-full flex-col items-center gap-2 rounded-2xl border border-dashed border-neon/40 bg-neon/5 px-4 py-6 text-center transition-colors hover:bg-neon/10 disabled:opacity-60"
+                    >
+                      {uploading ? <Loader2 className="h-6 w-6 animate-spin text-neon" /> : <UploadCloud className="h-6 w-6 text-neon" />}
+                      <span className="text-[13px] font-bold text-ink">{uploading ? "در حال بارگذاری..." : "انتخاب عکس یا ویدیو از دستگاه"}</span>
+                      <span className="text-[10.5px] text-ink-muted">عکس تا ۵MB (JPG/PNG/WebP) · ویدیو تا ۲۵MB (MP4/WebM)</span>
+                    </button>
+                  )}
+                  <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm,video/quicktime" className="hidden" onChange={(e) => onPickFile(e.target.files?.[0])} />
+
                   {[
                     { key: "none", label: "بدون رسانه", desc: "فقط متن خبر", icon: <ImageOff className="h-5 w-5" /> },
                     { key: "photo", label: "عکس", desc: "تصویر میدانی از رویداد", icon: <ImageIcon className="h-5 w-5" /> },
@@ -223,6 +286,10 @@ export function SubmitFlow({
                     <span className="rounded-full bg-neon/12 px-3 py-1 text-[11px] font-bold text-neon">{CATEGORY_LABELS[category]}</span>
                     <span className="text-[10.5px] text-ink-muted">{mediaType === "none" ? "بدون رسانه" : mediaType === "photo" ? "با عکس" : "با ویدیو"} · {fa(duration)} دقیقه</span>
                   </div>
+                  {mediaUrl && mediaType === "photo" && (
+                    <img src={mediaUrl} alt="" className="mt-3 max-h-40 w-full rounded-2xl object-cover" />
+                  )}
+                  {mediaUrl && mediaType === "video" && <video src={mediaUrl} controls className="mt-3 max-h-40 w-full rounded-2xl bg-black" />}
                   <h4 className="mt-3 text-[15.5px] font-black leading-7 text-ink">{title}</h4>
                   <p className="mt-2 line-clamp-6 whitespace-pre-line text-[12.5px] leading-6 text-ink-muted">{content}</p>
                   {challengeId && (

@@ -35,6 +35,7 @@ model User {
   drafts          Draft[]
   notifSetting    NotifSetting?
   participations  ChallengeParticipation[]
+  notifications   Notification[]
 }
 
 // اخبار با چرخه بررسی سه‌مرحله‌ای: district → specialist → admin
@@ -55,6 +56,7 @@ model NewsItem {
   reviewedBy   String    @default("")
   reviewedAt   DateTime?
   challengeId  Int?
+  mediaUrl     String    @default("") // آدرس فایل رسانه آپلودشده
   durationMin  Int       @default(0) // زمان صرف‌شده برای تهیه خبر (دقیقه)
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
@@ -70,6 +72,7 @@ model Challenge {
   reward      String    @default("")
   status      String    @default("active") // active | finished
   createdBy   String    @default("")
+  deadlineNotified Boolean @default(false) // یادآور مهلت یک‌بار ارسال شد
   createdAt   DateTime  @default(now())
   finishedAt  DateTime?
   participations ChallengeParticipation[]
@@ -127,4 +130,20 @@ model NotifSetting {
   quietStart String  @default("22:00")
   quietEnd   String  @default("08:00")
   updatedAt DateTime @updatedAt
+}
+
+// اعلان‌های درون‌برنامه‌ای — معادل پیام‌های ربات با احترام به تنظیمات و ساعت سکوت
+model Notification {
+  id          Int       @id @default(autoincrement())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+  kind        String // approved | rejected | badge | broadcast | challenge | challenge_reminder | rank | review | user_status | demotion
+  title       String
+  body        String    @default("")
+  ref         String    @default("")
+  deliveredAt DateTime  @default(now()) // با ساعت سکوت به پایان سکوت موکول می‌شود
+  readAt      DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([userId, deliveredAt])
 }

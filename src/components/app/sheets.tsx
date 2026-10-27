@@ -100,6 +100,24 @@ export function ChallengesSheet({ open, onClose }: { open: boolean; onClose: () 
                 </div>
                 <p className="mt-2 text-[11px] font-bold text-warn">{c.reward}</p>
 
+                {/* نتایج چالش پایان‌یافته */}
+                {c.status === "finished" && (
+                  <div className="mt-2.5 rounded-2xl border border-warn/25 bg-warn/8 p-3">
+                    <p className="text-[11px] font-black text-warn">🏁 نتایج نهایی</p>
+                    {c.winners.length > 0 ? (
+                      <div className="mt-1.5 space-y-1">
+                        {c.winners.map((w, i) => (
+                          <p key={w.fullName + i} className="text-[11.5px] font-bold text-ink">
+                            {["🥇", "🥈", "🥉"][i]} {w.fullName} — {fa(w.count)} خبر {w.prize > 0 && <span className="text-neon">+{fa(w.prize)} امتیاز</span>}
+                          </p>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="mt-1 text-[11px] text-ink-muted">بدون شرکت‌کننده فعال</p>
+                    )}
+                  </div>
+                )}
+
                 <div className="mt-3 flex items-center justify-between border-t border-line pt-3">
                   <span className="text-[10.5px] text-ink-muted">
                     {c.joined ? (

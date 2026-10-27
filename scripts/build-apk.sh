@@ -48,7 +48,7 @@ if [ ! -f release.keystore ]; then
 fi
 "$BT/apksigner" sign --ks release.keystore \
   --ks-pass pass:basharnews2026 --key-pass pass:basharnews2026 \
-  --out /home/z/my-project/apk/BasharNews-v1.0.0.apk aligned.apk
+  --out /home/z/my-project/apk/BasharNews-v1.1.0.apk aligned.apk
 
-"$BT/apksigner" verify /home/z/my-project/apk/BasharNews-v1.0.0.apk && echo "APK_SIGNED_OK"
+"$BT/apksigner" verify /home/z/my-project/apk/BasharNews-v1.1.0.apk && echo "APK_SIGNED_OK"
 ls -la /home/z/my-project/apk/
