@@ -144,8 +144,9 @@ export function Welcome() {
       <RegisterDialog
         open={regOpen}
         onOpenChange={setRegOpen}
+        isFirstUser={users !== null && users.length === 0}
         onDone={(id, msg) => {
-          doLogin(id, "خبرنگار تازه‌وارد")
+          doLogin(id, "ادمین کل سازمان")
           toast({ title: msg })
         }}
       />
@@ -158,23 +159,27 @@ function RegisterDialog({
   open,
   onOpenChange,
   onDone,
+  isFirstUser,
 }: {
   open: boolean
   onOpenChange: (v: boolean) => void
   onDone: (userId: string, message: string) => void
+  isFirstUser: boolean
 }) {
   const { register } = useApp()
   const { toast } = useToast()
   const [step, setStep] = useState(0)
   const [f, setF] = useState({ fullName: "", phone: "", age: "", education: "bachelor", district: "b1", base: "" })
-  const steps = ["نام و شماره", "سن و تحصیلات", "حوزه و پایگاه"]
+  // ادمین کل (اولین کاربر) بدون حوزه و پایگاه ثبت‌نام می‌شود — دو مرحله‌ای
+  const steps = isFirstUser ? ["نام و شماره", "سن و تحصیلات"] : ["نام و شماره", "سن و تحصیلات", "حوزه و پایگاه"]
+  const lastStep = steps.length - 1
   const canNext =
     (step === 0 && f.fullName.trim().length >= 3 && f.phone.trim().length >= 8) ||
     (step === 1 && Number(faToEn(f.age)) >= 15 && Number(faToEn(f.age)) <= 80) ||
     (step === 2 && !!f.base)
 
   const submit = async () => {
-    const r = await register(f)
+    const r = await register(isFirstUser ? { ...f, district: "", base: "" } : f)
     if (r.ok && r.userId) {
       onOpenChange(false)
       onDone(r.userId, r.message ?? "ثبت‌نام شد")
@@ -191,7 +196,7 @@ function RegisterDialog({
         <DialogHeader className="text-right">
           <DialogTitle className="text-ink">ثبت‌نام خبرنگار</DialogTitle>
           <DialogDescription className="text-ink-muted">
-            مرحله {toFa(step + 1)} از {toFa(3)} — {steps[step]}
+            مرحله {toFa(step + 1)} از {toFa(steps.length)} — {steps[step]}
           </DialogDescription>
         </DialogHeader>
         <div className="mt-1 flex gap-1.5">
@@ -199,6 +204,11 @@ function RegisterDialog({
             <span key={i} className={cn("h-1.5 flex-1 rounded-full", i <= step ? "bg-neon" : "bg-surface-2")} />
           ))}
         </div>
+        {isFirstUser && (
+          <p className="rounded-2xl border border-neon/30 bg-neon/10 px-4 py-3 text-[12px] leading-5 text-ink">
+            شما اولین عضو سازمان هستید — به‌عنوان <span className="font-bold text-neon">ادمین کل</span> ثبت‌نام می‌شوید و بدون انتخاب حوزه و پایگاه، مستقیم وارد اپ می‌شوید.
+          </p>
+        )}
 
         <div className="mt-4 space-y-3">
           {step === 0 && (
@@ -284,7 +294,7 @@ function RegisterDialog({
               قبلی
             </button>
           )}
-          {step < 2 ? (
+          {step < lastStep ? (
             <button
               onClick={() => canNext && setStep(step + 1)}
               disabled={!canNext}

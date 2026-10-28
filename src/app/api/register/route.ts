@@ -9,7 +9,12 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
     const { fullName, phone, age, education, district, base } = body ?? {}
-    if (!fullName || !phone || !district || !base) {
+
+    // راه‌اندازی سازمان: اولین کاربر، ادمین کل سازمان می‌شود — بدون نیاز به حوزه و پایگاه
+    const totalUsers = await db.user.count()
+    const firstUser = totalUsers === 0
+
+    if (!fullName || !phone || (!firstUser && (!district || !base))) {
       return NextResponse.json({ error: "نام، شماره تماس، حوزه و پایگاه الزامی است" }, { status: 400 })
     }
     if (String(fullName).trim().length < 3) {
@@ -20,7 +25,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "شماره تماس معتبر وارد کنید" }, { status: 400 })
     }
     const validBases = BASE_LISTS[district] ?? []
-    if (!validBases.includes(base)) {
+    if (!firstUser && !validBases.includes(base)) {
       return NextResponse.json({ error: "پایگاه انتخابی با حوزه همخوانی ندارد" }, { status: 400 })
     }
     const username = `user_${phoneDigits.slice(-8) || Date.now()}`
@@ -30,9 +35,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "مقطع تحصیلی نامعتبر است" }, { status: 400 })
     }
 
-    // راه‌اندازی سازمان: اولین کاربر، ادمین کل سازمان می‌شود
-    const totalUsers = await db.user.count()
-    const firstUser = totalUsers === 0
     const role = firstUser ? "admin" : "reporter"
     const status = firstUser ? "active" : "pending"
 
@@ -42,8 +44,8 @@ export async function POST(req: NextRequest) {
         fullName: String(fullName).trim().slice(0, 80),
         role,
         status,
-        district,
-        base,
+        district: firstUser ? "" : district,
+        base: firstUser ? "" : base,
         phone: String(phone),
         age: String(age ?? ""),
         education: String(education ?? ""),
