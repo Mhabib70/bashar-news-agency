@@ -42,6 +42,7 @@ export type NewsDTO = {
   code: string
   reporterId: string
   reporterName: string
+  reporterAvatar: string
   reporterDistrict: string
   district: string
   category: string
@@ -78,7 +79,7 @@ export type ChallengeDTO = {
   roster: { fullName: string; count: number; isMe: boolean }[]
 }
 
-export type LeaderRow = { id: string; fullName: string; points: number; levelKey: string; district: string; rank: number; isMe: boolean }
+export type LeaderRow = { id: string; fullName: string; avatar: string; points: number; levelKey: string; district: string; rank: number; isMe: boolean }
 
 export type AppState = {
   user: AppUser
@@ -127,12 +128,12 @@ function toNewsDTO(
     id: number; code: string; reporterId: string; district: string; category: string; title: string; content: string
     mediaType: string; mediaUrl: string; status: string; reviewStage: string; rejectReason: string; rejectNote: string; reviewedBy: string
     challengeId: number | null; durationMin: number; createdAt: Date
-    reporter: { fullName: string; district: string }
+    reporter: { fullName: string; district: string; avatar: string }
   },
   events: NewsEventDTO[] = [],
 ): NewsDTO {
   return {
-    id: n.id, code: n.code, reporterId: n.reporterId, reporterName: n.reporter.fullName, reporterDistrict: n.reporter.district,
+    id: n.id, code: n.code, reporterId: n.reporterId, reporterName: n.reporter.fullName, reporterAvatar: n.reporter.avatar, reporterDistrict: n.reporter.district,
     district: n.district, category: n.category, title: n.title, content: n.content, mediaType: n.mediaType, mediaUrl: n.mediaUrl,
     status: n.status, reviewStage: n.reviewStage, rejectReason: n.rejectReason, rejectNote: n.rejectNote,
     reviewedBy: n.reviewedBy, challengeId: n.challengeId, durationMin: n.durationMin, createdAt: n.createdAt.toISOString(),
@@ -153,7 +154,7 @@ async function eventsForNews(newsIds: number[]): Promise<Map<number, NewsEventDT
   return map
 }
 
-const newsInclude = { reporter: { select: { fullName: true, district: true } } } satisfies Prisma.NewsItemInclude
+const newsInclude = { reporter: { select: { fullName: true, district: true, avatar: true } } } satisfies Prisma.NewsItemInclude
 
 export async function getAppState(userId: string): Promise<AppState | null> {
   // نگهداری دوره‌ای lazy (معادل scheduler ربات): انقضای ثبت‌نام‌ها، پایان چالش‌ها، سقوط غیبت
@@ -191,10 +192,10 @@ export async function getAppState(userId: string): Promise<AppState | null> {
   ])
 
   // رتبه‌بندی
-  const reporters = await db.user.findMany({ where: { role: "reporter" }, orderBy: { points: "desc" }, select: { id: true, fullName: true, points: true, levelKey: true, district: true } })
+  const reporters = await db.user.findMany({ where: { role: "reporter" }, orderBy: { points: "desc" }, select: { id: true, fullName: true, avatar: true, points: true, levelKey: true, district: true } })
   const rank = reporters.findIndex((r) => r.id === userId)
   const leaderboard: LeaderRow[] = reporters.slice(0, 10).map((r, i) => ({
-    id: r.id, fullName: r.fullName, points: r.points, levelKey: r.levelKey, district: r.district, rank: i + 1, isMe: r.id === userId,
+    id: r.id, fullName: r.fullName, avatar: r.avatar, points: r.points, levelKey: r.levelKey, district: r.district, rank: i + 1, isMe: r.id === userId,
   }))
 
   // رویدادهای چرخه هر خبر (تایم‌لاین زنده) + شمارش نیروهای ارزیاب هر مرحله

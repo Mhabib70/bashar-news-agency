@@ -13,8 +13,9 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Avatar } from "@/components/app/bits"
 
-type DemoUser = { id: string; fullName: string; role: string; district: string; base: string; levelKey: string; points: number }
+type DemoUser = { id: string; fullName: string; avatar: string; role: string; district: string; base: string; levelKey: string; points: number }
 
 const faToEn = (s: string) => s.replace(/[۰-۹]/g, (d) => String("۰۱۲۳۴۵۶۷۸۹".indexOf(d)))
 
@@ -113,9 +114,7 @@ export function Welcome() {
                 className="flex w-full items-center justify-between rounded-2xl border border-line bg-surface px-4 py-3 text-right transition-colors hover:border-neon/40 hover:bg-surface-2 disabled:opacity-50"
               >
                 <span className="flex items-center gap-3">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-full bg-neon/12 text-sm font-bold text-neon">
-                    {u.fullName.slice(0, 1)}
-                  </span>
+                  <Avatar name={u.fullName} src={u.avatar} size={40} />
                   <span>
                     <span className="block text-[14px] font-bold text-ink">{u.fullName}</span>
                     <span className="block text-[11px] text-ink-muted">

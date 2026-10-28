@@ -4,7 +4,7 @@ import Image from "next/image"
 import { useState } from "react"
 import { Flame, Timer, FileText, MoreHorizontal } from "lucide-react"
 import { useApp } from "@/lib/store"
-import { Ring, SectionHeader, StatCard, CountUp } from "@/components/app/bits"
+import { Ring, SectionHeader, StatCard, CountUp, Avatar } from "@/components/app/bits"
 import { StatusDot } from "@/components/app/home"
 import { fa, faNum, durFmt, jalali, jalaliDay, relTime } from "@/lib/format"
 import { cn } from "@/lib/utils"
@@ -101,14 +101,17 @@ export function ActivityScreen() {
                 r.isMe ? "border-neon/40 bg-neon/8" : "border-line bg-surface",
               )}
             >
-              <span
-                className={cn(
-                  "flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[12px] font-black",
-                  r.rank === 1 ? "bg-neon text-neon-foreground" : r.isMe ? "bg-neon/20 text-neon" : "bg-surface-2 text-ink-muted",
-                )}
-              >
-                {fa(r.rank)}
-              </span>
+              <div className="relative shrink-0">
+                <Avatar name={r.fullName} src={r.avatar} size={40} />
+                <span
+                  className={cn(
+                    "absolute -bottom-1 -right-1 flex h-4.5 w-4.5 items-center justify-center rounded-full text-[9px] font-black ring-2 ring-background",
+                    r.rank === 1 ? "bg-neon text-neon-foreground" : r.isMe ? "bg-neon/25 text-neon" : "bg-surface-2 text-ink-muted",
+                  )}
+                >
+                  {fa(r.rank)}
+                </span>
+              </div>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-[13.5px] font-bold text-ink">
                   {r.fullName} {r.isMe && <span className="text-[10px] font-bold text-neon">(شما)</span>}

@@ -7,7 +7,7 @@ import { fa, relTime, durFmt } from "@/lib/format"
 import { CATEGORY_LABELS, REJECT_REASONS, reviewStageLabel, DISTRICT_LABELS, ROLE_STAGE, REVIEW_STAGES } from "@/lib/domain"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
-import { StageTimeline, StageChip } from "@/components/app/bits"
+import { StageTimeline, StageChip, Avatar } from "@/components/app/bits"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
 
@@ -155,9 +155,7 @@ export function ReviewScreen() {
                 </div>
 
                 <div className="mt-3 flex items-center gap-2 border-t border-line pt-3">
-                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-neon/12 text-[11px] font-black text-neon">
-                    {n.reporterName.slice(0, 1)}
-                  </span>
+                  <Avatar name={n.reporterName} src={n.reporterAvatar} size={32} />
                   <span className="flex-1 text-[11px] text-ink-muted">
                     {n.reporterName} · {DISTRICT_LABELS[n.district] ?? n.district}
                   </span>

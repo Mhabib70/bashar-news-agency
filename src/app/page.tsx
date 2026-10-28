@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useApp } from "@/lib/store"
 import { Welcome } from "@/components/app/welcome"
+import { Avatar } from "@/components/app/bits"
 import { HomeScreen } from "@/components/app/home"
 import { ActivityScreen } from "@/components/app/activity"
 import { NewsScreen } from "@/components/app/news-tab"
@@ -145,7 +146,7 @@ function GateScreen({ icon, title, body, action }: { icon: React.ReactNode; titl
 
 function SwitchAccountSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { login, userId } = useApp()
-  const [users, setUsers] = useState<{ id: string; fullName: string; role: string; district: string }[]>([])
+  const [users, setUsers] = useState<{ id: string; fullName: string; avatar: string; role: string; district: string }[]>([])
   useEffect(() => {
     if (open) {
       fetch("/api/bootstrap")
@@ -172,7 +173,10 @@ function SwitchAccountSheet({ open, onClose }: { open: boolean; onClose: () => v
               }}
               className={`flex w-full items-center justify-between rounded-2xl border px-4 py-3 text-right transition-colors ${u.id === userId ? "border-neon/50 bg-neon/8" : "border-line bg-surface hover:bg-surface-2"}`}
             >
-              <span className="text-[13.5px] font-bold text-ink">{u.fullName}</span>
+              <span className="flex items-center gap-3">
+                <Avatar name={u.fullName} src={u.avatar} size={36} />
+                <span className="text-[13.5px] font-bold text-ink">{u.fullName}</span>
+              </span>
               <span className="text-[11px] text-ink-muted">{ROLE_LABELS[u.role]}</span>
             </button>
           ))}

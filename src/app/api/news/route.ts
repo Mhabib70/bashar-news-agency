@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
   }
   const rows = await db.newsItem.findMany({
     where,
-    include: { reporter: { select: { fullName: true, district: true } } },
+    include: { reporter: { select: { fullName: true, district: true, avatar: true } } },
     orderBy: { createdAt: "desc" },
     take: 30,
   })
