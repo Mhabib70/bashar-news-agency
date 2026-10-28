@@ -83,16 +83,16 @@ export function Welcome() {
       {/* شعار و دکمه */}
       <div className="relative -mt-14 z-10 flex flex-1 flex-col px-6">
         <h1 className="text-[34px] font-black leading-[1.25] text-white">
-          همیشه
+          روایت‌گرِ
           <br />
-          <span className="text-neon">سرِ خبر</span>
+          <span className="text-neon">حقیقت</span>
           <br />
-          باش
+          صدای بشر
         </h1>
         <p className="mt-3 text-[13.5px] leading-6 text-ink-muted">
-          گزارش بده، امتیاز بگیر، نشان جمع کن
+          از قلبِ رویداد تا صفحهٔ خبر؛
           <br />
-          و قهرمان چالش‌های خبری شو.
+          روایتی معتبر با تعهّد به حقیقت و اعتماد.
         </p>
         <button
           onClick={() => setOpen(true)}

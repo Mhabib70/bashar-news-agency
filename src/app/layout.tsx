@@ -5,7 +5,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 
 export const metadata: Metadata = {
   title: "خبرگزاری بشر | اپ خبرنگاران",
-  description: "اپلیکیشن خبرگزاری بشر — ارسال خبر، چرخه بررسی سه‌مرحله‌ای، امتیاز، سطح و چالش",
+  description: "خبرگزاری بشر — روایت‌گر حقیقت، صدای بشر. ارسال خبر، چرخه بررسی سه‌مرحله‌ای، امتیاز، سطح و چالش",
   icons: { icon: "https://z-cdn.chatglm.cn/z-ai/static/logo.svg" },
 };
 
