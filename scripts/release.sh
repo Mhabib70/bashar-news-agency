@@ -15,11 +15,11 @@ fi
 BODY=$(cat "$NOTES_FILE")
 
 echo "[1/3] ساخت Release..."
-REL=$(node -e "
+REL=$(TAG="$TAG" TITLE="$TITLE" NOTES="$NOTES_FILE" node -e "
 const fs = require('fs');
 const payload = JSON.stringify({ tag_name: process.env.TAG, target_commitish: 'main', name: process.env.TITLE, body: fs.readFileSync(process.env.NOTES, 'utf8'), draft: false, prerelease: false });
 console.log(payload);
-" 2>/dev/null TAG="$TAG" TITLE="$TITLE" NOTES="$NOTES_FILE" | curl -s -X POST -H "Authorization: Bearer $PAT" -H "Content-Type: application/json" \
+" 2>/dev/null | curl -s -X POST -H "Authorization: Bearer $PAT" -H "Content-Type: application/json" \
   -d @- "https://api.github.com/repos/$REPO/releases")
 REL_ID=$(echo "$REL" | node -e "let d='';process.stdin.on('data',c=>d+=c).on('end',()=>{const j=JSON.parse(d); if(j.id){console.log(j.id)}else{console.error('ERR',JSON.stringify(j).slice(0,300));process.exit(1)}})")
 echo "RELEASE_ID=$REL_ID"
