@@ -80,3 +80,5 @@ android/keystore-release.jks
 # اجازه انتشار فایل نمونه env (بدون مقادیر واقعی)
 !.env.example
 public/uploads/
+assets/final-2.png
+scripts/speech/Vazirmatn-Regular.ttf
