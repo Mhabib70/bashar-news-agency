@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
 # ساخت APK اندروید خبرگزاری بشر — بدون Gradle، مستقیم با build-tools
 set -e
-export JAVA_HOME=/home/z/my-project/jdk
-export PATH=$JAVA_HOME/bin:$PATH
+# جاوا سیستمی (JRE 21) استفاده می‌شود
 cd /home/z/my-project/android
 SDK=/home/z/my-project/android-sdk
-BT=$SDK/build-tools/35.0.0
+BT=$SDK/build-tools/34.0.0
 PLAT=$SDK/platforms/android-34/android.jar
 BT_JAR=$BT/lib/d8.jar
 
@@ -23,7 +22,7 @@ echo "[2/6] لینک منابع و تولید R.java (aapt2 link)..."
 
 echo "[3/6] کامپایل جاوا..."
 rm -rf classes && mkdir -p classes
-javac -classpath "$PLAT" -source 1.8 -target 1.8 -nowarn \
+java -jar $SDK/ecj.jar -classpath "$PLAT" -source 1.8 -target 1.8 -nowarn -proc:none \
   -d classes \
   gen/ir/basharnews/app/R.java \
   java/ir/basharnews/app/MainActivity.java
@@ -48,7 +47,7 @@ if [ ! -f release.keystore ]; then
 fi
 "$BT/apksigner" sign --ks release.keystore \
   --ks-pass pass:basharnews2026 --key-pass pass:basharnews2026 \
-  --out /home/z/my-project/apk/BasharNews-v1.2.0.apk aligned.apk
+  --out /home/z/my-project/apk/BasijNews-v1.2.1.apk aligned.apk
 
-"$BT/apksigner" verify /home/z/my-project/apk/BasharNews-v1.2.0.apk && echo "APK_SIGNED_OK"
+"$BT/apksigner" verify /home/z/my-project/apk/BasijNews-v1.2.1.apk && echo "APK_SIGNED_OK"
 ls -la /home/z/my-project/apk/

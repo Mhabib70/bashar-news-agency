@@ -4,8 +4,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/theme-provider";
 
 export const metadata: Metadata = {
-  title: "خبرگزاری بشر | اپ خبرنگاران",
-  description: "خبرگزاری بشر — روایت‌گر حقیقت، صدای بشر. ارسال خبر، چرخه بررسی سه‌مرحله‌ای، امتیاز، سطح و چالش",
+  title: "خبرگزاری بسیج شهر رشت | اپ خبرنگاران",
+  description: "خبرگزاری بسیج شهر رشت — روایت‌گر حقیقت، صدای بسیج. ارسال خبر، چرخه بررسی سه‌مرحله‌ای، امتیاز، سطح و چالش",
   icons: { icon: "https://z-cdn.chatglm.cn/z-ai/static/logo.svg" },
 };
 

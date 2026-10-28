@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
         userId: user.id,
         role,
         status,
-        message: `ثبت‌نام کامل شد. ${fullName} عزیز، شما به‌عنوان ادمین کل خبرگزاری بشر راه‌اندازی شدید!`,
+        message: `ثبت‌نام کامل شد. ${fullName} عزیز، شما به‌عنوان ادمین کل خبرگزاری بسیج شهر رشت راه‌اندازی شدید!`,
       })
     }
 

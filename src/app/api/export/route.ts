@@ -45,7 +45,7 @@ export async function GET(req: NextRequest) {
         levelFor(u.points).title, u.currentStreak, jalaliDate(u.createdAt),
       ]),
     ]
-    return csvResponse(csv(rows), "bashar-users.csv")
+    return csvResponse(csv(rows), "basij-users.csv")
   }
 
   if (type === "news") {
@@ -63,7 +63,7 @@ export async function GET(req: NextRequest) {
         n.durationMin, n.challengeId ?? "", jalaliDate(n.createdAt), n.reviewedBy,
       ]),
     ]
-    return csvResponse(csv(rows), "bashar-news.csv")
+    return csvResponse(csv(rows), "basij-news.csv")
   }
 
   if (type === "districts") {
@@ -82,7 +82,7 @@ export async function GET(req: NextRequest) {
         du.reduce((s, u) => s + u.points, 0),
       ])
     }
-    return csvResponse(csv(rows), "bashar-districts.csv")
+    return csvResponse(csv(rows), "basij-districts.csv")
   }
 
   if (type === "presscard") {
@@ -97,7 +97,7 @@ export async function GET(req: NextRequest) {
     ])
     const total = approved + rejected
     const rows: (string | number)[][] = [
-      ["کارت خبرنگاری دیجیتال — خبرگزاری بشر"],
+      ["کارت خبرنگاری دیجیتال — خبرگزاری بسیج شهر رشت"],
       ["نام و نام خانوادگی", u.fullName],
       ["نام کاربری", u.username],
       ["نقش", ROLE_LABELS[u.role] ?? u.role],
@@ -114,7 +114,7 @@ export async function GET(req: NextRequest) {
       ["نشان‌ها", badges.map((b) => b.badgeKey).join(" | ")],
       ["تاریخ عضویت", jalaliDate(u.createdAt)],
     ]
-    return csvResponse(csv(rows), `bashar-presscard-${u.username}.csv`)
+    return csvResponse(csv(rows), `basij-presscard-${u.username}.csv`)
   }
 
   return new Response(JSON.stringify({ error: "نوع خروجی نامعتبر" }), { status: 400 })

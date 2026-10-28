@@ -54,7 +54,7 @@ export function ProfileScreen({ onSwitchAccount, onOpenAdmin }: { onSwitchAccoun
   const unlockedBadges = state.badges.filter((b) => b.unlocked).length
 
   const shareCard = async () => {
-    const text = `🎖 کارت خبرنگاری دیجیتال\n${user.fullName}\n${ROLE_LABELS[user.role]} · ${DISTRICT_LABELS[user.district] ?? ""}\n${user.base}\nسطح: ${user.levelEmoji} ${user.levelTitle} · ${faNum(user.points)} امتیاز\nعضو از ${jalali(user.createdAt, true)}\n📰 خبرگزاری بشر`
+    const text = `🎖 کارت خبرنگاری دیجیتال\n${user.fullName}\n${ROLE_LABELS[user.role]} · ${DISTRICT_LABELS[user.district] ?? ""}\n${user.base}\nسطح: ${user.levelEmoji} ${user.levelTitle} · ${faNum(user.points)} امتیاز\nعضو از ${jalali(user.createdAt, true)}\n📰 خبرگزاری بسیج شهر رشت`
     try {
       if (navigator.share) await navigator.share({ title: "کارت خبرنگاری", text })
       else {
@@ -116,7 +116,7 @@ export function ProfileScreen({ onSwitchAccount, onOpenAdmin }: { onSwitchAccoun
           <div className="flex items-center justify-between">
             <span className="flex items-center gap-1.5 text-[10.5px] font-black text-neon">
               <BadgeCheck className="h-4 w-4" />
-              خبرگزاری بشر
+              خبرگزاری بسیج شهر رشت
             </span>
             <span className="rounded-full bg-black/25 px-2.5 py-1 font-mono text-[9px] font-bold text-neon" dir="ltr">
               {user.username}

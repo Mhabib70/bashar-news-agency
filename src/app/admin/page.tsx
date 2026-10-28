@@ -135,7 +135,7 @@ export default function AdminPage() {
                 </p>
                 <p className="mt-0.5 flex items-center gap-1.5 text-[10px] text-ink-muted lg:hidden">
                   <ShieldCheck className="h-3 w-3 text-neon" />
-                  پنل مدیریت خبرگزاری بشر
+                  پنل مدیریت خبرگزاری بسیج شهر رشت
                 </p>
               </div>
               <div className="flex shrink-0 items-center gap-2">

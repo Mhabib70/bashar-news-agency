@@ -4,8 +4,7 @@ import { useEffect, useState } from "react"
 import Image from "next/image"
 import { Menu, Bell, ArrowLeft, X, Check, ChevronLeft } from "lucide-react"
 import { useApp } from "@/lib/store"
-import { Ring, CountUp } from "@/components/app/bits"
-import { fa, toFa } from "@/lib/format"
+import { toFa } from "@/lib/format"
 import { DISTRICT_LABELS, BASE_LISTS, EDUCATION_LEVEL_LABELS } from "@/lib/domain"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
@@ -16,16 +15,6 @@ import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
 
 type DemoUser = { id: string; fullName: string; role: string; district: string; base: string; levelKey: string; points: number }
-
-type Overview = {
-  progressPct: number
-  pointsToday: number
-  newsThisWeek: number
-  newsToday: number
-  activeToday: number
-  totalReporters: number
-  top: { fullName: string; points: number } | null
-}
 
 const faToEn = (s: string) => s.replace(/[۰-۹]/g, (d) => String("۰۱۲۳۴۵۶۷۸۹".indexOf(d)))
 
@@ -40,7 +29,6 @@ export function Welcome() {
   const { login, register } = useApp()
   const { toast } = useToast()
   const [users, setUsers] = useState<DemoUser[] | null>(null)
-  const [overview, setOverview] = useState<Overview | null>(null)
   const [open, setOpen] = useState(false)
   const [regOpen, setRegOpen] = useState(false)
   const [busy, setBusy] = useState<string | null>(null)
@@ -49,10 +37,6 @@ export function Welcome() {
       .then((r) => r.json())
       .then((d) => setUsers(d.users))
       .catch(() => setUsers([]))
-    fetch("/api/overview")
-      .then((r) => r.json())
-      .then((d: Overview) => setOverview(d))
-      .catch(() => setOverview(null))
   }, [])
 
   const doLogin = async (id: string, name: string) => {
@@ -65,9 +49,9 @@ export function Welcome() {
 
   return (
     <div className="relative flex h-full flex-col overflow-hidden bg-background">
-      {/* هیرو — لوگوی خبرگزاری بشر */}
+      {/* هیرو — لوگوی خبرگزاری بسیج شهر رشت */}
       <div className="relative h-[54%] w-full shrink-0 bg-black">
-        <Image src="/img/agency-logo.png" alt="خبرگزاری بشر" fill priority sizes="430px" className="object-cover" />
+        <Image src="/img/agency-logo.png" alt="خبرگزاری بسیج شهر رشت" fill priority sizes="430px" className="object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/25 to-transparent" />
         <div className="absolute inset-x-0 top-0 flex items-center justify-between p-5">
           <button className="flex h-10 w-10 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur transition-colors hover:bg-black/65" aria-label="منو">
@@ -82,12 +66,12 @@ export function Welcome() {
 
       {/* شعار و دکمه */}
       <div className="relative -mt-14 z-10 flex flex-1 flex-col px-6">
-        <h1 className="text-[34px] font-black leading-[1.25] text-white">
+        <h1 className="text-[34px] font-black leading-[1.25] text-ink">
           روایت‌گرِ
           <br />
           <span className="text-neon">حقیقت</span>
           <br />
-          صدای بشر
+          صدای بسیج
         </h1>
         <p className="mt-3 text-[13.5px] leading-6 text-ink-muted">
           از قلبِ رویداد تا صفحهٔ خبر؛
@@ -101,42 +85,6 @@ export function Welcome() {
           شروع کن
           <ArrowLeft className="h-5 w-5" />
         </button>
-
-        {/* کارت پیشرفت امروز — داده واقعی از /api/overview */}
-        <div className="mt-auto mb-6 rounded-[28px] bg-surface/90 p-5 backdrop-blur">
-          <div className="mb-2 flex items-center justify-between">
-            <p className="text-[15px] font-bold text-ink">پیشرفت امروز</p>
-            {overview?.top && (
-              <p className="text-[10.5px] text-ink-muted">
-                صدرنشین: <span className="font-bold text-neon">{overview.top.fullName}</span>
-              </p>
-            )}
-          </div>
-          <div className="flex flex-col items-center gap-4">
-            <Ring value={overview?.progressPct ?? 0} max={100} size={150} stroke={11}>
-              <span className="text-[30px] font-black leading-none text-white">
-                <CountUp to={overview?.progressPct ?? 0} fmt={fa} />
-                <span className="text-[15px] font-bold">٪</span>
-              </span>
-              <span className="mt-1 text-[11px] text-ink-muted">خبرنگاران فعال</span>
-            </Ring>
-            <div className="grid w-full grid-cols-3 gap-2">
-              {[
-                { v: overview?.pointsToday ?? 0, l: "امتیاز", s: "امروز" },
-                { v: overview?.newsThisWeek ?? 0, l: "خبر", s: "این هفته" },
-                { v: overview ? `${fa(overview.activeToday)}/${fa(overview.totalReporters)}` : "—", l: "فعال", s: "خبرنگار" },
-              ].map((x) => (
-                <div key={x.l} className="flex flex-col items-center gap-0.5 border-l last:border-l-0 border-line px-1">
-                  <span className="text-[17px] font-black text-neon">
-                    {typeof x.v === "number" ? <CountUp to={x.v} fmt={fa} /> : x.v}
-                  </span>
-                  <span className="text-[11px] font-semibold text-ink">{x.l}</span>
-                  <span className="text-[9.5px] text-ink-muted">{x.s}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* ورود */}
