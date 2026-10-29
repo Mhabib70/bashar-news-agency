@@ -47,7 +47,7 @@ export function Ring({
           strokeDasharray={c}
           strokeDashoffset={offset}
           className={cn(barClass)}
-          style={{ filter: "drop-shadow(0 0 8px rgba(201,247,58,0.45))" }}
+          style={{ filter: "drop-shadow(0 0 8px rgba(47,107,51,0.45))" }}
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center">{children}</div>

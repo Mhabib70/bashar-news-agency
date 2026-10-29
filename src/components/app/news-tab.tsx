@@ -42,7 +42,7 @@ export function NewsScreen({ onQuickSubmit, draftsView }: { onQuickSubmit: () =>
         <h1 className="text-[22px] font-black text-ink">{draftsView ? "اخبار و پیش‌نویس‌ها" : "اخبار من"}</h1>
         <button
           onClick={onQuickSubmit}
-          className="flex items-center gap-1.5 rounded-full bg-neon px-4 py-2.5 text-[13px] font-bold text-neon-foreground shadow-[0_10px_26px_-10px_rgba(201,247,58,0.7)] transition-transform hover:scale-[1.03] active:scale-95"
+          className="flex items-center gap-1.5 rounded-full bg-neon px-4 py-2.5 text-[13px] font-bold text-neon-foreground btn-glow transition-transform hover:scale-[1.03] active:scale-95"
         >
           <Plus className="h-4 w-4" />
           ارسال خبر

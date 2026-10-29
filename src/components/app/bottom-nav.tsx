@@ -5,7 +5,7 @@ import { useApp, type Tab } from "@/lib/store"
 import { fa } from "@/lib/format"
 import { cn } from "@/lib/utils"
 
-export function BottomNav({ onReview }: { onReview: () => void }) {
+export function BottomNav({ onReview, className }: { onReview: () => void; className?: string }) {
   const { state, tab, setTab } = useApp()
   if (!state) return null
   const isReviewer = state.user.role !== "reporter"
@@ -18,7 +18,7 @@ export function BottomNav({ onReview }: { onReview: () => void }) {
   ]
 
   return (
-    <nav className="sticky bottom-0 z-30 mt-auto border-t border-line bg-[var(--nav-bg)]/95 px-2 pb-2 pt-1.5 backdrop-blur-lg" aria-label="ناوبری اصلی">
+    <nav className={cn("sticky bottom-0 z-30 mt-auto border-t border-line bg-[var(--nav-bg)]/95 px-2 pb-2 pt-1.5 backdrop-blur-lg lg:hidden", className)} aria-label="ناوبری اصلی">
       <div className={cn("flex items-end justify-around", isReviewer && "gap-0")}>
         {items.slice(0, 2).map((it) => (
           <NavBtn key={it.id} label={it.label} icon={it.icon} active={tab === it.id} onClick={() => setTab(it.id)} />
@@ -26,7 +26,7 @@ export function BottomNav({ onReview }: { onReview: () => void }) {
         {isReviewer ? (
           <button
             onClick={onReview}
-            className="relative -mt-7 flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-neon text-neon-foreground shadow-[0_12px_30px_-8px_rgba(201,247,58,0.65)] transition-transform hover:scale-105 active:scale-95"
+            className="relative -mt-7 flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-neon text-neon-foreground btn-glow-strong transition-transform hover:scale-105 active:scale-95"
             aria-label="صف بررسی"
           >
             <ClipboardCheck className="h-6 w-6" />

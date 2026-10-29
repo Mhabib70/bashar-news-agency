@@ -91,99 +91,105 @@
 
 :root {
   --radius: 1.25rem;
-  /* پالت تیره + سبز نئونی (مطابق نمونه رابط کاربری) */
-  --background: #0b0c09;
-  --foreground: #f2f4ec;
-  --card: #15170f;
-  --card-foreground: #f2f4ec;
-  --popover: #191b12;
-  --popover-foreground: #f2f4ec;
-  --primary: #c9f73a;
-  --primary-foreground: #141604;
-  --secondary: #1e2115;
-  --secondary-foreground: #e6e9da;
-  --muted: #1a1c12;
-  --muted-foreground: #99a08a;
-  --accent: #222616;
-  --accent-foreground: #e6e9da;
+  /* پالت تیره — جنگلی سبز (هویت بسیج) */
+  --background: #0f1712;
+  --foreground: #e9f1ea;
+  --card: #141e18;
+  --card-foreground: #e9f1ea;
+  --popover: #17231c;
+  --popover-foreground: #e9f1ea;
+  --primary: #4e9c5c;
+  --primary-foreground: #08120b;
+  --secondary: #1a2820;
+  --secondary-foreground: #dbe8dd;
+  --muted: #16221b;
+  --muted-foreground: #93a89a;
+  --accent: #1c2b22;
+  --accent-foreground: #dbe8dd;
   --destructive: #ff5c5c;
-  --border: #262a1b;
-  --input: #262a1b;
-  --ring: #c9f73a;
-  --chart-1: #c9f73a;
-  --chart-2: #8fd14f;
-  --chart-3: #e8ffb0;
-  --chart-4: #6b7a4a;
-  --chart-5: #3d4527;
-  --sidebar: #15170f;
-  --sidebar-foreground: #f2f4ec;
-  --sidebar-primary: #c9f73a;
-  --sidebar-primary-foreground: #141604;
-  --sidebar-accent: #222616;
-  --sidebar-accent-foreground: #e6e9da;
-  --sidebar-border: #262a1b;
-  --sidebar-ring: #c9f73a;
-  --neon: #c9f73a;
-  --neon-foreground: #141604;
-  --surface: #15170f;
-  --surface-2: #1c1f12;
-  --ink: #f2f4ec;
-  --ink-muted: #99a08a;
-  --line: #262a1b;
+  --border: #233529;
+  --input: #233529;
+  --ring: #4e9c5c;
+  --chart-1: #4e9c5c;
+  --chart-2: #7bb661;
+  --chart-3: #a8d5a2;
+  --chart-4: #5d7a63;
+  --chart-5: #2c4033;
+  --sidebar: #141e18;
+  --sidebar-foreground: #e9f1ea;
+  --sidebar-primary: #4e9c5c;
+  --sidebar-primary-foreground: #08120b;
+  --sidebar-accent: #1c2b22;
+  --sidebar-accent-foreground: #dbe8dd;
+  --sidebar-border: #233529;
+  --sidebar-ring: #4e9c5c;
+  --neon: #5cae6b;
+  --neon-foreground: #0a130d;
+  --surface: #141e18;
+  --surface-2: #1a2820;
+  --ink: #e9f1ea;
+  --ink-muted: #93a89a;
+  --line: #233529;
   --warn: #ffc24b;
   --danger: #ff5c5c;
   --danger-soft: #ff8484;
-  --page: #060704;
-  --frame-border: #2a2e1d;
-  --nav-bg: #101208;
+  --page: #0a100c;
+  --frame-border: #223428;
+  --nav-bg: #0e1611;
+  --grad-a: #2f6b33;
+  --grad-b: #17321f;
+  --grad-ink: #f2f8f4;
 }
 
-/* پالت روشن — همان هویت سبز لیمویی با خوانایی حرفه‌ای */
+/* پالت روشن — سبز رسمی بسیج (مطابق پیش‌نمایش اجتماعی) */
 html.light {
-  --background: #f2f4ea;
-  --foreground: #1d2612;
+  --background: #f7faf7;
+  --foreground: #1d2b22;
   --card: #ffffff;
-  --card-foreground: #1d2612;
+  --card-foreground: #1d2b22;
   --popover: #ffffff;
-  --popover-foreground: #1d2612;
-  --primary: #4d7c0f;
+  --popover-foreground: #1d2b22;
+  --primary: #2f6b33;
   --primary-foreground: #ffffff;
-  --secondary: #e9edd9;
-  --secondary-foreground: #2a331a;
-  --muted: #eaedde;
-  --muted-foreground: #5d684e;
-  --accent: #e4e9d1;
-  --accent-foreground: #2a331a;
+  --secondary: #e9f1ea;
+  --secondary-foreground: #1a3c2a;
+  --muted: #eef3ee;
+  --muted-foreground: #5f6f64;
+  --accent: #e6efe7;
+  --accent-foreground: #1a3c2a;
   --destructive: #dc2626;
-  --border: #dce1c9;
-  --input: #dce1c9;
-  --ring: #4d7c0f;
-  --chart-1: #4d7c0f;
-  --chart-2: #84cc16;
-  --chart-3: #a3d139;
-  --chart-4: #84916a;
-  --chart-5: #d7ddc4;
+  --border: #e0e8e0;
+  --input: #e0e8e0;
+  --ring: #2f6b33;
+  --chart-1: #2f6b33;
+  --chart-2: #7bb661;
+  --chart-3: #a8d5a2;
+  --chart-4: #84966f;
+  --chart-5: #d7e4d7;
   --sidebar: #ffffff;
-  --sidebar-foreground: #1d2612;
-  --sidebar-primary: #4d7c0f;
+  --sidebar-foreground: #1d2b22;
+  --sidebar-primary: #2f6b33;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #e4e9d1;
-  --sidebar-accent-foreground: #2a331a;
-  --sidebar-border: #dce1c9;
-  --sidebar-ring: #4d7c0f;
-  --neon: #4d7c0f;
+  --sidebar-accent: #e6efe7;
+  --sidebar-accent-foreground: #1a3c2a;
+  --sidebar-border: #e0e8e0;
+  --sidebar-ring: #2f6b33;
+  --neon: #2f6b33;
   --neon-foreground: #ffffff;
   --surface: #ffffff;
-  --surface-2: #edf0e1;
-  --ink: #1d2612;
-  --ink-muted: #5d684e;
-  --line: #dce1c9;
+  --surface-2: #eff4ef;
+  --ink: #1d2b22;
+  --ink-muted: #5f6f64;
+  --line: #e0e8e0;
   --warn: #b45309;
   --danger: #dc2626;
   --danger-soft: #dc2626;
-  --page: #e7ebdb;
-  --frame-border: #d3d9bf;
-  --nav-bg: #fbfcf4;
+  --page: #e9eee9;
+  --frame-border: #dfe7df;
+  --nav-bg: #ffffff;
+  --grad-a: #2f6b33;
+  --grad-b: #17321f;
+  --grad-ink: #f2f8f4;
 }
 
 * {
@@ -223,17 +229,28 @@ body {
   scrollbar-width: none;
 }
 
-/* متن درخشان روی کارت نئونی */
+/* کارت گرادیانی سبز بسیج (چالش فعال و...) */
 .neon-card {
-  background: linear-gradient(145deg, #d7ff55 0%, #c2f02c 55%, #b4e31f 100%);
-  color: #161a04;
+  background: linear-gradient(145deg, var(--grad-a) 0%, var(--grad-b) 100%);
+  color: var(--grad-ink);
   box-shadow:
-    0 18px 50px -18px rgba(201, 247, 58, 0.45),
-    0 2px 0 rgba(255, 255, 255, 0.25) inset;
+    0 18px 50px -18px rgba(26, 60, 42, 0.55),
+    0 2px 0 rgba(255, 255, 255, 0.14) inset;
 }
 
 .glow-ring {
-  filter: drop-shadow(0 0 10px rgba(201, 247, 58, 0.35));
+  filter: drop-shadow(0 0 10px rgba(47, 107, 51, 0.35));
+}
+
+/* حلقه استوری سبز */
+.story-ring {
+  background: conic-gradient(from 30deg, #2f6b33, #7bb661, #2f6b33);
+}
+.btn-glow {
+  box-shadow: 0 10px 26px -8px rgba(47, 107, 51, 0.5);
+}
+.btn-glow-strong {
+  box-shadow: 0 12px 30px -8px rgba(47, 107, 51, 0.55);
 }
 
 .stage-enter {
@@ -272,17 +289,17 @@ body {
   padding-bottom: max(env(safe-area-inset-bottom), 0px);
 }
 
-/* ---------- کادر آواتار حرفه‌ای: مربع کج با حاشیه قرمز نئونی ---------- */
+/* ---------- کادر آواتار حرفه‌ای: مربع کج با حاشیه سبز بسیج ---------- */
 .avatar-neon {
   position: relative;
   border-radius: 14px;
-  border: 2px solid #ff2d55;
+  border: 2px solid #2f6b33;
   background: var(--surface);
   box-shadow:
-    0 0 0 1px rgba(255, 45, 85, 0.28),
-    0 0 12px rgba(255, 45, 85, 0.55),
-    0 0 30px rgba(255, 45, 85, 0.25),
-    inset 0 0 10px rgba(255, 45, 85, 0.18);
+    0 0 0 1px rgba(47, 107, 51, 0.28),
+    0 0 12px rgba(47, 107, 51, 0.4),
+    0 0 30px rgba(47, 107, 51, 0.18),
+    inset 0 0 10px rgba(47, 107, 51, 0.14);
   overflow: hidden;
   flex-shrink: 0;
 }
@@ -296,7 +313,7 @@ body {
   z-index: 2;
 }
 .avatar-neon::after {
-  /* نشان گوشه قرمز نئونی */
+  /* نشان گوشه سبز */
   content: "";
   position: absolute;
   left: 4px;
@@ -304,8 +321,8 @@ body {
   width: 7px;
   height: 7px;
   border-radius: 2px;
-  background: #ff2d55;
-  box-shadow: 0 0 8px rgba(255, 45, 85, 0.9);
+  background: #2f6b33;
+  box-shadow: 0 0 8px rgba(47, 107, 51, 0.8);
   z-index: 3;
 }
 .avatar-neon > * {
@@ -316,8 +333,8 @@ body {
 .avatar-photo {
   position: relative;
   border-radius: 12px;
-  border: 2px solid rgba(255, 45, 85, 0.55);
-  box-shadow: 0 0 8px rgba(255, 45, 85, 0.22);
+  border: 2px solid rgba(47, 107, 51, 0.5);
+  box-shadow: 0 0 8px rgba(47, 107, 51, 0.2);
   overflow: hidden;
   flex-shrink: 0;
   background: var(--surface-2);

@@ -81,7 +81,7 @@ export function Welcome() {
         </p>
         <button
           onClick={() => setOpen(true)}
-          className="mt-5 flex w-[62%] items-center justify-between rounded-full bg-neon px-6 py-4 text-[15px] font-bold text-neon-foreground shadow-[0_14px_38px_-10px_rgba(201,247,58,0.5)] transition-transform hover:scale-[1.02] active:scale-[0.98]"
+          className="mt-5 flex w-[62%] items-center justify-between rounded-full bg-neon px-6 py-4 text-[15px] font-bold text-neon-foreground btn-glow transition-transform hover:scale-[1.02] active:scale-[0.98]"
         >
           شروع کن
           <ArrowLeft className="h-5 w-5" />

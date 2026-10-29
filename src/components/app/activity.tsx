@@ -41,7 +41,7 @@ export function ActivityScreen() {
             onClick={() => setRange(k)}
             className={cn(
               "flex-1 rounded-full py-2.5 text-[13px] font-bold transition-all",
-              range === k ? "bg-neon text-neon-foreground shadow-[0_8px_20px_-8px_rgba(201,247,58,0.6)]" : "text-ink-muted hover:text-ink",
+              range === k ? "bg-neon text-neon-foreground btn-glow" : "text-ink-muted hover:text-ink",
             )}
           >
             {k === "day" ? "روز" : k === "week" ? "هفته" : "ماه"}

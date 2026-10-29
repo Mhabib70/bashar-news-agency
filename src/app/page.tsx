@@ -13,6 +13,7 @@ import { ReviewScreen } from "@/components/app/review-tab"
 import { SubmitFlow } from "@/components/app/submit-flow"
 import { NotificationsSheet, ChallengesSheet } from "@/components/app/sheets"
 import { BottomNav } from "@/components/app/bottom-nav"
+import { TopBar, SideNav, RightRail } from "@/components/app/social"
 import { USER_REJECT_TITLES } from "@/lib/domain"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -59,49 +60,67 @@ export default function Page() {
   }
 
   const user = state?.user
+  const loggedIn = !!(userId && state && user && user.status === "active")
 
   return (
-    <main className="flex min-h-dvh items-center justify-center bg-[var(--page)] sm:p-6">
-      {/* پس‌زمینه دسکتاپ */}
-      <div className="pointer-events-none fixed inset-0 hidden sm:block" aria-hidden>
-        <div className="absolute left-1/2 top-1/2 h-[560px] w-[560px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-neon/6 blur-[140px]" />
-        <div className="absolute bottom-10 right-16 h-72 w-72 rounded-full bg-neon/4 blur-[110px]" />
-      </div>
-
-      {/* قاب موبایل */}
-      <div className="relative flex h-dvh w-full flex-col overflow-hidden bg-background sm:h-[860px] sm:max-h-[92dvh] sm:w-[420px] sm:rounded-[44px] sm:border sm:border-[var(--frame-border)] sm:shadow-[0_40px_120px_-30px_rgba(0,0,0,0.9),0_0_80px_-40px_rgba(201,247,58,0.25)]">
-        {!booted ? (
-          <div className="flex flex-1 flex-col gap-6 p-6">
-            <Skeleton className="h-[54%] w-full rounded-[28px] bg-surface" />
-            <Skeleton className="h-10 w-2/3 rounded-full bg-surface" />
-            <Skeleton className="h-44 w-full rounded-[28px] bg-surface" />
-          </div>
-        ) : !userId || !state ? (
+    <main className="flex min-h-dvh flex-col bg-[var(--page)]">
+      {!booted ? (
+        <div className="mx-auto flex w-full max-w-[520px] flex-1 flex-col gap-6 p-6">
+          <Skeleton className="h-[54%] w-full rounded-[28px] bg-surface" />
+          <Skeleton className="h-10 w-2/3 rounded-full bg-surface" />
+          <Skeleton className="h-44 w-full rounded-[28px] bg-surface" />
+        </div>
+      ) : !userId || !state ? (
+        /* ورود: در موبایل تمام‌صفحه، در دسکتاپ قاب مرکزی */
+        <div className="mx-auto flex h-dvh w-full max-w-[460px] flex-col overflow-hidden sm:my-6 sm:h-[min(880px,94dvh)] sm:rounded-[36px] sm:border sm:border-[var(--frame-border)] sm:shadow-[0_40px_120px_-40px_rgba(23,50,31,0.45)]">
           <Welcome />
-        ) : user?.status === "pending" ? (
-          <GateScreen
-            icon={<Hourglass className="h-10 w-10 text-warn" />}
-            title="حساب شما در انتظار تایید است"
-            body="درخواست عضویت شما برای ادمین کل ارسال شد. به‌محض تایید، به‌صورت خودکار وارد محیط خبرگزاری می‌شوید. معمولاً بررسی کمتر از ۷۲ ساعت طول می‌کشد."
+        </div>
+      ) : user?.status === "pending" ? (
+        <GateScreen
+          icon={<Hourglass className="h-10 w-10 text-warn" />}
+          title="حساب شما در انتظار تایید است"
+          body="درخواست عضویت شما برای ادمین کل ارسال شد. به‌محض تایید، به‌صورت خودکار وارد محیط خبرگزاری می‌شوید. معمولاً بررسی کمتر از ۷۲ ساعت طول می‌کشد."
+        />
+      ) : user?.status === "rejected" ? (
+        <GateScreen
+          icon={<ShieldX className="h-10 w-10 text-danger-soft" />}
+          title="درخواست عضویت شما تایید نشد"
+          body={user.rejectReason ? `دلیل: ${USER_REJECT_TITLES[user.rejectReason] ?? user.rejectReason}` : "درخواست شما رد شده است."}
+          action={
+            <button
+              onClick={logout}
+              className="mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-[var(--neon)] py-3.5 text-[14px] font-bold text-[var(--neon-foreground)]"
+            >
+              <LogOut className="h-4.5 w-4.5" />
+              بازگشت و ثبت‌نام مجدد
+            </button>
+          }
+        />
+      ) : (
+        <>
+          <TopBar
+            state={state}
+            onOpenNotifications={() => setNotifOpen(true)}
+            onOpenSwitch={() => setSwitchOpen(true)}
+            onGotoNews={() => setTab("news")}
           />
-        ) : user?.status === "rejected" ? (
-          <GateScreen
-            icon={<ShieldX className="h-10 w-10 text-danger-soft" />}
-            title="درخواست عضویت شما تایید نشد"
-            body={user.rejectReason ? `دلیل: ${USER_REJECT_TITLES[user.rejectReason] ?? user.rejectReason}` : "درخواست شما رد شده است."}
-            action={
-              <button
-                onClick={logout}
-                className="mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-neon py-3.5 text-[14px] font-bold text-neon-foreground"
-              >
-                <LogOut className="h-4.5 w-4.5" />
-                بازگشت و ثبت‌نام مجدد
-              </button>
-            }
-          />
-        ) : (
-          <>
-            <div key={tab} className="nice-scroll flex-1 overflow-y-auto">
+
+          <div className="mx-auto grid w-full max-w-[1380px] flex-1 items-start gap-4 px-3 pb-28 lg:grid-cols-[262px_minmax(0,1fr)_306px] lg:gap-5 lg:px-5 lg:pb-8 lg:pt-5">
+            {/* ستون راست (دسکتاپ): پروفایل، منو، چالش‌ها */}
+            <aside className="hidden lg:sticky lg:top-[84px] lg:block">
+              <SideNav
+                state={state}
+                tab={tab}
+                setTab={setTab}
+                onGotoReview={() => setTab("review")}
+                onOpenAdmin={openAdmin}
+                onOpenNotifications={() => setNotifOpen(true)}
+                onOpenChallenges={() => setChallengesOpen(true)}
+              />
+            </aside>
+
+            {/* ستون میانی: محتوای تب فعال */}
+            <div key={tab} className="nice-scroll min-w-0">
               {tab === "home" && (
                 <HomeScreen
                   onOpenNotifications={() => setNotifOpen(true)}
@@ -118,16 +137,24 @@ export default function Page() {
               {tab === "profile" && <ProfileScreen onSwitchAccount={() => setSwitchOpen(true)} onOpenAdmin={openAdmin} />}
               {tab === "review" && <ReviewScreen />}
             </div>
-            <BottomNav onReview={() => setTab("review")} />
-          </>
-        )}
 
-        {/* شیت‌ها */}
-        <SubmitFlow open={submitOpen} onClose={() => setSubmitOpen(false)} preset={submitPreset} />
-        <NotificationsSheet open={notifOpen} onClose={() => setNotifOpen(false)} />
-        <ChallengesSheet open={challengesOpen} onClose={() => setChallengesOpen(false)} />
-        <SwitchAccountSheet open={switchOpen} onClose={() => setSwitchOpen(false)} />
-      </div>
+            {/* ستون چپ (دسکتاپ): اعلان‌ها، برترین‌ها، چالش */}
+            <aside className="hidden lg:sticky lg:top-[84px] lg:block">
+              <RightRail state={state} onOpenNotifications={() => setNotifOpen(true)} onOpenChallenges={() => setChallengesOpen(true)} />
+            </aside>
+          </div>
+
+          <div className="lg:hidden">
+            <BottomNav onReview={() => setTab("review")} />
+          </div>
+        </>
+      )}
+
+      {/* شیت‌ها */}
+      <SubmitFlow open={submitOpen} onClose={() => setSubmitOpen(false)} preset={submitPreset} />
+      <NotificationsSheet open={notifOpen} onClose={() => setNotifOpen(false)} />
+      <ChallengesSheet open={challengesOpen} onClose={() => setChallengesOpen(false)} />
+      <SwitchAccountSheet open={switchOpen} onClose={() => setSwitchOpen(false)} />
     </main>
   )
 }
@@ -135,7 +162,7 @@ export default function Page() {
 // صفحه انتظار/رد عضویت (سناریوی ۱ ربات)
 function GateScreen({ icon, title, body, action }: { icon: React.ReactNode; title: string; body: string; action?: React.ReactNode }) {
   return (
-    <div className="flex flex-1 flex-col items-center justify-center gap-4 px-8 text-center stage-enter">
+    <div className="mx-auto flex w-full max-w-[460px] flex-1 flex-col items-center justify-center gap-4 px-8 text-center stage-enter">
       <span className="flex h-24 w-24 items-center justify-center rounded-full bg-surface border border-line">{icon}</span>
       <h2 className="text-[19px] font-black text-ink">{title}</h2>
       <p className="max-w-[280px] text-[12.5px] leading-6 text-ink-muted">{body}</p>
@@ -171,7 +198,7 @@ function SwitchAccountSheet({ open, onClose }: { open: boolean; onClose: () => v
                 onClose()
                 if (u.id !== userId) login(u.id)
               }}
-              className={`flex w-full items-center justify-between rounded-2xl border px-4 py-3 text-right transition-colors ${u.id === userId ? "border-neon/50 bg-neon/8" : "border-line bg-surface hover:bg-surface-2"}`}
+              className={`flex w-full items-center justify-between rounded-2xl border px-4 py-3 text-right transition-colors ${u.id === userId ? "border-[var(--neon)]/50 bg-[var(--neon)]/8" : "border-line bg-surface hover:bg-surface-2"}`}
             >
               <span className="flex items-center gap-3">
                 <Avatar name={u.fullName} src={u.avatar} size={36} />
