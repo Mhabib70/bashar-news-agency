@@ -89,3 +89,8 @@ scripts/mockup/preview*.jpg
 scripts/mockup/qa-*.png
 scripts/mockup/assets/
 scripts/mockup/fonts/
+
+# AI/dev tool artifacts (not for git)
+tool-results/
+*.log
+server.log
