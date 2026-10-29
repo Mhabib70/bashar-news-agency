@@ -82,3 +82,10 @@ android/keystore-release.jks
 public/uploads/
 assets/final-2.png
 scripts/speech/Vazirmatn-Regular.ttf
+
+# Task 16 — ماکت رابط کاربری (خروجی‌های تصویری میانی)
+scripts/mockup/preview*.png
+scripts/mockup/preview*.jpg
+scripts/mockup/qa-*.png
+scripts/mockup/assets/
+scripts/mockup/fonts/
