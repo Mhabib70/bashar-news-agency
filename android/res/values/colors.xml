@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="bg">#060704</color>
-    <color name="ink">#F2F4EC</color>
-    <color name="ink_muted">#9BA08D</color>
-    <color name="neon">#C9F73A</color>
-    <color name="neon_text">#1A1D0B</color>
+    <!-- پالت هویت بسیج — نسخه ۲.۱ (رابط اجتماعی سبز) -->
+    <color name="bg">#F2F8F4</color>
+    <color name="ink">#1D2B22</color>
+    <color name="ink_muted">#4F5E52</color>
+    <color name="neon">#2F6B33</color>
+    <color name="neon_text">#FFFFFF</color>
+    <color name="green_deep">#17321F</color>
 </resources>
