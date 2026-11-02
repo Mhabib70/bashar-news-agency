@@ -1,7 +1,8 @@
 "use client"
 
 import { useRef, useState } from "react"
-import { LogOut, SwitchCamera, Zap, Trophy, Flame, BellRing, ShieldCheck, Users2, Timer, Award, ChevronDown, BadgeCheck, Share2, FileDown, Camera, Trash2, Loader2 } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { LogOut, SwitchCamera, Zap, Trophy, Flame, BellRing, ShieldCheck, Users2, Timer, Award, ChevronDown, BadgeCheck, Share2, FileDown, Camera, Trash2, Loader2, Landmark } from "lucide-react"
 import { useApp } from "@/lib/store"
 import { Ring, SectionHeader, Avatar, NeonAvatar } from "@/components/app/bits"
 import { fa, faNum, jalali } from "@/lib/format"
@@ -15,6 +16,7 @@ import { useToast } from "@/hooks/use-toast"
 export function ProfileScreen({ onOpenAdmin }: { onOpenAdmin?: () => void }) {
   const { state, saveSettings, logout, uploadAvatar } = useApp()
   const { toast } = useToast()
+  const router = useRouter()
   const [showSettings, setShowSettings] = useState(false)
   const [busy, setBusy] = useState(false)
   const [uploading, setUploading] = useState(false)
@@ -289,7 +291,7 @@ export function ProfileScreen({ onOpenAdmin }: { onOpenAdmin?: () => void }) {
       </div>
 
       {/* اکشن‌ها */}
-      <div className="flex gap-2.5 pb-2">
+      <div className="flex flex-wrap gap-2.5 pb-2">
         {user.role === "admin" && (
           <button
             onClick={onOpenAdmin}
@@ -297,6 +299,15 @@ export function ProfileScreen({ onOpenAdmin }: { onOpenAdmin?: () => void }) {
           >
             <ShieldCheck className="h-4.5 w-4.5" />
             پنل مدیریت
+          </button>
+        )}
+        {(user.role === "admin" || user.role === "district_manager") && (
+          <button
+            onClick={() => router.push("/organization")}
+            className="flex flex-1 items-center justify-center gap-2 rounded-full border border-line bg-surface py-3.5 text-[13.5px] font-bold text-ink transition-colors hover:bg-surface-2"
+          >
+            <Landmark className="h-4.5 w-4.5" />
+            حوزه‌ها و پایگاه‌ها
           </button>
         )}
         <button

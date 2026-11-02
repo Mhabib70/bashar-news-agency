@@ -2,6 +2,7 @@
 
 import { create } from "zustand"
 import type { AppState } from "@/lib/server/state"
+import { applyOrgUnits } from "@/lib/domain"
 
 export type Tab = "home" | "news" | "activity" | "profile" | "review"
 
@@ -65,6 +66,7 @@ type Store = {
   setUserRole: (targetId: string, newRole: "reporter" | "district_manager" | "specialist" | "admin", newDistrict?: string) => Promise<Result>
   editNews: (newsId: number, p: { title: string; content: string }) => Promise<Result>
   sendToEitaa: (newsId: number) => Promise<Result>
+  markNotificationsRead: () => Promise<void>
   uploadMedia: (file: File) => Promise<{ ok: boolean; url?: string; mediaType?: string; message?: string }>
   uploadAvatar: (dataUrl: string) => Promise<Result>
   fetchUserDetail: (targetId: string) => Promise<AdminUserDetail | null>
@@ -98,6 +100,7 @@ export const useApp = create<Store>((set, get) => ({
     set({ loading: true })
     try {
       const state = await api<AppState>(`/api/state?userId=${encodeURIComponent(userId)}`)
+      if (state.districts?.length) applyOrgUnits(state.districts)
       localStorage.setItem("newsapp_uid", userId)
       set({ userId, state, tab: "home", booted: true })
     } finally {
@@ -115,6 +118,7 @@ export const useApp = create<Store>((set, get) => ({
     if (!uid) return
     try {
       const state = await api<AppState>(`/api/state?userId=${encodeURIComponent(uid)}`)
+      if (state.districts?.length) applyOrgUnits(state.districts)
       set({ state })
     } catch {
       /* silent */
@@ -289,6 +293,20 @@ export const useApp = create<Store>((set, get) => ({
       return { ok: true, message: r.message }
     } catch (e) {
       return { ok: false, message: (e as Error).message }
+    }
+  },
+
+  markNotificationsRead: async () => {
+    const uid = get().userId
+    if (!uid) return
+    try {
+      await api("/api/notifications/read", {
+        method: "POST",
+        body: JSON.stringify({ userId: uid }),
+      })
+      await get().refresh()
+    } catch {
+      /* silent */
     }
   },
 

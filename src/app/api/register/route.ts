@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
-import { BASE_LISTS, EDUCATION_LABELS, isSuperAdminPhone } from "@/lib/domain"
+import { EDUCATION_LABELS, isSuperAdminPhone } from "@/lib/domain"
+import { getOrgUnits } from "@/lib/server/orgunits"
 import { notifyUser } from "@/lib/server/notify"
 
 // ثبت‌نام خبرنگار جدید (سناریوی ۱: نام ← شماره ← سن ← تحصیلات ← حوزه ← پایگاه)
@@ -25,7 +26,12 @@ export async function POST(req: NextRequest) {
     if (phoneDigits.length < 10 || phoneDigits.length > 12) {
       return NextResponse.json({ error: "شماره تماس معتبر وارد کنید" }, { status: 400 })
     }
-    const validBases = BASE_LISTS[district] ?? []
+    // حوزه/پایگاه بر اساس فهرست زنده سازمان (قابل ویرایش از پنل) اعتبارسنجی می‌شود
+    const units = await getOrgUnits()
+    const validBases = units.find((d) => d.key === district)?.bases ?? []
+    if (!boss && (district === "" || !units.some((d) => d.key === district))) {
+      return NextResponse.json({ error: "حوزه فعالیت معتبر انتخاب کنید" }, { status: 400 })
+    }
     if (!boss && !validBases.includes(base)) {
       return NextResponse.json({ error: "پایگاه انتخابی با حوزه همخوانی ندارد" }, { status: 400 })
     }

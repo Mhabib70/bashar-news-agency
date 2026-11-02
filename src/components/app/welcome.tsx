@@ -5,7 +5,7 @@ import Image from "next/image"
 import { Menu, Bell, ArrowLeft, X, Check, LogIn } from "lucide-react"
 import { useApp } from "@/lib/store"
 import { toFa } from "@/lib/format"
-import { DISTRICT_LABELS, BASE_LISTS, EDUCATION_LEVEL_LABELS } from "@/lib/domain"
+import { DISTRICT_LABELS, BASE_LISTS, EDUCATION_LEVEL_LABELS, applyOrgUnits } from "@/lib/domain"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
 import {
@@ -23,6 +23,15 @@ export function Welcome() {
   const [busy, setBusy] = useState(false)
   const [phone, setPhone] = useState("")
   const [err, setErr] = useState("")
+  // حوزه‌ها/پایگاه‌های زنده سازمان — برای فرم ثبت‌نام (قبل از ورود)
+  useEffect(() => {
+    fetch("/api/districts")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.units?.length) applyOrgUnits(d.units)
+      })
+      .catch(() => {})
+  }, [])
 
   // ورود امن: فقط با شماره موبایل حساب خودتان وارد می‌شوید
   const doPhoneLogin = async () => {

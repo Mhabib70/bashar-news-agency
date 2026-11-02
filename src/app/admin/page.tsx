@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { LayoutDashboard, Users2, ClipboardList, Trophy, Megaphone, FileDown, ArrowRight, ShieldCheck, Loader2 } from "lucide-react"
+import { LayoutDashboard, Users2, ClipboardList, Trophy, Megaphone, FileDown, ArrowRight, ShieldCheck, Loader2, Landmark } from "lucide-react"
 import { useApp } from "@/lib/store"
 import { NeonAvatar } from "@/components/app/bits"
 import { ThemeToggle } from "@/components/app/theme-toggle"
@@ -15,12 +15,13 @@ import { AdminChallengesSection } from "@/components/admin/challenges"
 import { AdminBroadcastSection } from "@/components/admin/broadcast"
 import { AdminExportsSection } from "@/components/admin/exports"
 
-type SectionKey = "overview" | "users" | "review" | "challenges" | "broadcast" | "exports"
+type SectionKey = "overview" | "users" | "review" | "challenges" | "broadcast" | "exports" | "organization"
 
 const NAV: { key: SectionKey; label: string; icon: React.ReactNode; desc: string }[] = [
   { key: "overview", label: "داشبورد", icon: <LayoutDashboard className="h-4.5 w-4.5" />, desc: "نمای کلی سازمان" },
   { key: "users", label: "کاربران", icon: <Users2 className="h-4.5 w-4.5" />, desc: "مدیریت اعضا و پرونده‌ها" },
   { key: "review", label: "بررسی اخبار", icon: <ClipboardList className="h-4.5 w-4.5" />, desc: "صف تصمیم‌گیری" },
+  { key: "organization", label: "حوزه‌ها و پایگاه‌ها", icon: <Landmark className="h-4.5 w-4.5" />, desc: "ویرایش ساختار سازمان" },
   { key: "challenges", label: "چالش‌ها", icon: <Trophy className="h-4.5 w-4.5" />, desc: "ایجاد و اعلام نتایج" },
   { key: "broadcast", label: "پیام همگانی", icon: <Megaphone className="h-4.5 w-4.5" />, desc: "اطلاع‌رسانی سازمانی" },
   { key: "exports", label: "خروجی‌ها", icon: <FileDown className="h-4.5 w-4.5" />, desc: "گزارش‌های CSV" },
@@ -86,7 +87,7 @@ export default function AdminPage() {
             {NAV.map((n) => (
               <button
                 key={n.key}
-                onClick={() => setSection(n.key)}
+                onClick={() => (n.key === "organization" ? router.push("/organization") : setSection(n.key))}
                 className={cn(
                   "flex items-center gap-3 rounded-2xl border px-3.5 py-3 text-right transition-all",
                   section === n.key
@@ -157,7 +158,7 @@ export default function AdminPage() {
             {NAV.map((n) => (
               <button
                 key={n.key}
-                onClick={() => setSection(n.key)}
+                onClick={() => (n.key === "organization" ? router.push("/organization") : setSection(n.key))}
                 className={cn(
                   "relative flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-2 text-[11.5px] font-bold transition-colors",
                   section === n.key ? "border-neon bg-neon text-neon-foreground" : "border-line bg-surface text-ink-muted",

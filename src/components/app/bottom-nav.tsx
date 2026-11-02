@@ -18,7 +18,7 @@ export function BottomNav({ onReview, className }: { onReview: () => void; class
   ]
 
   return (
-    <nav className={cn("sticky bottom-0 z-30 mt-auto border-t border-line bg-[var(--nav-bg)]/95 px-2 pb-2 pt-1.5 backdrop-blur-lg lg:hidden", className)} aria-label="ناوبری اصلی">
+    <nav className={cn("fixed inset-x-0 bottom-0 z-40 border-t border-line bg-[var(--nav-bg)]/95 px-2 pb-2 pt-1.5 backdrop-blur-lg lg:hidden", className)} aria-label="ناوبری اصلی">
       <div className={cn("flex items-end justify-around", isReviewer && "gap-0")}>
         {items.slice(0, 2).map((it) => (
           <NavBtn key={it.id} label={it.label} icon={it.icon} active={tab === it.id} onClick={() => setTab(it.id)} />

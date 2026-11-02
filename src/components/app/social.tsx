@@ -3,9 +3,10 @@
 
 import Image from "next/image"
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import {
   Bell, Home, Newspaper, BarChart3, UserRound, ClipboardCheck, ShieldCheck, Search,
-  Megaphone, Target, Trophy, Plus, ChevronLeft, Rss, CheckCircle2, PlayCircle, Smile,
+  Megaphone, Target, Trophy, Plus, ChevronLeft, Rss, CheckCircle2, PlayCircle, Smile, Landmark,
 } from "lucide-react"
 import { type Tab } from "@/lib/store"
 import type { AppState, AppUser, LeaderRow } from "@/lib/server/state"
@@ -26,7 +27,7 @@ export function TopBar({
   onOpenNotifications: () => void
   onGotoNews: () => void
 }) {
-  const { user, notifications } = state
+  const { user, unreadCount } = state
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-[var(--nav-bg)]/95 backdrop-blur-md">
       <div className="mx-auto flex h-14 w-full max-w-[1380px] items-center gap-3 px-3 lg:h-16 lg:px-5">
@@ -56,9 +57,9 @@ export function TopBar({
             aria-label="اعلان‌ها"
           >
             <Bell className="h-4.5 w-4.5" />
-            {notifications.length > 0 && (
+            {unreadCount > 0 && (
               <span className="absolute -left-1 -top-1 flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-danger px-1 text-[9px] font-black text-white">
-                {fa(notifications.length)}
+                {fa(unreadCount)}
               </span>
             )}
           </button>
@@ -107,7 +108,8 @@ export function SideNav({
   onOpenNotifications: () => void
   onOpenChallenges: () => void
 }) {
-  const { user, stats, reviewQueue, challenges, notifications, pendingUsersCount } = state
+  const router = useRouter()
+  const { user, stats, reviewQueue, challenges, pendingUsersCount, unreadCount } = state
   const isReviewer = user.role !== "reporter"
   const activeChallenges = challenges.filter((c) => c.status === "active")
 
@@ -124,9 +126,14 @@ export function SideNav({
     })
   }
   menu.push(
-    { icon: <Bell className="h-4.5 w-4.5" />, label: "اعلان‌ها", onClick: onOpenNotifications, badge: notifications.length || undefined, badgeTone: "green" },
+    { icon: <Bell className="h-4.5 w-4.5" />, label: "اعلان‌ها", onClick: onOpenNotifications, badge: unreadCount || undefined, badgeTone: "green" },
     { icon: <Target className="h-4.5 w-4.5" />, label: "چالش‌ها", onClick: onOpenChallenges, badge: activeChallenges.length || undefined, badgeTone: "green" },
   )
+  if (user.role === "admin" || user.role === "district_manager") {
+    menu.push({
+      icon: <Landmark className="h-4.5 w-4.5" />, label: "حوزه‌ها و پایگاه‌ها", onClick: () => router.push("/organization"),
+    })
+  }
   if (user.role === "admin") {
     menu.push({
       icon: <ShieldCheck className="h-4.5 w-4.5" />, label: "پنل مدیریت", onClick: onOpenAdmin,

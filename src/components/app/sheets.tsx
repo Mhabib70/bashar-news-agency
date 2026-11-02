@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Bell, Megaphone, Trophy, Users2, Plus, CheckCircle2, XCircle, Flame, CalendarClock } from "lucide-react"
 import { useApp } from "@/lib/store"
 import { fa, faNum, relTime, untilFmt, jalali } from "@/lib/format"
@@ -10,7 +10,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 
 // ---------- شیت اعلان‌ها ----------
 export function NotificationsSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { state } = useApp()
+  const { state, markNotificationsRead } = useApp()
+  // با باز شدن شیت، همهٔ اعلان‌های رسیده خوانده‌شده علامت می‌خورند تا بَج زنگوله پاک شود
+  useEffect(() => {
+    if (open) markNotificationsRead()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open])
   if (!state) return null
   const icon = (kind: string) =>
     kind === "approved" ? (
@@ -33,10 +38,19 @@ export function NotificationsSheet({ open, onClose }: { open: boolean; onClose: 
         <div className="mt-2 space-y-2">
           {state.notifications.length === 0 && <p className="py-8 text-center text-[12.5px] text-ink-muted">فعلاً اعلانی ندارید.</p>}
           {state.notifications.map((n) => (
-            <div key={n.id} className="flex items-start gap-3 rounded-2xl border border-line bg-surface p-3.5">
-              <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface-2">{icon(n.kind)}</span>
+            <div
+              key={n.id}
+              className={cn(
+                "flex items-start gap-3 rounded-2xl border p-3.5",
+                n.unread ? "border-neon/35 bg-neon/6" : "border-line bg-surface",
+              )}
+            >
+              <span className="relative mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface-2">
+                {icon(n.kind)}
+                {n.unread && <span className="absolute -left-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-neon" />}
+              </span>
               <div className="min-w-0 flex-1">
-                <p className="text-[13px] font-bold text-ink">{n.title}</p>
+                <p className={cn("text-[13px] text-ink", n.unread ? "font-black" : "font-bold")}>{n.title}</p>
                 <p className="mt-0.5 line-clamp-2 text-[11.5px] leading-5 text-ink-muted">{n.body}</p>
               </div>
               <span className="shrink-0 text-[9.5px] text-ink-muted/70">{relTime(n.at)}</span>

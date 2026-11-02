@@ -166,3 +166,10 @@ model Notification {
 
   @@index([userId, deliveredAt])
 }
+
+// حوزه‌ها و پایگاه‌های سازمان — قابل ویرایش توسط ادمین کل و مدیر حوزه (جدول تک‌ردیفی)
+model OrgUnits {
+  id        Int      @id @default(1)
+  json      String // [{key,label,bases[]}]
+  updatedAt DateTime @updatedAt
+}

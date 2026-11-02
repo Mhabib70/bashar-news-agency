@@ -152,6 +152,21 @@ export function isSuperAdminPhone(raw: unknown): boolean {
   return normalizePhone(raw) === SUPER_ADMIN_NORM
 }
 
+// اعمال حوزه‌ها/پایگاه‌های سازمان (از دیتابیس) روی نقشه‌های این ماژول.
+// چون همهٔ کامپوننت‌ها همان DISTRICT_LABELS/BASE_LISTS را می‌خوانند،
+// با بازنویسی runtime مقادیر، کل اپ بدون تغییر کامپوننت به‌روز می‌شود.
+export function applyOrgUnits(units: { key: string; label: string; bases: string[] }[]) {
+  for (const k of Object.keys(DISTRICT_LABELS)) {
+    if (k !== "none") delete DISTRICT_LABELS[k]
+  }
+  for (const k of Object.keys(BASE_LISTS)) delete BASE_LISTS[k]
+  for (const d of units) {
+    if (!d?.key || !d?.label) continue
+    DISTRICT_LABELS[d.key] = d.label
+    BASE_LISTS[d.key] = Array.isArray(d.bases) ? d.bases.filter((b) => typeof b === "string" && b.trim()) : []
+  }
+}
+
 export const REJECT_REASONS: { key: string; label: string; hint: string }[] = [
   { key: "insufficient", label: "اطلاعات ناکافی", hint: "لطفاً جزئیات بیشتری اضافه کنید." },
   { key: "style", label: "عدم رعایت اصول خبرنویسی", hint: "لطفاً خبر را مطابق اصول خبرنویسی بازنویسی کنید." },

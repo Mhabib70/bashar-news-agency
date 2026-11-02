@@ -2,6 +2,7 @@ import { db } from "@/lib/db"
 import { LEVELS, levelFor, levelIndex, nextLevel, BADGES, POINTS, ROLE_STAGE, isSuperAdminPhone } from "@/lib/domain"
 import { tehranDayKey, tehranDayStart } from "./tz"
 import { challengeHousekeeping, applyInactivityPolicy, registrationHousekeeping } from "./challenges"
+import { getOrgUnits } from "./orgunits"
 import type { Prisma } from "@prisma/client"
 
 export type AppUser = {
@@ -95,7 +96,9 @@ export type AppState = {
   leaderboard: LeaderRow[]
   badges: { key: string; emoji: string; title: string; desc: string; unlocked: boolean; awardedAt: string | null }[]
   drafts: { id: number; category: string; title: string; content: string; savedAt: string }[]
-  notifications: { id: string; kind: string; title: string; body: string; at: string }[]
+  notifications: { id: string; kind: string; title: string; body: string; at: string; unread: boolean }[]
+  unreadCount: number
+  districts: { key: string; label: string; bases: string[] }[]
   notifSettings: { approvals: boolean; challenges: boolean; broadcast: boolean; rejections: boolean; quietStart: string; quietEnd: string }
   pendingUsersCount: number
   staffCounts: { district: number; specialist: number; admin: number }
@@ -273,13 +276,18 @@ export async function getAppState(userId: string): Promise<AppState | null> {
   })
 
   // اعلان‌های واقعی (جدول Notification — با احترام به تنظیمات و ساعت سکوت هنگام ایجاد)
-  const notifRows = await db.notification.findMany({
-    where: { userId, deliveredAt: { lte: new Date() } },
-    orderBy: { deliveredAt: "desc" },
-    take: 15,
-  })
+  const [notifRows, unreadCount, orgUnits] = await Promise.all([
+    db.notification.findMany({
+      where: { userId, deliveredAt: { lte: new Date() } },
+      orderBy: { deliveredAt: "desc" },
+      take: 20,
+    }),
+    db.notification.count({ where: { userId, readAt: null, deliveredAt: { lte: new Date() } } }),
+    getOrgUnits(),
+  ])
   const notifications: AppState["notifications"] = notifRows.map((n) => ({
     id: `notif-${n.id}`, kind: n.kind, title: n.title, body: n.body, at: n.deliveredAt.toISOString(),
+    unread: n.readAt === null,
   }))
 
   let pendingUsersCount = 0
@@ -299,7 +307,9 @@ export async function getAppState(userId: string): Promise<AppState | null> {
       awardedAt: allBadges.find((x) => x.badgeKey === key)?.awardedAt.toISOString() ?? null,
     })),
     drafts: drafts.map((d) => ({ id: d.id, category: d.category, title: d.title, content: d.content, savedAt: d.savedAt.toISOString() })),
-    notifications: notifications.slice(0, 15),
+    notifications: notifications.slice(0, 20),
+    unreadCount,
+    districts: orgUnits,
     notifSettings: {
       approvals: u.notifSetting?.approvals ?? true, challenges: u.notifSetting?.challenges ?? true,
       broadcast: u.notifSetting?.broadcast ?? true, rejections: u.notifSetting?.rejections ?? true,
