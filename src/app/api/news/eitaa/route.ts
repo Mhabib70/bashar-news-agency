@@ -54,16 +54,24 @@ export async function POST(req: NextRequest) {
       `#خبرگزاری_بسیج_رشت`,
     ].join("\n")
 
-    const apiRes = await fetch(`https://eitaayar.ir/api/${token}/sendMessage`, {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({ chat_id: channel, text, title: news.title }),
-      signal: AbortSignal.timeout(20000),
-    }).catch(() => null)
+    // ارسال با یک تلاش مجدد خودکار — شبکهٔ ایتا گاهی لحظه‌ای قطع می‌شود
+    const sendOnce = () =>
+      fetch(`https://eitaayar.ir/api/${token}/sendMessage`, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({ chat_id: channel, text, title: news.title }),
+        signal: AbortSignal.timeout(30000),
+      }).catch(() => null)
+
+    let apiRes = await sendOnce()
+    if (!apiRes || !apiRes.ok) {
+      await new Promise((r) => setTimeout(r, 4000))
+      apiRes = await sendOnce()
+    }
 
     if (!apiRes || !apiRes.ok) {
-      const detail = apiRes ? await apiRes.text().catch(() => "") : "عدم دسترسی به سرور ایتا"
-      return NextResponse.json({ error: `ارسال به ایتا ناموفق بود: ${detail.slice(0, 160) || "خطای شبکه"}` }, { status: 502 })
+      const detail = apiRes ? await apiRes.text().catch(() => "") : ""
+      return NextResponse.json({ error: `ارسال به ایتا ناموفق بود: ${detail.slice(0, 160) || "خطای شبکه — دوباره تلاش کنید"}` }, { status: 502 })
     }
     const data = (await apiRes.json().catch(() => ({}))) as { ok?: boolean; error?: string; description?: string }
     if (data.ok === false) {
