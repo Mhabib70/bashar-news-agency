@@ -1,14 +1,29 @@
 import { NextRequest, NextResponse } from "next/server"
+import { readFile } from "fs/promises"
+import path from "path"
 import { db } from "@/lib/db"
 import { CATEGORY_LABELS, DISTRICT_LABELS, ROLE_LABELS } from "@/lib/domain"
 import { toJalali, JALALI_MONTHS } from "@/lib/jalali"
 
-// ارسال خبر به کانال ایتا — با حفظ الگوی متن خبر
+// ارسال خبر به کانال ایتا — با حفظ الگوی متن + عکس خبر
 // پیش‌نیاز (متغیرهای محیطی سرویس bashar در docker-compose):
-//   BASHAR_EITAA_TOKEN    توکن ربات ایتا (از @eitaa_bot)
-//   BASHAR_EITAA_CHANNEL  شناسه کانال مقصد (مثل channel_name@ یا شناسه عددی)
-// ارسال از طریق API رسمی eitaayar انجام می‌شود؛ متن plain ارسال می‌گردد تا
-// خط‌به‌خط و ساختار الگوی خبر دقیقاً همان‌طور که هست حفظ شود.
+//   BASHAR_EITAA_TOKEN    توکن ربات ایتا (از eitaayar.ir)
+//   BASHAR_EITAA_CHANNEL  شناسه کانال مقصد (مثل @channel_name)
+// رفتار:
+//   - خبر بدون عکس → پیام متنی با الگوی کامل
+//   - خبر با عکس → عکس + متن کامل به‌عنوان کپشن (نکته: API ایتا فایل را با فیلد «file» می‌پذیرد)
+//     اگر متن از سقف کپشن بلندتر باشد → عکس با تیتر، سپس متن کامل در پیام بعدی
+//   - خطای شبکه → یک تلاش مجدد خودکار
+const CAPTION_MAX = 900
+
+const MIME_BY_EXT: Record<string, string> = {
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".png": "image/png",
+  ".webp": "image/webp",
+  ".gif": "image/gif",
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
@@ -40,22 +55,22 @@ export async function POST(req: NextRequest) {
     const category = CATEGORY_LABELS[news.category] ?? "خبر"
     const district = DISTRICT_LABELS[news.district] ?? news.district
     const reporter = news.reporter?.fullName ?? "خبرنگار"
+    const header = `📰 ${category} | خبرگزاری بسیج رشت`
+    const footer = `👤 خبرنگار: ${reporter}${district ? ` · ${district}` : ""}\n🕐 ${dateStr} · کد ${news.code}\n\n#خبرگزاری_بسیج_رشت`
+    const text = [header, ``, `${news.title}`, ``, `${news.content.trim()}`, ``, footer].join("\n")
+    const shortCaption = [header, ``, `${news.title}`, ``, footer].join("\n")
 
-    const text = [
-      `📰 ${category} | خبرگزاری بسیج رشت`,
-      ``,
-      `${news.title}`,
-      ``,
-      `${news.content.trim()}`,
-      ``,
-      `👤 خبرنگار: ${reporter}${district ? ` · ${district}` : ""}`,
-      `🕐 ${dateStr} · کد ${news.code}`,
-      ``,
-      `#خبرگزاری_بسیج_رشت`,
-    ].join("\n")
+    // ── ارسال‌کننده‌ها با یک تلاش مجدد ──
+    const withRetry = async (fn: () => Promise<Response | null>): Promise<Response | null> => {
+      let r = await fn()
+      if (!r || !r.ok) {
+        await new Promise((res) => setTimeout(res, 4000))
+        r = await fn()
+      }
+      return r
+    }
 
-    // ارسال با یک تلاش مجدد خودکار — شبکهٔ ایتا گاهی لحظه‌ای قطع می‌شود
-    const sendOnce = () =>
+    const sendTextOnce = () =>
       fetch(`https://eitaayar.ir/api/${token}/sendMessage`, {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -63,36 +78,90 @@ export async function POST(req: NextRequest) {
         signal: AbortSignal.timeout(30000),
       }).catch(() => null)
 
-    let apiRes = await sendOnce()
-    if (!apiRes || !apiRes.ok) {
-      await new Promise((r) => setTimeout(r, 4000))
-      apiRes = await sendOnce()
+    const hasPhoto = news.mediaType === "photo" && news.mediaUrl.startsWith("/uploads/")
+    const photoPath = hasPhoto ? path.join(process.cwd(), "public", news.mediaUrl) : null
+    const ext = photoPath ? path.extname(photoPath).toLowerCase() : ""
+
+    const sendPhotoOnce = async (caption: string): Promise<Response | null> => {
+      if (!photoPath) return null
+      try {
+        const buf = await readFile(photoPath)
+        const fd = new FormData()
+        fd.set("chat_id", channel)
+        fd.set("caption", caption)
+        fd.set("file", new Blob([buf], { type: MIME_BY_EXT[ext] ?? "image/jpeg" }), `news${ext || ".jpg"}`)
+        return await fetch(`https://eitaayar.ir/api/${token}/sendPhoto`, {
+          method: "POST",
+          body: fd,
+          signal: AbortSignal.timeout(45000),
+        }).catch(() => null)
+      } catch {
+        return null
+      }
     }
 
-    if (!apiRes || !apiRes.ok) {
-      const detail = apiRes ? await apiRes.text().catch(() => "") : ""
-      return NextResponse.json({ error: `ارسال به ایتا ناموفق بود: ${detail.slice(0, 160) || "خطای شبکه — دوباره تلاش کنید"}` }, { status: 502 })
+    const resultIsOk = (r: Response | null) => {
+      if (!r || !r.ok) return false
+      return true // پاسخ 2xx از eitaayar؛ خطای منطقی در body با ok:false می‌آید که پایین‌تر چک می‌شود
     }
-    const data = (await apiRes.json().catch(() => ({}))) as { ok?: boolean; error?: string; description?: string }
-    if (data.ok === false) {
-      return NextResponse.json({ error: `ایتا خطا داد: ${data.description ?? data.error ?? "نامشخص"}` }, { status: 502 })
+    const bodyOf = async (r: Response | null) => (r ? await r.json().catch(() => ({})) : {}) as { ok?: boolean; description?: string; error?: string }
+
+    // ── جریان ارسال ──
+    if (hasPhoto) {
+      const fullFits = text.length <= CAPTION_MAX
+      const photoRes = await withRetry(() => sendPhotoOnce(fullFits ? text : shortCaption))
+      const pd = await bodyOf(photoRes)
+
+      if (photoRes && photoRes.ok && pd.ok !== false) {
+        if (fullFits) {
+          await recordEvent(news.id, sender.id, sender.fullName, sender.role)
+          return NextResponse.json({ ok: true, message: "خبر با عکس و متن کامل به ایتا ارسال شد ✅" })
+        }
+        // متن بلند: عکس با تیتر رفت؛ متن کامل را در پیام بعدی بفرست
+        const textRes = await withRetry(sendTextOnce)
+        const td = await bodyOf(textRes)
+        if (textRes && textRes.ok && td.ok !== false) {
+          await recordEvent(news.id, sender.id, sender.fullName, sender.role)
+          return NextResponse.json({ ok: true, message: "عکس خبر + متن کامل در دو پیام به ایتا ارسال شد ✅" })
+        }
+        await recordEvent(news.id, sender.id, sender.fullName, sender.role)
+        return NextResponse.json({ ok: true, message: "عکس خبر به ایتا رسید اما متن کامل ارسال نشد — دوباره بزنید تا متن برود." })
+      }
+
+      // عکس ناموفق → حداقل متن برود
+      const textRes = await withRetry(sendTextOnce)
+      const td = await bodyOf(textRes)
+      if (textRes && textRes.ok && td.ok !== false) {
+        await recordEvent(news.id, sender.id, sender.fullName, sender.role)
+        return NextResponse.json({ ok: true, message: "خبر به‌صورت متن ارسال شد ✅ (عکسش ارسال نشد)" })
+      }
+      return NextResponse.json({ error: `ارسال به ایتا ناموفق بود: ${pd.description || td.description || td.error || "خطای شبکه — دوباره تلاش کنید"}` }, { status: 502 })
     }
 
-    await db.newsEvent.create({
-      data: {
-        newsId: news.id,
-        stage: "",
-        action: "sent_eitaa",
-        actorId: sender.id,
-        actorName: sender.fullName,
-        actorRole: sender.role,
-        note: `ارسال به ایتا توسط ${ROLE_LABELS[sender.role] ?? sender.role}`,
-      },
-    })
-
-    return NextResponse.json({ ok: true, message: "خبر با موفقیت به ایتا ارسال شد ✅" })
+    // خبر بدون عکس
+    const textRes = await withRetry(sendTextOnce)
+    const td = await bodyOf(textRes)
+    if (textRes && textRes.ok && td.ok !== false) {
+      await recordEvent(news.id, sender.id, sender.fullName, sender.role)
+      return NextResponse.json({ ok: true, message: "خبر با موفقیت به ایتا ارسال شد ✅" })
+    }
+    return NextResponse.json({ error: `ارسال به ایتا ناموفق بود: ${td.description || td.error || "خطای شبکه — دوباره تلاش کنید"}` }, { status: 502 })
   } catch (e) {
     console.error(e)
     return NextResponse.json({ error: "خطا در ارسال به ایتا" }, { status: 500 })
   }
+}
+
+async function recordEvent(newsId: number, actorId: string, actorName: string, actorRole: string) {
+  await db.newsEvent.create({
+    data: {
+      newsId,
+      stage: "",
+      action: "sent_eitaa",
+      actorId,
+      actorName,
+      actorRole,
+      note: `ارسال به ایتا توسط ${ROLE_LABELS[actorRole] ?? actorRole}`,
+    },
+  })
 }
