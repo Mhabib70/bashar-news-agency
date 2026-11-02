@@ -110,6 +110,8 @@ export const NEWS_EVENT_META: Record<string, { label: string; emoji: string }> =
   final_approved: { label: "تایید نهایی و انتشار", emoji: "🎉" },
   rejected: { label: "رد شد", emoji: "❌" },
   resubmitted: { label: "ویرایش و ارسال مجدد", emoji: "🔄" },
+  edited: { label: "ویرایش متن توسط ارزیاب", emoji: "✏️" },
+  sent_eitaa: { label: "ارسال به ایتا", emoji: "📨" },
 }
 
 // نقش‌های ارزیاب به‌ترتیب چرخه برای نمایش مراحل
@@ -131,6 +133,23 @@ export const ROLE_LABELS: Record<string, string> = {
   district_manager: "مدیر حوزه",
   specialist: "کارشناس خبر",
   admin: "ادمین کل",
+}
+
+// ── ادمین کل سامانه ──
+// صاحب این شماره همیشه و به‌صورت خودکار «ادمین کل» فعال است:
+// ثبت‌نام با این شماره مستقیم ادمین می‌شود و هر بار وارد اپ شود نقشش ترمیم می‌گردد.
+export const SUPER_ADMIN_PHONE = "09300500977"
+const SUPER_ADMIN_NORM = SUPER_ADMIN_PHONE.replace(/\D/g, "").slice(-10)
+
+// نرمال‌سازی شماره برای مقایسه: ارقام فارسی→انگلیسی، حذف غیررقم‌ها، ۱۰ رقم آخر
+export function normalizePhone(raw: unknown): string {
+  const fa = String(raw ?? "").replace(/[۰-۹]/g, (d) => String("۰۱۲۳۴۵۶۷۸۹".indexOf(d)))
+  const digits = fa.replace(/\D/g, "")
+  return digits.length > 10 ? digits.slice(-10) : digits
+}
+
+export function isSuperAdminPhone(raw: unknown): boolean {
+  return normalizePhone(raw) === SUPER_ADMIN_NORM
 }
 
 export const REJECT_REASONS: { key: string; label: string; hint: string }[] = [

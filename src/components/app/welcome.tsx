@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import Image from "next/image"
-import { Menu, Bell, ArrowLeft, X, Check, ChevronLeft } from "lucide-react"
+import { Menu, Bell, ArrowLeft, X, Check, LogIn } from "lucide-react"
 import { useApp } from "@/lib/store"
 import { toFa } from "@/lib/format"
 import { DISTRICT_LABELS, BASE_LISTS, EDUCATION_LEVEL_LABELS } from "@/lib/domain"
@@ -12,40 +12,46 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Avatar } from "@/components/app/bits"
-
-type DemoUser = { id: string; fullName: string; avatar: string; role: string; district: string; base: string; levelKey: string; points: number }
 
 const faToEn = (s: string) => s.replace(/[۰-۹]/g, (d) => String("۰۱۲۳۴۵۶۷۸۹".indexOf(d)))
-
-const ROLE_LABELS: Record<string, string> = {
-  reporter: "خبرنگار",
-  district_manager: "مدیر حوزه",
-  specialist: "کارشناس خبر",
-  admin: "ادمین کل",
-}
 
 export function Welcome() {
   const { login, register } = useApp()
   const { toast } = useToast()
-  const [users, setUsers] = useState<DemoUser[] | null>(null)
   const [open, setOpen] = useState(false)
   const [regOpen, setRegOpen] = useState(false)
-  const [busy, setBusy] = useState<string | null>(null)
-  useEffect(() => {
-    fetch("/api/bootstrap")
-      .then((r) => r.json())
-      .then((d) => setUsers(d.users))
-      .catch(() => setUsers([]))
-  }, [])
+  const [busy, setBusy] = useState(false)
+  const [phone, setPhone] = useState("")
+  const [err, setErr] = useState("")
 
-  const doLogin = async (id: string, name: string) => {
-    setBusy(id)
-    await login(id)
-    toast({ title: `خوش آمدی ${name}!`, description: "ورود با موفقیت انجام شد." })
-    setBusy(null)
-    setOpen(false)
+  // ورود امن: فقط با شماره موبایل حساب خودتان وارد می‌شوید
+  const doPhoneLogin = async () => {
+    const p = faToEn(phone).replace(/\D/g, "")
+    if (p.length < 10) {
+      setErr("شماره موبایل خود را کامل وارد کنید (مثل ۰۹۱۲۳۴۵۶۷۸۹)")
+      return
+    }
+    setBusy(true)
+    setErr("")
+    try {
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone: p }),
+      })
+      const d = await res.json().catch(() => ({}))
+      if (d.ok && d.userId) {
+        await login(d.userId)
+        toast({ title: `خوش آمدی ${d.fullName}!`, description: "ورود با موفقیت انجام شد." })
+        setOpen(false)
+        setPhone("")
+      } else {
+        setErr(d.error ?? "ورود ناموفق بود — دوباره تلاش کنید")
+      }
+    } catch {
+      setErr("خطای شبکه — اینترنت خود را بررسی کنید")
+    }
+    setBusy(false)
   }
 
   return (
@@ -88,50 +94,48 @@ export function Welcome() {
         </button>
       </div>
 
-      {/* ورود */}
+      {/* ورود — با شماره موبایل؛ هیچ فهرست حسابی نمایش داده نمی‌شود */}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="bottom-3 top-auto translate-y-0 gap-0 rounded-[28px] border-line bg-popover p-5 data-[state=open]:slide-in-from-bottom-10 max-h-[82dvh] overflow-y-auto nice-scroll">
           <DialogHeader className="text-right">
             <DialogTitle className="text-ink">ورود به حساب</DialogTitle>
             <DialogDescription className="text-ink-muted">
-              اگر حساب داری وارد شو، یا با ثبت‌نام جدید سازمانت را راه بنداز.
+              شماره موبایل حساب خودتان را وارد کنید. حساب ندارید؟ ثبت‌نام کنید.
             </DialogDescription>
           </DialogHeader>
-          <div className="mt-4 space-y-2">
-            {users === null &&
-              Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-14 w-full rounded-2xl bg-surface-2" />)}
-            {users?.length === 0 && (
-              <p className="rounded-2xl border border-line bg-surface px-4 py-3.5 text-[12.5px] leading-5 text-ink-muted">
-                هنوز حسابی ساخته نشده است. با «ثبت‌نام خبرنگار جدید» شروع کن —
-                <span className="font-bold text-neon"> اولین ثبت‌نام، ادمین کل سازمان می‌شود.</span>
-              </p>
+          <div className="mt-4 space-y-3">
+            <div>
+              <label className="mb-1.5 block text-[12px] font-semibold text-ink-muted">شماره موبایل</label>
+              <Input
+                value={phone}
+                onChange={(e) => {
+                  setPhone(faToEn(e.target.value).replace(/[^\d]/g, "").slice(0, 11))
+                  setErr("")
+                }}
+                onKeyDown={(e) => e.key === "Enter" && doPhoneLogin()}
+                placeholder="۰۹۱۲۳۴۵۶۷۸۹"
+                dir="ltr"
+                inputMode="tel"
+                className="rounded-2xl border-line bg-surface text-right text-[15px] tracking-widest text-ink placeholder:text-ink-muted/50"
+              />
+            </div>
+            {err && (
+              <p className="rounded-2xl border border-danger/30 bg-danger/8 px-4 py-3 text-[12px] leading-5 text-danger-soft">{err}</p>
             )}
-            {users?.map((u) => (
-              <button
-                key={u.id}
-                onClick={() => doLogin(u.id, u.fullName)}
-                disabled={busy !== null}
-                className="flex w-full items-center justify-between rounded-2xl border border-line bg-surface px-4 py-3 text-right transition-colors hover:border-neon/40 hover:bg-surface-2 disabled:opacity-50"
-              >
-                <span className="flex items-center gap-3">
-                  <Avatar name={u.fullName} src={u.avatar} size={40} />
-                  <span>
-                    <span className="block text-[14px] font-bold text-ink">{u.fullName}</span>
-                    <span className="block text-[11px] text-ink-muted">
-                      {ROLE_LABELS[u.role]}
-                      {u.district ? ` · ${DISTRICT_LABELS[u.district] ?? ""}` : ""}
-                    </span>
-                  </span>
-                </span>
-                {busy === u.id ? <Check className="h-4 w-4 text-neon" /> : <ChevronLeft className="h-4 w-4 text-ink-muted" />}
-              </button>
-            ))}
+            <button
+              onClick={doPhoneLogin}
+              disabled={busy}
+              className="flex w-full items-center justify-center gap-2 rounded-full bg-neon px-4 py-3.5 text-[14px] font-bold text-neon-foreground transition-transform hover:scale-[1.01] disabled:opacity-50"
+            >
+              <LogIn className="h-4.5 w-4.5" />
+              {busy ? "در حال ورود..." : "ورود"}
+            </button>
             <button
               onClick={() => {
                 setOpen(false)
                 setRegOpen(true)
               }}
-              className="mt-1 flex w-full items-center justify-center gap-2 rounded-2xl bg-neon px-4 py-3.5 text-[14px] font-bold text-neon-foreground transition-transform hover:scale-[1.01]"
+              className="flex w-full items-center justify-center gap-2 rounded-2xl border border-line bg-surface px-4 py-3.5 text-[14px] font-bold text-ink transition-colors hover:border-neon/40"
             >
               <X className="hidden" />
               ثبت‌نام خبرنگار جدید
@@ -143,10 +147,11 @@ export function Welcome() {
       <RegisterDialog
         open={regOpen}
         onOpenChange={setRegOpen}
-        isFirstUser={users !== null && users.length === 0}
+        initialPhone={faToEn(phone).replace(/\D/g, "")}
         onDone={(id, msg) => {
-          doLogin(id, "ادمین کل سازمان")
-          toast({ title: msg })
+          login(id).then(() => {
+            toast({ title: msg })
+          })
         }}
       />
     </div>
@@ -158,19 +163,22 @@ function RegisterDialog({
   open,
   onOpenChange,
   onDone,
-  isFirstUser,
+  initialPhone = "",
 }: {
   open: boolean
   onOpenChange: (v: boolean) => void
   onDone: (userId: string, message: string) => void
-  isFirstUser: boolean
+  initialPhone?: string
 }) {
   const { register } = useApp()
   const { toast } = useToast()
   const [step, setStep] = useState(0)
   const [f, setF] = useState({ fullName: "", phone: "", age: "", education: "bachelor", district: "b1", base: "" })
-  // ادمین کل (اولین کاربر) بدون حوزه و پایگاه ثبت‌نام می‌شود — دو مرحله‌ای
-  const steps = isFirstUser ? ["نام و شماره", "سن و تحصیلات"] : ["نام و شماره", "سن و تحصیلات", "حوزه و پایگاه"]
+  // شماره‌ای که کاربر در صفحه ورود وارد کرده، همین‌جا پیش‌پر می‌شود
+  useEffect(() => {
+    if (open && initialPhone) setF((prev) => ({ ...prev, phone: initialPhone }))
+  }, [open, initialPhone])
+  const steps = ["نام و شماره", "سن و تحصیلات", "حوزه و پایگاه"]
   const lastStep = steps.length - 1
   const canNext =
     (step === 0 && f.fullName.trim().length >= 3 && f.phone.trim().length >= 8) ||
@@ -178,7 +186,7 @@ function RegisterDialog({
     (step === 2 && !!f.base)
 
   const submit = async () => {
-    const r = await register(isFirstUser ? { ...f, district: "", base: "" } : f)
+    const r = await register(f)
     if (r.ok && r.userId) {
       onOpenChange(false)
       onDone(r.userId, r.message ?? "ثبت‌نام شد")
@@ -203,12 +211,11 @@ function RegisterDialog({
             <span key={i} className={cn("h-1.5 flex-1 rounded-full", i <= step ? "bg-neon" : "bg-surface-2")} />
           ))}
         </div>
-        {isFirstUser && (
-          <p className="rounded-2xl border border-neon/30 bg-neon/10 px-4 py-3 text-[12px] leading-5 text-ink">
-            شما اولین عضو سازمان هستید — به‌عنوان <span className="font-bold text-neon">ادمین کل</span> ثبت‌نام می‌شوید و بدون انتخاب حوزه و پایگاه، مستقیم وارد اپ می‌شوید.
+        {step === 0 && (
+          <p className="rounded-2xl border border-line bg-surface px-4 py-3 text-[11.5px] leading-5 text-ink-muted">
+            ثبت‌نام شما به‌عنوان خبرنگار ثبت می‌شود و پس از تایید ادمین کل فعال خواهد شد.
           </p>
         )}
-
         <div className="mt-4 space-y-3">
           {step === 0 && (
             <>

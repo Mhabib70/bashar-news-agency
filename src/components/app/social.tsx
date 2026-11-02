@@ -20,12 +20,10 @@ import { cn } from "@/lib/utils"
 export function TopBar({
   state,
   onOpenNotifications,
-  onOpenSwitch,
   onGotoNews,
 }: {
   state: AppState
   onOpenNotifications: () => void
-  onOpenSwitch: () => void
   onGotoNews: () => void
 }) {
   const { user, notifications } = state
@@ -67,17 +65,17 @@ export function TopBar({
           <div className="hidden sm:block">
             <ThemeToggle compact />
           </div>
-          <button
-            onClick={onOpenSwitch}
-            className="flex items-center gap-2 rounded-xl border border-line bg-surface py-1 pl-2.5 pr-1.5 transition-colors hover:bg-surface-2"
-            aria-label="تغییر حساب"
+          {/* نمایش کاربر جاری — صرفاً اطلاع‌رسان؛ ورود/خروج از صفحه پروفایل */}
+          <div
+            className="flex items-center gap-2 rounded-xl border border-line bg-surface py-1 pl-2.5 pr-1.5"
+            aria-label="حساب کاربری شما"
           >
             <Avatar name={user.fullName} src={user.avatar} size={30} />
             <span className="hidden min-w-0 text-right md:block">
               <span className="block max-w-[120px] truncate text-[11.5px] font-bold leading-4 text-ink">{user.fullName}</span>
               <span className="block text-[9.5px] leading-3.5 text-ink-muted">{user.levelEmoji} {user.levelTitle}</span>
             </span>
-          </button>
+          </div>
         </div>
       </div>
     </header>

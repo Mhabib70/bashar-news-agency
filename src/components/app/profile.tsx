@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils"
 import { Switch } from "@/components/ui/switch"
 import { useToast } from "@/hooks/use-toast"
 
-export function ProfileScreen({ onSwitchAccount, onOpenAdmin }: { onSwitchAccount: () => void; onOpenAdmin?: () => void }) {
+export function ProfileScreen({ onOpenAdmin }: { onOpenAdmin?: () => void }) {
   const { state, saveSettings, logout, uploadAvatar } = useApp()
   const { toast } = useToast()
   const [showSettings, setShowSettings] = useState(false)
@@ -300,18 +300,11 @@ export function ProfileScreen({ onSwitchAccount, onOpenAdmin }: { onSwitchAccoun
           </button>
         )}
         <button
-          onClick={onSwitchAccount}
-          className="flex flex-1 items-center justify-center gap-2 rounded-full border border-line bg-surface py-3.5 text-[13.5px] font-bold text-ink transition-colors hover:bg-surface-2"
-        >
-          <SwitchCamera className="h-4.5 w-4.5" />
-          تغییر حساب
-        </button>
-        <button
           onClick={logout}
           className="flex flex-1 items-center justify-center gap-2 rounded-full border border-danger/30 py-3.5 text-[13.5px] font-bold text-danger-soft transition-colors hover:bg-danger/8"
         >
           <LogOut className="h-4.5 w-4.5" />
-          خروج
+          خروج از حساب
         </button>
       </div>
     </div>

@@ -1,12 +1,10 @@
-import { NextRequest, NextResponse } from "next/server"
-import { db } from "@/lib/db"
+import { NextResponse } from "next/server"
 
-// لیست حساب‌های فعال برای صفحه ورود/تغییر حساب
+// وضعیت راه‌اندازی اپ برای صفحه ورود.
+// نکته امنیتی: هیچ فهرستی از حساب‌ها برگردانده نمی‌شود —
+// ورود فقط از طریق /api/login با شماره موبایل انجام می‌شود.
+// نکته نقش‌ها: ادمین کل فقط و فقط از طریق شماره محافظت‌شده تعیین می‌شود؛
+// «اولین ثبت‌نام‌کننده» دیگر ادمین نمی‌شود.
 export async function GET() {
-  const users = await db.user.findMany({
-    where: { status: "active" },
-    select: { id: true, fullName: true, avatar: true, role: true, district: true, base: true, levelKey: true, points: true },
-    orderBy: [{ role: "asc" }, { fullName: "asc" }],
-  })
-  return NextResponse.json({ users })
+  return NextResponse.json({ users: [], firstUser: false })
 }

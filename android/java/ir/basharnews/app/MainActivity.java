@@ -99,7 +99,7 @@ public class MainActivity extends Activity {
             public void onClick(View v) {
                 String u = urlInput.getText().toString().trim();
                 if (u.isEmpty()) return;
-                if (!u.startsWith("http://") && !u.startsWith("https://")) u = "https://" + u;
+                if (!u.startsWith("http://") && !u.startsWith("https://")) u = "http://" + u;
                 prefs.edit().putString(KEY_URL, u).apply();
                 errored = false;
                 errorBox.setVisibility(View.GONE);

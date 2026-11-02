@@ -1,18 +1,19 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import { Check, X, ClipboardList, Inbox, ChevronDown, RefreshCw, Hourglass, Filter } from "lucide-react"
+import { Check, X, ClipboardList, Inbox, ChevronDown, RefreshCw, Hourglass, Filter, Pencil, Send } from "lucide-react"
 import { useApp } from "@/lib/store"
 import { fa, relTime, durFmt } from "@/lib/format"
 import { CATEGORY_LABELS, REJECT_REASONS, reviewStageLabel, DISTRICT_LABELS, REVIEW_STAGES } from "@/lib/domain"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
+import { NewsEditDialog } from "@/components/app/news-edit"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
 
 // صف بررسی اختصاصی ادمین: همه مراحل، فیلتر مرحله/حوزه، متن کامل + رسانه
 export function AdminReviewSection() {
-  const { state, reviewNews, refresh } = useApp()
+  const { state, reviewNews, sendToEitaa, refresh } = useApp()
   const { toast } = useToast()
   const [stage, setStage] = useState("all")
   const [district, setDistrict] = useState("all")
@@ -21,6 +22,8 @@ export function AdminReviewSection() {
   const [reason, setReason] = useState("insufficient")
   const [note, setNote] = useState("")
   const [busy, setBusy] = useState<number | null>(null)
+  const [editing, setEditing] = useState<number | null>(null)
+  const [eitaaBusy, setEitaaBusy] = useState<number | null>(null)
 
   const queue = state?.reviewQueue ?? []
 
@@ -48,7 +51,21 @@ export function AdminReviewSection() {
     }
   }
 
+  const doEitaa = async (newsId: number) => {
+    setEitaaBusy(newsId)
+    const res = await sendToEitaa(newsId)
+    setEitaaBusy(null)
+    if (res.ok) {
+      toast({ title: "ارسال شد", description: res.message })
+      refresh()
+    } else {
+      toast({ title: "خطا", description: res.message, variant: "destructive" })
+    }
+  }
+
   if (!state) return null
+
+  const editingNews = queue.find((n) => n.id === editing) ?? null
 
   return (
     <div className="space-y-5">
@@ -139,6 +156,26 @@ export function AdminReviewSection() {
                   {open ? "بستن متن کامل" : "متن کامل خبر"}
                 </button>
 
+                {open && (
+                  <div className="mt-3 grid grid-cols-2 gap-2 rounded-2xl border border-line bg-surface-2/50 p-2">
+                    <button
+                      onClick={() => setEditing(n.id)}
+                      className="flex items-center justify-center gap-1.5 rounded-full border border-line bg-surface py-2.5 text-[12px] font-bold text-ink transition-colors hover:border-neon/40 hover:text-neon"
+                    >
+                      <Pencil className="h-4 w-4" />
+                      ویرایش متن خبر
+                    </button>
+                    <button
+                      onClick={() => doEitaa(n.id)}
+                      disabled={eitaaBusy !== null}
+                      className="flex items-center justify-center gap-1.5 rounded-full border border-neon/45 bg-neon/10 py-2.5 text-[12px] font-bold text-neon transition-colors hover:bg-neon/20 disabled:opacity-50"
+                    >
+                      <Send className="h-4 w-4" />
+                      {eitaaBusy === n.id ? "در حال ارسال..." : "ارسال به ایتا"}
+                    </button>
+                  </div>
+                )}
+
                 <div className="mt-3 flex items-center gap-2 border-t border-line pt-3">
                   <span className="flex h-8 w-8 items-center justify-center rounded-full bg-neon/12 text-[11px] font-black text-neon">
                     {n.reporterName.slice(0, 1)}
@@ -214,6 +251,14 @@ export function AdminReviewSection() {
           </button>
         </DialogContent>
       </Dialog>
+
+      {/* ویرایش متن خبر — اختیار سردبیری */}
+      <NewsEditDialog
+        open={editing !== null}
+        onClose={() => setEditing(null)}
+        news={editingNews ? { id: editingNews.id, title: editingNews.title, content: editingNews.content } : null}
+        onSaved={() => setExpanded(null)}
+      />
     </div>
   )
 }

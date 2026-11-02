@@ -94,3 +94,7 @@ scripts/mockup/fonts/
 tool-results/
 *.log
 server.log
+
+# Android SDK محلی و خروجی بیلد (build-apk-windows.sh)
+android/sdk/
+android/build/

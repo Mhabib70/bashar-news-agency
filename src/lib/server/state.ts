@@ -1,5 +1,5 @@
 import { db } from "@/lib/db"
-import { LEVELS, levelFor, levelIndex, nextLevel, BADGES, POINTS, ROLE_STAGE } from "@/lib/domain"
+import { LEVELS, levelFor, levelIndex, nextLevel, BADGES, POINTS, ROLE_STAGE, isSuperAdminPhone } from "@/lib/domain"
 import { tehranDayKey, tehranDayStart } from "./tz"
 import { challengeHousekeeping, applyInactivityPolicy, registrationHousekeeping } from "./challenges"
 import type { Prisma } from "@prisma/client"
@@ -162,8 +162,18 @@ export async function getAppState(userId: string): Promise<AppState | null> {
   await challengeHousekeeping().catch(() => {})
   await applyInactivityPolicy(userId).catch(() => {})
 
-  const u = await db.user.findUnique({ where: { id: userId }, include: { notifSetting: true } })
+  let u = await db.user.findUnique({ where: { id: userId }, include: { notifSetting: true } })
   if (!u) return null
+
+  // ادمین کل سامانه: صاحب شماره محافظت‌شده هر بار که وارد اپ شود،
+  // نقش/وضعیتش به‌صورت خودکار به «ادمین کل فعال» ترمیم می‌شود.
+  if (isSuperAdminPhone(u.phone) && (u.role !== "admin" || u.status !== "active")) {
+    u = await db.user.update({
+      where: { id: u.id },
+      data: { role: "admin", status: "active", rejectReason: "" },
+      include: { notifSetting: true },
+    })
+  }
 
   const [day, week, month, ownNews, queue, challenges, allBadges, drafts] = await Promise.all([
     periodStat(userId, "day"),

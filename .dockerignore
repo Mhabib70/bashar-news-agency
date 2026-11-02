@@ -1,0 +1,65 @@
+# ============================================================
+# .dockerignore — فایل‌هایی که نباید در تصویر Docker کپی شوند
+# ============================================================
+
+# وابستگی‌ها (در Docker نصب می‌شوند)
+node_modules
+.next
+out
+build
+dist
+
+# فایل‌های سیستمی
+.git
+.gitignore
+.DS_Store
+*.log
+dev.log
+server.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# فایل‌های محیطی
+.env
+.env.local
+.env.development
+.env.production
+.env.example
+.env*.local
+
+# اندروید و خروجی APK (مربوط به کلاینت، نه سرور)
+android
+apk
+
+# اسکریپت‌های توسعه
+scripts
+docs
+mockup
+
+# دیتابیس محلی (در volume ذخیره می‌شود)
+db/*
+!db/.gitkeep
+
+# فایل‌های آپلودشده (در volume ذخیره می‌شوند)
+public/uploads/*
+!public/uploads/.gitkeep
+
+# مستندات و README
+README.md
+LICENSE
+
+# استقرار قبلی با Caddy — اینجا nginx ودا reverse proxy است
+Caddyfile
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# Docker خودش
+Dockerfile
+docker-compose.yml
+docker-compose*.yml
+.dockerignore

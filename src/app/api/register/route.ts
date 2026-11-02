@@ -1,31 +1,32 @@
 import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
-import { BASE_LISTS, EDUCATION_LABELS } from "@/lib/domain"
+import { BASE_LISTS, EDUCATION_LABELS, isSuperAdminPhone } from "@/lib/domain"
 import { notifyUser } from "@/lib/server/notify"
 
 // ثبت‌نام خبرنگار جدید (سناریوی ۱: نام ← شماره ← سن ← تحصیلات ← حوزه ← پایگاه)
-// اولین کاربر → ادمین کل (فعال فوری)؛ کاربران بعدی → خبرنگار با وضعیت «در انتظار تایید ادمین»
+// فقط و فقط ثبت‌نام با شماره ادمین کل سامانه → ادمین فعال؛
+// همهٔ ثبت‌نام‌های دیگر (حتی اولین نفر) → خبرنگار با وضعیت «در انتظار تایید ادمین»
+// استثنا: ثبت‌نام با شماره ادمین کل سامانه → همیشه ادمین فعال، بدون نیاز به حوزه و پایگاه
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
     const { fullName, phone, age, education, district, base } = body ?? {}
 
-    // راه‌اندازی سازمان: اولین کاربر، ادمین کل سازمان می‌شود — بدون نیاز به حوزه و پایگاه
-    const totalUsers = await db.user.count()
-    const firstUser = totalUsers === 0
+    const superAdmin = isSuperAdminPhone(phone)
+    const boss = superAdmin
 
-    if (!fullName || !phone || (!firstUser && (!district || !base))) {
+    if (!fullName || !phone || (!boss && (!district || !base))) {
       return NextResponse.json({ error: "نام، شماره تماس، حوزه و پایگاه الزامی است" }, { status: 400 })
     }
     if (String(fullName).trim().length < 3) {
       return NextResponse.json({ error: "نام و نام خانوادگی باید حداقل ۳ کاراکتر باشد" }, { status: 400 })
     }
-    const phoneDigits = String(phone).replace(/\D/g, "")
+    const phoneDigits = String(phone).replace(/[۰-۹]/g, (d) => String("۰۱۲۳۴۵۶۷۸۹".indexOf(d))).replace(/\D/g, "")
     if (phoneDigits.length < 10 || phoneDigits.length > 12) {
       return NextResponse.json({ error: "شماره تماس معتبر وارد کنید" }, { status: 400 })
     }
     const validBases = BASE_LISTS[district] ?? []
-    if (!firstUser && !validBases.includes(base)) {
+    if (!boss && !validBases.includes(base)) {
       return NextResponse.json({ error: "پایگاه انتخابی با حوزه همخوانی ندارد" }, { status: 400 })
     }
     const username = `user_${phoneDigits.slice(-8) || Date.now()}`
@@ -35,8 +36,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "مقطع تحصیلی نامعتبر است" }, { status: 400 })
     }
 
-    const role = firstUser ? "admin" : "reporter"
-    const status = firstUser ? "active" : "pending"
+    const role = boss ? "admin" : "reporter"
+    const status = boss ? "active" : "pending"
 
     const user = await db.user.create({
       data: {
@@ -44,8 +45,8 @@ export async function POST(req: NextRequest) {
         fullName: String(fullName).trim().slice(0, 80),
         role,
         status,
-        district: firstUser ? "" : district,
-        base: firstUser ? "" : base,
+        district: boss ? "" : district,
+        base: boss ? "" : base,
         phone: String(phone),
         age: String(age ?? ""),
         education: String(education ?? ""),
@@ -54,7 +55,7 @@ export async function POST(req: NextRequest) {
       },
     })
 
-    if (firstUser) {
+    if (boss) {
       return NextResponse.json({
         ok: true,
         userId: user.id,

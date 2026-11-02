@@ -62,7 +62,9 @@ type Store = {
   broadcast: (title: string, text: string) => Promise<Result>
   fetchUsers: () => Promise<UserInfo[]>
   moderateUser: (targetId: string, action: "approve" | "reject", reason?: string) => Promise<Result>
-  setUserRole: (targetId: string, newRole: "reporter" | "district_manager" | "specialist", newDistrict?: string) => Promise<Result>
+  setUserRole: (targetId: string, newRole: "reporter" | "district_manager" | "specialist" | "admin", newDistrict?: string) => Promise<Result>
+  editNews: (newsId: number, p: { title: string; content: string }) => Promise<Result>
+  sendToEitaa: (newsId: number) => Promise<Result>
   uploadMedia: (file: File) => Promise<{ ok: boolean; url?: string; mediaType?: string; message?: string }>
   uploadAvatar: (dataUrl: string) => Promise<Result>
   fetchUserDetail: (targetId: string) => Promise<AdminUserDetail | null>
@@ -255,6 +257,34 @@ export const useApp = create<Store>((set, get) => ({
       const r = await api<Result & { message: string }>("/api/users", {
         method: "POST",
         body: JSON.stringify({ userId: uid, targetId, action: "set_role", newRole, newDistrict }),
+      })
+      return { ok: true, message: r.message }
+    } catch (e) {
+      return { ok: false, message: (e as Error).message }
+    }
+  },
+
+  editNews: async (newsId, p) => {
+    const uid = get().userId
+    if (!uid) return { ok: false }
+    try {
+      const r = await api<Result & { message: string }>("/api/news/edit", {
+        method: "POST",
+        body: JSON.stringify({ userId: uid, newsId, title: p.title, content: p.content }),
+      })
+      return { ok: true, message: r.message }
+    } catch (e) {
+      return { ok: false, message: (e as Error).message }
+    }
+  },
+
+  sendToEitaa: async (newsId) => {
+    const uid = get().userId
+    if (!uid) return { ok: false }
+    try {
+      const r = await api<Result & { message: string }>("/api/news/eitaa", {
+        method: "POST",
+        body: JSON.stringify({ userId: uid, newsId }),
       })
       return { ok: true, message: r.message }
     } catch (e) {

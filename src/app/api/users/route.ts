@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { notifyUser } from "@/lib/server/notify"
-import { USER_REJECT_TITLES, ROLE_LABELS, DISTRICT_LABELS } from "@/lib/domain"
+import { USER_REJECT_TITLES, ROLE_LABELS, DISTRICT_LABELS, isSuperAdminPhone } from "@/lib/domain"
 
 // مدیریت کاربران — فقط ادمین کل
 // GET  بدون targetId: لیست همه اعضا | GET با targetId: پرونده کامل کاربر
@@ -80,6 +80,10 @@ export async function POST(req: NextRequest) {
     const target = await db.user.findUnique({ where: { id: targetId } })
     if (!target) return NextResponse.json({ error: "کاربر یافت نشد" }, { status: 404 })
     if (target.id === admin.id) return NextResponse.json({ error: "تغییر وضعیت حساب خودتان ممکن نیست" }, { status: 400 })
+    // حساب ادمین کل سامانه (شماره محافظت‌شده) قابل تغییر نیست — نه نقش، نه وضعیت
+    if (isSuperAdminPhone(target.phone)) {
+      return NextResponse.json({ error: "حساب ادمین کل سامانه محافظت‌شده است و نقش/وضعیت آن قابل تغییر نیست" }, { status: 403 })
+    }
 
     if (action === "approve") {
       if (target.status !== "pending") {
@@ -100,10 +104,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: true, message: `درخواست ${target.fullName} رد شد (${USER_REJECT_TITLES[reasonKey]}).` })
     }
 
-    // انتصاب نقش — کلید رفع گلوگاه چرخه: ادمین می‌تواند خبرنگار را به مدیر حوزه یا کارشناس ارتقا دهد
+    // انتصاب نقش — کلید رفع گلوگاه چرخه: ادمین می‌تواند هر کاربر را به هر نقشی
+    // (از جمله ادمین کل) ارتقا دهد یا تنزل دهد
     if (action === "set_role") {
       const newRole = String(body.newRole ?? "")
-      if (!["reporter", "district_manager", "specialist"].includes(newRole)) {
+      if (!["reporter", "district_manager", "specialist", "admin"].includes(newRole)) {
         return NextResponse.json({ error: "نقش نامعتبر است" }, { status: 400 })
       }
       if (target.status === "pending") {

@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react"
 import { Search, Check, X, Clock, RefreshCw, Phone, GraduationCap, CalendarDays, Activity, Flame, Trophy, Newspaper, ChevronLeft, ImageOff, Loader2, FileText, Award } from "lucide-react"
 import { useApp, type AdminUserDetail } from "@/lib/store"
 import { fa, faNum, relTime, jalali } from "@/lib/format"
-import { ROLE_LABELS, DISTRICT_LABELS, BASE_LISTS, USER_REJECT_TITLES, LEVELS, EDUCATION_LABELS, BADGES } from "@/lib/domain"
+import { ROLE_LABELS, DISTRICT_LABELS, BASE_LISTS, USER_REJECT_TITLES, LEVELS, EDUCATION_LABELS, BADGES, isSuperAdminPhone } from "@/lib/domain"
 import { NeonAvatar } from "@/components/app/bits"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
@@ -332,7 +332,7 @@ function UserDetailDialog({ userId, onClose, onChanged }: { userId: string | nul
   }
 
   // انتصاب نقش — موتور چرخه سه‌مرحله‌ای (مدیر حوزه/کارشناس باید اینجا ساخته شوند)
-  const assignRole = async (newRole: "reporter" | "district_manager" | "specialist") => {
+  const assignRole = async (newRole: "reporter" | "district_manager" | "specialist" | "admin") => {
     if (!detail) return
     setBusy(true)
     const res = await setUserRole(detail.user.id, newRole, newRole === "district_manager" ? roleDistrict || detail.user.district : undefined)
@@ -406,15 +406,21 @@ function UserDetailDialog({ userId, onClose, onChanged }: { userId: string | nul
               </div>
             )}
 
-            {/* نقش سازمانی — منصوب‌کردن چرخه سه‌مرحله‌ای */}
-            {u.status === "active" && u.role !== "admin" && (
+            {/* نقش سازمانی — منصوب‌کردن چرخه سه‌مرحله‌ای + ارتقا به ادمین کل */}
+            {u.status === "active" && isSuperAdminPhone(u.phone) && (
+              <div className="flex items-center justify-between rounded-[24px] border border-warn/35 bg-warn/6 p-4">
+                <p className="text-[12px] font-black text-warn">👑 حساب ادمین کل سامانه</p>
+                <p className="text-[10.5px] text-ink-muted">این حساب محافظت‌شده است؛ نقش و وضعیت آن قابل تغییر نیست.</p>
+              </div>
+            )}
+            {u.status === "active" && !isSuperAdminPhone(u.phone) && (
               <div className="rounded-[24px] border border-line bg-surface p-4">
                 <div className="mb-1 flex items-center justify-between">
                   <p className="text-[13px] font-black text-ink">نقش در چرخه بررسی</p>
                   <span className="rounded-full bg-neon/12 px-2.5 py-0.5 text-[10px] font-bold text-neon">{ROLE_LABELS[u.role]}</span>
                 </div>
                 <p className="mb-3 text-[11px] leading-5 text-ink-muted">
-                  مدیر حوزه، اخبار حوزه خودش را در مرحله ۱ بررسی می‌کند؛ کارشناس مرحله ۲ را. برای راه‌اندازی کامل چرخه، حداقل یک مدیر حوزه و یک کارشناس منصوب کنید.
+                  هر وقت اراده کردید نقش این کاربر را عوض کنید: مدیر حوزه، اخبار حوزه خودش را در مرحله ۱ بررسی می‌کند؛ کارشناس مرحله ۲ را؛ ادمین کل اختیار تام دارد.
                 </p>
                 {u.role === "district_manager" && (
                   <div className="mb-3">
@@ -430,12 +436,13 @@ function UserDetailDialog({ userId, onClose, onChanged }: { userId: string | nul
                     </select>
                   </div>
                 )}
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                   {(
                     [
                       { key: "reporter", label: "خبرنگار", emoji: "📝" },
                       { key: "district_manager", label: "مدیر حوزه", emoji: "🏛️" },
                       { key: "specialist", label: "کارشناس", emoji: "🔍" },
+                      { key: "admin", label: "ادمین کل", emoji: "👑" },
                     ] as const
                   ).map((r) => (
                     <button
@@ -444,7 +451,11 @@ function UserDetailDialog({ userId, onClose, onChanged }: { userId: string | nul
                       disabled={busy || u.role === r.key}
                       className={cn(
                         "rounded-2xl border px-2 py-2.5 text-[11.5px] font-bold transition-colors disabled:opacity-60",
-                        u.role === r.key ? "border-neon bg-neon/10 text-neon" : "border-line bg-surface text-ink hover:border-neon/40",
+                        u.role === r.key
+                          ? "border-neon bg-neon/10 text-neon"
+                          : r.key === "admin"
+                            ? "border-warn/40 bg-warn/6 text-warn hover:bg-warn/12"
+                            : "border-line bg-surface text-ink hover:border-neon/40",
                       )}
                     >
                       <span className="block text-[15px]">{r.emoji}</span>

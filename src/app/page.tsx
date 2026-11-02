@@ -4,7 +4,6 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useApp } from "@/lib/store"
 import { Welcome } from "@/components/app/welcome"
-import { Avatar } from "@/components/app/bits"
 import { HomeScreen } from "@/components/app/home"
 import { ActivityScreen } from "@/components/app/activity"
 import { NewsScreen } from "@/components/app/news-tab"
@@ -15,7 +14,6 @@ import { NotificationsSheet, ChallengesSheet } from "@/components/app/sheets"
 import { BottomNav } from "@/components/app/bottom-nav"
 import { TopBar, SideNav, RightRail } from "@/components/app/social"
 import { USER_REJECT_TITLES } from "@/lib/domain"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Hourglass, ShieldX, LogOut } from "lucide-react"
 
@@ -26,7 +24,6 @@ export default function Page() {
   const [notifOpen, setNotifOpen] = useState(false)
   const [challengesOpen, setChallengesOpen] = useState(false)
   const [submitPreset, setSubmitPreset] = useState<null | { category?: string; title?: string; content?: string; draftId?: number | null }>(null)
-  const [switchOpen, setSwitchOpen] = useState(false)
 
   const openAdmin = () => router.push("/admin")
 
@@ -101,7 +98,6 @@ export default function Page() {
           <TopBar
             state={state}
             onOpenNotifications={() => setNotifOpen(true)}
-            onOpenSwitch={() => setSwitchOpen(true)}
             onGotoNews={() => setTab("news")}
           />
 
@@ -134,7 +130,7 @@ export default function Page() {
               )}
               {tab === "news" && <NewsScreen onQuickSubmit={() => openSubmit()} draftsView />}
               {tab === "activity" && <ActivityScreen />}
-              {tab === "profile" && <ProfileScreen onSwitchAccount={() => setSwitchOpen(true)} onOpenAdmin={openAdmin} />}
+              {tab === "profile" && <ProfileScreen onOpenAdmin={openAdmin} />}
               {tab === "review" && <ReviewScreen />}
             </div>
 
@@ -154,7 +150,6 @@ export default function Page() {
       <SubmitFlow open={submitOpen} onClose={() => setSubmitOpen(false)} preset={submitPreset} />
       <NotificationsSheet open={notifOpen} onClose={() => setNotifOpen(false)} />
       <ChallengesSheet open={challengesOpen} onClose={() => setChallengesOpen(false)} />
-      <SwitchAccountSheet open={switchOpen} onClose={() => setSwitchOpen(false)} />
     </main>
   )
 }
@@ -168,47 +163,5 @@ function GateScreen({ icon, title, body, action }: { icon: React.ReactNode; titl
       <p className="max-w-[280px] text-[12.5px] leading-6 text-ink-muted">{body}</p>
       {action}
     </div>
-  )
-}
-
-function SwitchAccountSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { login, userId } = useApp()
-  const [users, setUsers] = useState<{ id: string; fullName: string; avatar: string; role: string; district: string }[]>([])
-  useEffect(() => {
-    if (open) {
-      fetch("/api/bootstrap")
-        .then((r) => r.json())
-        .then((d) => setUsers(d.users))
-        .catch(() => setUsers([]))
-    }
-  }, [open])
-  const ROLE_LABELS: Record<string, string> = { reporter: "خبرنگار", district_manager: "مدیر حوزه", specialist: "کارشناس خبر", admin: "ادمین کل" }
-  return (
-    <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-h-[70dvh] overflow-y-auto nice-scroll rounded-[28px] border-line bg-popover p-5">
-        <DialogHeader className="text-right">
-          <DialogTitle className="text-ink">تغییر حساب (دمو)</DialogTitle>
-          <DialogDescription className="text-ink-muted">برای دیدن اپ از دید نقش‌های دیگر، حساب را عوض کن.</DialogDescription>
-        </DialogHeader>
-        <div className="mt-2 space-y-2">
-          {users.map((u) => (
-            <button
-              key={u.id}
-              onClick={() => {
-                onClose()
-                if (u.id !== userId) login(u.id)
-              }}
-              className={`flex w-full items-center justify-between rounded-2xl border px-4 py-3 text-right transition-colors ${u.id === userId ? "border-[var(--neon)]/50 bg-[var(--neon)]/8" : "border-line bg-surface hover:bg-surface-2"}`}
-            >
-              <span className="flex items-center gap-3">
-                <Avatar name={u.fullName} src={u.avatar} size={36} />
-                <span className="text-[13.5px] font-bold text-ink">{u.fullName}</span>
-              </span>
-              <span className="text-[11px] text-ink-muted">{ROLE_LABELS[u.role]}</span>
-            </button>
-          ))}
-        </div>
-      </DialogContent>
-    </Dialog>
   )
 }
