@@ -173,3 +173,42 @@ model OrgUnits {
   json      String // [{key,label,bases[]}]
   updatedAt DateTime @updatedAt
 }
+
+// بخش آموزش — محتوای آموزشی (متن/فایل/ویدئو) برای خبرنگاران
+model Training {
+  id         Int      @id @default(autoincrement())
+  title      String
+  body       String   @default("")
+  kind       String   @default("text") // text | file | video
+  fileUrl    String   @default("")
+  authorId   String   @default("")
+  authorName String   @default("")
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+}
+
+// تالار گفتگو — تاپیک‌ها و پیام‌ها (کلاس تصویری، هم‌فکری و...)
+model ForumTopic {
+  id          Int      @id @default(autoincrement())
+  title       String
+  pinned      Boolean  @default(false)
+  createdBy   String
+  creatorName String   @default("")
+  createdAt   DateTime @default(now())
+  messages    ForumMessage[]
+}
+
+model ForumMessage {
+  id         Int        @id @default(autoincrement())
+  topicId    Int
+  topic      ForumTopic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  userId     String
+  authorName String     @default("")
+  authorRole String     @default("")
+  body       String
+  fileUrl    String     @default("")
+  createdAt  DateTime   @default(now())
+
+  @@index([topicId, createdAt])
+}

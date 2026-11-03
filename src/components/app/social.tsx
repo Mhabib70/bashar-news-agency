@@ -6,7 +6,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import {
   Bell, Home, Newspaper, BarChart3, UserRound, ClipboardCheck, ShieldCheck, Search,
-  Megaphone, Target, Trophy, Plus, ChevronLeft, Rss, CheckCircle2, PlayCircle, Smile, Landmark,
+  Megaphone, Target, Trophy, Plus, ChevronLeft, Rss, CheckCircle2, PlayCircle, Smile, Landmark, GraduationCap, MessagesSquare,
 } from "lucide-react"
 import { type Tab } from "@/lib/store"
 import type { AppState, AppUser, LeaderRow } from "@/lib/server/state"
@@ -129,6 +129,8 @@ export function SideNav({
     { icon: <Bell className="h-4.5 w-4.5" />, label: "اعلان‌ها", onClick: onOpenNotifications, badge: unreadCount || undefined, badgeTone: "green" },
     { icon: <Target className="h-4.5 w-4.5" />, label: "چالش‌ها", onClick: onOpenChallenges, badge: activeChallenges.length || undefined, badgeTone: "green" },
   )
+  menu.push({ icon: <GraduationCap className="h-4.5 w-4.5" />, label: "آموزش", onClick: () => router.push("/training") })
+  menu.push({ icon: <MessagesSquare className="h-4.5 w-4.5" />, label: "تالار گفتگو", onClick: () => router.push("/forum") })
   if (user.role === "admin" || user.role === "district_manager") {
     menu.push({
       icon: <Landmark className="h-4.5 w-4.5" />, label: "حوزه‌ها و پایگاه‌ها", onClick: () => router.push("/organization"),

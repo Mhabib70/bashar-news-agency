@@ -1,7 +1,7 @@
 "use client"
 
 import { create } from "zustand"
-import type { AppState } from "@/lib/server/state"
+import type { AppState, NewsDTO } from "@/lib/server/state"
 import { applyOrgUnits } from "@/lib/domain"
 
 export type Tab = "home" | "news" | "activity" | "profile" | "review"
@@ -33,6 +33,22 @@ export type AdminUserDetail = {
   pointsLog: { amount: number; reason: string; createdAt: string }[]
   news: { id: number; code: string; title: string; status: string; category: string; createdAt: string }[]
   participations: { challengeId: number; count: number; joinedAt: string; challengeTitle: string; challengeStatus: string }[]
+}
+
+export type TrainingItem = {
+  id: number; title: string; body: string; kind: string; fileUrl: string
+  authorName: string; createdAt: string
+}
+
+export type ForumTopicItem = {
+  id: number; title: string; pinned: boolean; createdBy: string; creatorName: string
+  createdAt: string; replies?: number
+  lastMessage?: { body: string; authorName: string; at: string } | null
+}
+
+export type ForumMessageItem = {
+  id: number; userId: string; authorName: string; authorRole: string
+  body: string; fileUrl: string; createdAt: string
 }
 
 export type AdminOverview = {
@@ -67,6 +83,18 @@ type Store = {
   editNews: (newsId: number, p: { title: string; content: string }) => Promise<Result>
   sendToEitaa: (newsId: number) => Promise<Result>
   markNotificationsRead: () => Promise<void>
+  fetchAllNews: () => Promise<NewsDTO[]>
+  deleteNews: (newsId: number) => Promise<Result>
+  fetchTrainings: () => Promise<TrainingItem[]>
+  createTraining: (p: { title: string; body: string; kind: string; fileUrl?: string }) => Promise<Result>
+  deleteTraining: (id: number) => Promise<Result>
+  fetchForumTopics: () => Promise<ForumTopicItem[]>
+  fetchForumMessages: (topicId: number) => Promise<{ topic: ForumTopicItem; messages: ForumMessageItem[] } | null>
+  createForumTopic: (title: string) => Promise<Result & { id?: number }>
+  sendForumMessage: (p: { topicId: number; body: string; fileUrl?: string }) => Promise<Result>
+  deleteForumTopic: (topicId: number) => Promise<Result>
+  deleteForumMessage: (messageId: number) => Promise<Result>
+  pinForumTopic: (topicId: number) => Promise<Result>
   uploadMedia: (file: File) => Promise<{ ok: boolean; url?: string; mediaType?: string; message?: string }>
   uploadAvatar: (dataUrl: string) => Promise<Result>
   fetchUserDetail: (targetId: string) => Promise<AdminUserDetail | null>
@@ -307,6 +335,161 @@ export const useApp = create<Store>((set, get) => ({
       await get().refresh()
     } catch {
       /* silent */
+    }
+  },
+
+  fetchAllNews: async () => {
+    const uid = get().userId
+    if (!uid) return []
+    try {
+      const r = await api<{ news: NewsDTO[] }>(`/api/news/all?userId=${encodeURIComponent(uid)}`)
+      return r.news ?? []
+    } catch {
+      return []
+    }
+  },
+
+  deleteNews: async (newsId) => {
+    const uid = get().userId
+    if (!uid) return { ok: false }
+    try {
+      const r = await api<Result & { message: string }>("/api/news/delete", {
+        method: "POST",
+        body: JSON.stringify({ userId: uid, newsId }),
+      })
+      return { ok: true, message: r.message }
+    } catch (e) {
+      return { ok: false, message: (e as Error).message }
+    }
+  },
+
+  fetchTrainings: async () => {
+    const uid = get().userId
+    if (!uid) return []
+    try {
+      const r = await api<{ trainings: TrainingItem[] }>(`/api/training?userId=${encodeURIComponent(uid)}`)
+      return r.trainings ?? []
+    } catch {
+      return []
+    }
+  },
+
+  createTraining: async (p) => {
+    const uid = get().userId
+    if (!uid) return { ok: false }
+    try {
+      const r = await api<Result & { message: string }>("/api/training", {
+        method: "POST",
+        body: JSON.stringify({ userId: uid, action: "create", ...p }),
+      })
+      return { ok: true, message: r.message }
+    } catch (e) {
+      return { ok: false, message: (e as Error).message }
+    }
+  },
+
+  deleteTraining: async (id) => {
+    const uid = get().userId
+    if (!uid) return { ok: false }
+    try {
+      const r = await api<Result & { message: string }>("/api/training", {
+        method: "POST",
+        body: JSON.stringify({ userId: uid, action: "delete", id }),
+      })
+      return { ok: true, message: r.message }
+    } catch (e) {
+      return { ok: false, message: (e as Error).message }
+    }
+  },
+
+  fetchForumTopics: async () => {
+    const uid = get().userId
+    if (!uid) return []
+    try {
+      const r = await api<{ topics: ForumTopicItem[] }>(`/api/forum?userId=${encodeURIComponent(uid)}`)
+      return r.topics ?? []
+    } catch {
+      return []
+    }
+  },
+
+  fetchForumMessages: async (topicId) => {
+    const uid = get().userId
+    if (!uid) return null
+    try {
+      return await api<{ topic: ForumTopicItem; messages: ForumMessageItem[] }>(`/api/forum?userId=${encodeURIComponent(uid)}&topicId=${topicId}`)
+    } catch {
+      return null
+    }
+  },
+
+  createForumTopic: async (title) => {
+    const uid = get().userId
+    if (!uid) return { ok: false }
+    try {
+      const r = await api<Result & { id?: number; message: string }>("/api/forum", {
+        method: "POST",
+        body: JSON.stringify({ userId: uid, action: "topic", title }),
+      })
+      return { ok: true, id: r.id, message: r.message }
+    } catch (e) {
+      return { ok: false, message: (e as Error).message }
+    }
+  },
+
+  sendForumMessage: async (p) => {
+    const uid = get().userId
+    if (!uid) return { ok: false }
+    try {
+      await api("/api/forum", {
+        method: "POST",
+        body: JSON.stringify({ userId: uid, action: "message", topicId: p.topicId, body: p.body, fileUrl: p.fileUrl }),
+      })
+      return { ok: true, message: "پیام ارسال شد" }
+    } catch (e) {
+      return { ok: false, message: (e as Error).message }
+    }
+  },
+
+  deleteForumTopic: async (topicId) => {
+    const uid = get().userId
+    if (!uid) return { ok: false }
+    try {
+      const r = await api<Result & { message: string }>("/api/forum", {
+        method: "POST",
+        body: JSON.stringify({ userId: uid, action: "delete_topic", topicId }),
+      })
+      return { ok: true, message: r.message }
+    } catch (e) {
+      return { ok: false, message: (e as Error).message }
+    }
+  },
+
+  deleteForumMessage: async (messageId) => {
+    const uid = get().userId
+    if (!uid) return { ok: false }
+    try {
+      const r = await api<Result & { message: string }>("/api/forum", {
+        method: "POST",
+        body: JSON.stringify({ userId: uid, action: "delete_message", messageId }),
+      })
+      return { ok: true, message: r.message }
+    } catch (e) {
+      return { ok: false, message: (e as Error).message }
+    }
+  },
+
+  pinForumTopic: async (topicId) => {
+    const uid = get().userId
+    if (!uid) return { ok: false }
+    try {
+      const r = await api<Result & { message: string }>("/api/forum", {
+        method: "POST",
+        body: JSON.stringify({ userId: uid, action: "pin", topicId }),
+      })
+      return { ok: true, message: r.message }
+    } catch (e) {
+      return { ok: false, message: (e as Error).message }
     }
   },
 

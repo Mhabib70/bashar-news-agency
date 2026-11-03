@@ -238,7 +238,27 @@ export function ReviewScreen() {
                   {detailNews.code} · {detailNews.reporterName} · {DISTRICT_LABELS[detailNews.district] ?? detailNews.district}
                 </DialogDescription>
               </DialogHeader>
-              <p className="mt-1 whitespace-pre-line text-[13px] leading-7 text-ink/90">{detailNews.content}</p>
+              {/* پیش‌نمایش خبر — همان شکلی که منتشر می‌شود */}
+              <div className="mt-3 rounded-[22px] border border-line bg-surface p-4">
+                <p className="mb-2.5 flex items-center gap-1.5 text-[11px] font-black text-ink-muted">
+                  <Eye className="h-3.5 w-3.5 text-neon" />
+                  پیش‌نمایش خبر (پیش از تصمیم)
+                </p>
+                {detailNews.mediaUrl && detailNews.mediaType === "photo" && (
+                  <img src={detailNews.mediaUrl} alt="رسانه خبر" className="mb-3 max-h-52 w-full rounded-2xl border border-line object-cover" />
+                )}
+                {detailNews.mediaUrl && detailNews.mediaType === "video" && (
+                  <video src={detailNews.mediaUrl} controls className="mb-3 max-h-52 w-full rounded-2xl border border-line bg-black" />
+                )}
+                <div className="flex items-center justify-between">
+                  <span className="rounded-full bg-surface-2 px-2.5 py-0.5 text-[10px] font-bold text-ink-muted">{CATEGORY_LABELS[detailNews.category]}</span>
+                  <span className="text-[10px] text-ink-muted">
+                    {detailNews.reporterName} · {DISTRICT_LABELS[detailNews.district] ?? detailNews.district} · {durFmt(detailNews.durationMin)}
+                  </span>
+                </div>
+                <p className="mt-2 text-[15px] font-black leading-7 text-ink">{detailNews.title}</p>
+                <p className="mt-1.5 whitespace-pre-line text-[13px] leading-7 text-ink/90">{detailNews.content}</p>
+              </div>
               <div className="mt-3">
                 <StageTimeline news={detailNews} />
               </div>

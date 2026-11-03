@@ -1,13 +1,15 @@
 "use client"
 
 import Image from "next/image"
-import { useMemo, useState } from "react"
-import { Plus, PencilLine, X, FileText, Search } from "lucide-react"
-import { useApp } from "@/lib/store"
+import { useEffect, useMemo, useState } from "react"
+import { Plus, PencilLine, X, FileText, Search, Trash2, RefreshCw, Globe2, UserRound, Send } from "lucide-react"
+import { useApp, type NewsDTO } from "@/lib/store"
 import { SectionHeader, StatusChip, StageDots, StageTimeline, StageChip } from "@/components/app/bits"
+import { NewsEditDialog } from "@/components/app/news-edit"
 import { fa, durFmt, relTime, jalali } from "@/lib/format"
 import { CATEGORY_LABELS, REJECT_REASONS, DISTRICT_LABELS } from "@/lib/domain"
 import { cn } from "@/lib/utils"
+import { useToast } from "@/hooks/use-toast"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 
 const FILTERS = [
@@ -18,28 +20,65 @@ const FILTERS = [
 ] as const
 
 export function NewsScreen({ onQuickSubmit, draftsView }: { onQuickSubmit: () => void; draftsView?: boolean }) {
-  const { state } = useApp()
+  const { state, fetchAllNews, deleteNews, refresh } = useApp()
+  const { toast } = useToast()
   const [filter, setFilter] = useState<(typeof FILTERS)[number]["key"]>("all")
   const [detail, setDetail] = useState<number | null>(null)
   const [q, setQ] = useState("")
+  const [scope, setScope] = useState<"all" | "mine">("all")
+  const [allNews, setAllNews] = useState<NewsDTO[]>([])
+  const [loadingAll, setLoadingAll] = useState(false)
+  const [editing, setEditing] = useState<number | null>(null)
+  const [deleting, setDeleting] = useState<number | null>(null)
   const searched = q.trim().length >= 2
+
+  const loadAll = async () => {
+    setLoadingAll(true)
+    const rows = await fetchAllNews()
+    setAllNews(rows)
+    setLoadingAll(false)
+  }
+  useEffect(() => {
+    if (scope === "all") loadAll()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [scope])
+
+  const base = scope === "all" ? allNews : (state?.news ?? [])
   const list = useMemo(() => {
-    if (!state) return []
-    let rows = state.news
+    let rows = base
     if (filter !== "all") rows = rows.filter((n) => n.status === filter)
     if (searched) {
       const s = q.trim().toLowerCase()
       rows = rows.filter((n) => n.title.toLowerCase().includes(s) || n.content.toLowerCase().includes(s) || n.code.toLowerCase().includes(s))
     }
     return rows
-  }, [state, filter, q, searched])
+  }, [base, filter, q, searched])
+
   if (!state) return null
-  const detailNews = state.news.find((n) => n.id === detail)
+  const me = state.user
+  const detailNews = base.find((n) => n.id === detail)
+  const canEditNews = (n: NewsDTO) =>
+    (["admin", "specialist"].includes(me.role)) || (n.reporterId === me.id && n.status === "pending")
+  const canDeleteNews = (n: NewsDTO) =>
+    me.role === "admin" || (n.reporterId === me.id && (n.status === "pending" || n.status === "rejected"))
+
+  const doDelete = async (id: number) => {
+    const r = await deleteNews(id)
+    if (r.ok) {
+      toast({ title: "حذف شد", description: r.message })
+      setDetail(null)
+      setDeleting(null)
+      if (scope === "all") loadAll()
+      refresh()
+    } else {
+      toast({ title: "خطا", description: r.message, variant: "destructive" })
+    }
+  }
 
   return (
     <div className="stage-enter flex flex-col gap-4 px-5 pb-4 pt-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-[22px] font-black text-ink">{draftsView ? "اخبار و پیش‌نویس‌ها" : "اخبار من"}</h1>
+        <h1 className="text-[22px] font-black text-ink">اخبار خبرگزاری</h1>
         <button
           onClick={onQuickSubmit}
           className="flex items-center gap-1.5 rounded-full bg-neon px-4 py-2.5 text-[13px] font-bold text-neon-foreground btn-glow transition-transform hover:scale-[1.03] active:scale-95"
@@ -47,6 +86,38 @@ export function NewsScreen({ onQuickSubmit, draftsView }: { onQuickSubmit: () =>
           <Plus className="h-4 w-4" />
           ارسال خبر
         </button>
+      </div>
+
+      {/* انتخاب دامنه: همه اخبار سازمان / اخبار من */}
+      <div className="flex items-center gap-2">
+        <div className="flex flex-1 rounded-full border border-line bg-surface p-1">
+          {([
+            { key: "all", label: "همه اخبار", icon: <Globe2 className="h-3.5 w-3.5" /> },
+            { key: "mine", label: "اخبار من", icon: <UserRound className="h-3.5 w-3.5" /> },
+          ] as const).map((s) => (
+            <button
+              key={s.key}
+              onClick={() => setScope(s.key)}
+              className={cn(
+                "flex flex-1 items-center justify-center gap-1.5 rounded-full py-2 text-[12px] font-bold transition-colors",
+                scope === s.key ? "bg-neon text-neon-foreground" : "text-ink-muted",
+              )}
+            >
+              {s.icon}
+              {s.label}
+            </button>
+          ))}
+        </div>
+        {scope === "all" && (
+          <button
+            onClick={loadAll}
+            disabled={loadingAll}
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-line bg-surface text-ink-muted transition-colors hover:text-neon disabled:opacity-50"
+            aria-label="بارگذاری مجدد"
+          >
+            <RefreshCw className={cn("h-4 w-4", loadingAll && "animate-spin")} />
+          </button>
+        )}
       </div>
 
       {/* جستجوی اخبار */}
@@ -68,7 +139,7 @@ export function NewsScreen({ onQuickSubmit, draftsView }: { onQuickSubmit: () =>
       {/* فیلترها */}
       <div className="no-scrollbar flex gap-2 overflow-x-auto pb-0.5">
         {FILTERS.map((f) => {
-          const count = f.key === "all" ? state.news.length : state.news.filter((n) => n.status === f.key).length
+          const count = f.key === "all" ? base.length : base.filter((n) => n.status === f.key).length
           return (
             <button
               key={f.key}
@@ -85,7 +156,7 @@ export function NewsScreen({ onQuickSubmit, draftsView }: { onQuickSubmit: () =>
       </div>
 
       {/* پیش‌نویس‌ها */}
-      {draftsView && state.drafts.length > 0 && (
+      {draftsView && scope === "mine" && state.drafts.length > 0 && (
         <div>
           <SectionHeader title="پیش‌نویس‌ها" />
           <div className="space-y-2">
@@ -110,8 +181,10 @@ export function NewsScreen({ onQuickSubmit, draftsView }: { onQuickSubmit: () =>
         {list.length === 0 && (
           <div className="flex flex-col items-center gap-2 rounded-[26px] border border-dashed border-line py-12 text-center">
             <FileText className="h-8 w-8 text-ink-muted/50" />
-            <p className="text-[13.5px] font-bold text-ink-muted">{searched ? "نتیجه‌ای برای جستجو پیدا نشد" : "خبری در این دسته نیست"}</p>
-            {!searched && <p className="text-[11.5px] text-ink-muted/70">با دکمه سبز بالا اولین خبرت را بفرست</p>}
+            <p className="text-[13.5px] font-bold text-ink-muted">
+              {loadingAll ? "در حال دریافت اخبار..." : searched ? "نتیجه‌ای برای جستجو پیدا نشد" : "خبری در این دسته نیست"}
+            </p>
+            {!searched && !loadingAll && <p className="text-[11.5px] text-ink-muted/70">با دکمه «ارسال خبر» اولین خبر را بفرستید</p>}
           </div>
         )}
         {list.map((n) => (
@@ -127,7 +200,7 @@ export function NewsScreen({ onQuickSubmit, draftsView }: { onQuickSubmit: () =>
                 </div>
                 <p className="mt-1.5 line-clamp-2 text-[13.5px] font-bold leading-6 text-ink">{n.title}</p>
                 <p className="mt-1 text-[10.5px] text-ink-muted">
-                  {n.code} · {jalali(n.createdAt)} · {durFmt(n.durationMin)}
+                  {n.reporterId === me.id ? "شما" : n.reporterName} · {n.code} · {jalali(n.createdAt)}
                   {n.mediaUrl && n.mediaType === "photo" ? " · 📷" : n.mediaUrl && n.mediaType === "video" ? " · 🎬" : ""}
                 </p>
               </div>
@@ -152,10 +225,9 @@ export function NewsScreen({ onQuickSubmit, draftsView }: { onQuickSubmit: () =>
                 </div>
                 <DialogTitle className="text-right text-[16px] leading-7 text-ink">{detailNews.title}</DialogTitle>
                 <DialogDescription className="text-[11px] text-ink-muted">
-                  {detailNews.code} · {jalali(detailNews.createdAt, true)} · {DISTRICT_LABELS[detailNews.district]}
+                  {detailNews.reporterId === me.id ? "شما" : detailNews.reporterName} · {detailNews.code} · {jalali(detailNews.createdAt, true)} · {DISTRICT_LABELS[detailNews.district] ?? detailNews.district}
                 </DialogDescription>
               </DialogHeader>
-              <p className="mt-1 whitespace-pre-line text-[13.5px] leading-7 text-ink/90">{detailNews.content}</p>
 
               {detailNews.mediaUrl && detailNews.mediaType === "photo" && (
                 <img src={detailNews.mediaUrl} alt="رسانه خبر" className="mt-3 max-h-64 w-full rounded-2xl border border-line object-cover" />
@@ -163,6 +235,8 @@ export function NewsScreen({ onQuickSubmit, draftsView }: { onQuickSubmit: () =>
               {detailNews.mediaUrl && detailNews.mediaType === "video" && (
                 <video src={detailNews.mediaUrl} controls className="mt-3 max-h-64 w-full rounded-2xl border border-line bg-black" />
               )}
+
+              <p className="mt-1 whitespace-pre-line text-[13.5px] leading-7 text-ink/90">{detailNews.content}</p>
 
               {detailNews.status === "rejected" && (
                 <div className="mt-3 rounded-2xl border border-danger/30 bg-danger/8 p-4">
@@ -174,15 +248,73 @@ export function NewsScreen({ onQuickSubmit, draftsView }: { onQuickSubmit: () =>
               )}
 
               <div className="mt-4">
-                <p className="mb-2 text-[12.5px] font-black text-ink">پیش‌نمایش زنده چرخه بررسی</p>
+                <p className="mb-2 text-[12.5px] font-black text-ink">چرخه بررسی خبر</p>
                 <StageTimeline news={detailNews} />
               </div>
 
-              {detailNews.status === "rejected" && (
+              {(canEditNews(detailNews) || canDeleteNews(detailNews)) && (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {canEditNews(detailNews) && (
+                    <button
+                      onClick={() => setEditing(detailNews.id)}
+                      className="flex flex-1 items-center justify-center gap-1.5 rounded-full border border-line bg-surface py-3 text-[12px] font-bold text-ink transition-colors hover:border-neon/40 hover:text-neon"
+                    >
+                      <PencilLine className="h-4 w-4" />
+                      ویرایش متن
+                    </button>
+                  )}
+                  {canDeleteNews(detailNews) && (
+                    <button
+                      onClick={() => setDeleting(detailNews.id)}
+                      className="flex flex-1 items-center justify-center gap-1.5 rounded-full border border-danger/30 py-3 text-[12px] font-bold text-danger-soft transition-colors hover:bg-danger/8"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      حذف خبر
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {detailNews.status === "rejected" && detailNews.reporterId === me.id && (
                 <ResubmitButton newsId={detailNews.id} onDone={() => setDetail(null)} />
               )}
             </>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* ویرایش متن خبر */}
+      <NewsEditDialog
+        open={editing !== null}
+        onClose={() => setEditing(null)}
+        news={detailNews ? { id: detailNews.id, title: detailNews.title, content: detailNews.content } : null}
+        onSaved={() => {
+          setDetail(null)
+          if (scope === "all") loadAll()
+          refresh()
+        }}
+      />
+
+      {/* تایید حذف */}
+      <Dialog open={deleting !== null} onOpenChange={(v) => !v && setDeleting(null)}>
+        <DialogContent className="rounded-[28px] border-line bg-popover p-5">
+          <DialogHeader className="text-right">
+            <DialogTitle className="text-ink">حذف خبر</DialogTitle>
+            <DialogDescription className="text-ink-muted">
+              مطمئنید؟ خبر و تمام سوابق چرخه‌اش برای همیشه حذف می‌شود.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mt-4 flex gap-2">
+            <button onClick={() => setDeleting(null)} className="flex-1 rounded-full border border-line py-3 text-[13px] font-bold text-ink-muted">
+              انصراف
+            </button>
+            <button
+              onClick={() => deleting !== null && doDelete(deleting)}
+              className="flex-1 rounded-full bg-danger py-3 text-[13px] font-bold text-white"
+            >
+              بله، حذف کن
+            </button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
@@ -203,7 +335,7 @@ function ResubmitButton({ newsId, onDone }: { newsId: number; onDone: () => void
       disabled={busy}
       className="mt-3 flex w-full items-center justify-center gap-2 rounded-full bg-neon py-3.5 text-[14px] font-bold text-neon-foreground disabled:opacity-50"
     >
-      {busy ? <X className="hidden" /> : <PencilLine className="h-4.5 w-4.5" />}
+      {busy ? <X className="hidden" /> : <Send className="h-4.5 w-4.5" />}
       ویرایش و ارسال مجدد (چرخه از مدیر حوزه)
     </button>
   )

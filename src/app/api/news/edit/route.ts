@@ -3,9 +3,10 @@ import { db } from "@/lib/db"
 import { notifyUser } from "@/lib/server/notify"
 import { ROLE_LABELS } from "@/lib/domain"
 
-// ویرایش متن خبر توسط ادمین کل یا کارشناس خبر (اختیار سردبیری)
-// - ادمین کل و کارشناس می‌توانند تیتر و متن کامل هر خبری را در هر وضعیتی ویرایش کنند.
-// - رویداد «ویرایش» در ردپای چرخه ثبت می‌شود و خبرنگار اعلان دریافت می‌کند.
+// ویرایش متن خبر (اختیار سردبیری)
+// - ادمین کل و کارشناس خبر: هر خبری در هر وضعیتی
+// - خودِ خبرنگار: فقط خبر «در انتظار بررسی» خودش (قبل از ورود به چرخه تصمیم)
+// رویداد «ویرایش» در ردپای چرخه ثبت می‌شود و خبرنگار اعلان دریافت می‌کند.
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
@@ -21,12 +22,21 @@ export async function POST(req: NextRequest) {
     }
 
     const editor = await db.user.findUnique({ where: { id: userId } })
-    if (!editor || !["admin", "specialist"].includes(editor.role) || editor.status !== "active") {
-      return NextResponse.json({ error: "فقط ادمین کل و کارشناس خبر می‌توانند متن خبر را ویرایش کنند" }, { status: 403 })
+    if (!editor || editor.status !== "active") {
+      return NextResponse.json({ error: "دسترسی مجاز نیست" }, { status: 403 })
     }
 
     const news = await db.newsItem.findUnique({ where: { id: Number(newsId)}, include: { reporter: true } })
     if (!news) return NextResponse.json({ error: "خبر یافت نشد" }, { status: 404 })
+
+    const isReviewer = ["admin", "specialist"].includes(editor.role)
+    const isOwnerPending = news.reporterId === editor.id && news.status === "pending"
+    if (!isReviewer && !isOwnerPending) {
+      return NextResponse.json(
+        { error: "ویرایش مجاز نیست: ارزیابان هر خبری را ویرایش می‌کنند؛ خبرنگار فقط خبر در انتظار بررسی خودش را." },
+        { status: 403 },
+      )
+    }
 
     const newTitle = String(title).trim().slice(0, 200)
     const newContent = String(content).trim()
@@ -44,11 +54,13 @@ export async function POST(req: NextRequest) {
         actorId: editor.id,
         actorName: editor.fullName,
         actorRole: editor.role,
-        note: `ویرایش متن خبر توسط ${ROLE_LABELS[editor.role] ?? editor.role}`,
+        note: isReviewer
+          ? `ویرایش متن خبر توسط ${ROLE_LABELS[editor.role] ?? editor.role}`
+          : "ویرایش توسط خبرنگار (پیش از بررسی)",
       },
     })
 
-    if (news.reporterId && news.reporterId !== editor.id) {
+    if (isReviewer && news.reporterId && news.reporterId !== editor.id) {
       await notifyUser(
         news.reporterId,
         "review",

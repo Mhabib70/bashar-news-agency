@@ -3,17 +3,23 @@ import { mkdir, writeFile } from "fs/promises"
 import path from "path"
 import { db } from "@/lib/db"
 
-// آپلود رسانه خبر (عکس/ویدیو) — ذخیره در public/uploads و سرو از همان مسیر
-// حجم مجاز: ۲۰ مگابایت (هماهنگ با client_max_body_size انجینکس)
-const MAX_BYTES = 20 * 1024 * 1024
+// آپلود رسانه (عکس/ویدیو/فایل آموزش) — ذخیره در public/uploads و سرو از همان مسیر
+// سقف عکس ۳۰MB و ویدیو ۳۰MB (انجینکس 64m است تا multipart بدون خطای 413 رد شود)
+const MAX_BYTES = 30 * 1024 * 1024
 const EXT_BY_TYPE: Record<string, string> = {
   "image/jpeg": ".jpg",
+  "image/jpg": ".jpg",
   "image/png": ".png",
   "image/webp": ".webp",
   "image/gif": ".gif",
+  "image/heic": ".heic",
+  "image/heif": ".heif",
+  "image/bmp": ".bmp",
   "video/mp4": ".mp4",
   "video/webm": ".webm",
   "video/quicktime": ".mov",
+  "video/x-matroska": ".mkv",
+  "application/pdf": ".pdf",
 }
 
 export async function POST(req: NextRequest) {
@@ -32,11 +38,12 @@ export async function POST(req: NextRequest) {
 
     const ext = EXT_BY_TYPE[file.type] ?? path.extname(file.name).toLowerCase()
     const isVideo = file.type.startsWith("video/")
-    if (!file.type.startsWith("image/") && !isVideo) {
-      return NextResponse.json({ error: "فقط عکس یا ویدیو قابل ارسال است" }, { status: 400 })
+    const isDoc = file.type === "application/pdf"
+    if (!file.type.startsWith("image/") && !isVideo && !isDoc) {
+      return NextResponse.json({ error: "فرمت پشتیبانی نمی‌شود — عکس، ویدیو یا PDF ارسال کنید" }, { status: 400 })
     }
     if (file.size > MAX_BYTES) {
-      return NextResponse.json({ error: "حجم فایل نباید بیشتر از ۲۰ مگابایت باشد" }, { status: 400 })
+      return NextResponse.json({ error: "حجم فایل نباید بیشتر از ۳۰ مگابایت باشد" }, { status: 400 })
     }
 
     const dir = path.join(process.cwd(), "public", "uploads")

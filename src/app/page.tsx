@@ -23,7 +23,7 @@ export default function Page() {
   const [submitOpen, setSubmitOpen] = useState(false)
   const [notifOpen, setNotifOpen] = useState(false)
   const [challengesOpen, setChallengesOpen] = useState(false)
-  const [submitPreset, setSubmitPreset] = useState<null | { category?: string; title?: string; content?: string; draftId?: number | null }>(null)
+  const [submitPreset, setSubmitPreset] = useState<null | { category?: string; title?: string; content?: string; draftId?: number | null; challengeId?: number | null }>(null)
 
   const openAdmin = () => router.push("/admin")
 
@@ -149,7 +149,11 @@ export default function Page() {
       {/* شیت‌ها */}
       <SubmitFlow open={submitOpen} onClose={() => setSubmitOpen(false)} preset={submitPreset} />
       <NotificationsSheet open={notifOpen} onClose={() => setNotifOpen(false)} />
-      <ChallengesSheet open={challengesOpen} onClose={() => setChallengesOpen(false)} />
+      <ChallengesSheet
+        open={challengesOpen}
+        onClose={() => setChallengesOpen(false)}
+        onQuickSubmitForChallenge={(cid) => openSubmit({ challengeId: cid })}
+      />
     </main>
   )
 }

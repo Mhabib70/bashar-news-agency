@@ -4,6 +4,7 @@ import { useMemo, useRef, useState } from "react"
 import { ArrowLeft, ArrowRight, Save, CheckCircle2, PartyPopper, ImageIcon, Video, ImageOff, UploadCloud, X, Loader2 } from "lucide-react"
 import { useApp } from "@/lib/store"
 import { fa, toFa } from "@/lib/format"
+import { compressPhotoForUpload } from "@/lib/image"
 import { NEWS_CATEGORIES, CATEGORY_LABELS } from "@/lib/domain"
 import { cn } from "@/lib/utils"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
@@ -21,7 +22,7 @@ export function SubmitFlow({
 }: {
   open: boolean
   onClose: () => void
-  preset?: { category?: string; title?: string; content?: string; draftId?: number | null } | null
+  preset?: { category?: string; title?: string; content?: string; draftId?: number | null; challengeId?: number | null } | null
 }) {
   const { state, submitNews, saveDraft, deleteDraft, uploadMedia } = useApp()
   const { toast } = useToast()
@@ -34,7 +35,7 @@ export function SubmitFlow({
   const [mediaUrl, setMediaUrl] = useState("")
   const [uploading, setUploading] = useState(false)
   const [duration, setDuration] = useState(30)
-  const [challengeId, setChallengeId] = useState<number | null>(null)
+  const [challengeId, setChallengeId] = useState<number | null>(preset?.challengeId ?? null)
   const [busy, setBusy] = useState(false)
   const [done, setDone] = useState<{ points: number; message: string; badges: string[] } | null>(null)
 
@@ -66,13 +67,14 @@ export function SubmitFlow({
       toast({ title: "فرمت نامعتبر", description: "فقط عکس یا ویدیو انتخاب کنید", variant: "destructive" })
       return
     }
-    const max = isPhoto ? 5 * 1024 * 1024 : 25 * 1024 * 1024
+    const max = 30 * 1024 * 1024
     if (file.size > max) {
-      toast({ title: "حجم زیاد", description: `حداکثر ${isPhoto ? "۵" : "۲۵"} مگابایت`, variant: "destructive" })
+      toast({ title: "حجم زیاد", description: "حداکثر ۳۰ مگابایت — عکس‌ها خودکار فشرده می‌شوند", variant: "destructive" })
       return
     }
     setUploading(true)
-    const r = await uploadMedia(file)
+    const payload = isPhoto ? await compressPhotoForUpload(file) : file
+    const r = await uploadMedia(payload)
     setUploading(false)
     if (r.ok && r.url) {
       setMediaType(r.mediaType ?? (isPhoto ? "photo" : "video"))
@@ -147,6 +149,17 @@ export function SubmitFlow({
                 مرحله {toFa(step + 1)} از {toFa(4)} — {STEPS[step]}
               </DialogDescription>
             </DialogHeader>
+
+            {challengeId && (
+              <div className="mt-3 flex items-center justify-between rounded-2xl border border-neon/30 bg-neon/8 px-4 py-2.5">
+                <p className="text-[12px] font-bold text-neon">
+                  🎯 ثبت محتوا برای چالش: {activeChallenges.find((c) => c.id === challengeId)?.title ?? "چالش"}
+                </p>
+                <button onClick={() => setChallengeId(null)} className="text-[11px] font-bold text-ink-muted">
+                  برداشتن
+                </button>
+              </div>
+            )}
 
             <div className="mt-3 flex gap-1.5">
               {STEPS.map((_, i) => (
@@ -231,10 +244,10 @@ export function SubmitFlow({
                     >
                       {uploading ? <Loader2 className="h-6 w-6 animate-spin text-neon" /> : <UploadCloud className="h-6 w-6 text-neon" />}
                       <span className="text-[13px] font-bold text-ink">{uploading ? "در حال بارگذاری..." : "انتخاب عکس یا ویدیو از دستگاه"}</span>
-                      <span className="text-[10.5px] text-ink-muted">عکس تا ۵MB (JPG/PNG/WebP) · ویدیو تا ۲۵MB (MP4/WebM)</span>
+                      <span className="text-[10.5px] text-ink-muted">عکس (JPG/PNG/WebP/HEIC — خودکار فشرده می‌شود) · ویدیو تا ۳۰MB</span>
                     </button>
                   )}
-                  <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm,video/quicktime" className="hidden" onChange={(e) => onPickFile(e.target.files?.[0])} />
+                  <input ref={fileRef} type="file" accept="image/*,video/mp4,video/webm,video/quicktime,.heic,.heif" className="hidden" onChange={(e) => onPickFile(e.target.files?.[0])} />
 
                   {[
                     { key: "none", label: "بدون رسانه", desc: "فقط متن خبر", icon: <ImageOff className="h-5 w-5" /> },

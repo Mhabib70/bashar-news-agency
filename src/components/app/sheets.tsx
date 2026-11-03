@@ -63,7 +63,15 @@ export function NotificationsSheet({ open, onClose }: { open: boolean; onClose: 
 }
 
 // ---------- شیت چالش‌ها ----------
-export function ChallengesSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
+export function ChallengesSheet({
+  open,
+  onClose,
+  onQuickSubmitForChallenge,
+}: {
+  open: boolean
+  onClose: () => void
+  onQuickSubmitForChallenge?: (challengeId: number) => void
+}) {
   const { state, joinChallenge } = useApp()
   const { toast } = useToast()
   const [busy, setBusy] = useState<number | null>(null)
@@ -90,6 +98,15 @@ export function ChallengesSheet({ open, onClose }: { open: boolean; onClose: () 
           </DialogDescription>
         </DialogHeader>
         <div className="mt-2 space-y-3">
+          {state.challenges.length === 0 && (
+            <div className="flex flex-col items-center gap-2 rounded-[24px] border border-dashed border-line py-10 text-center">
+              <Trophy className="h-8 w-8 text-ink-muted/50" />
+              <p className="text-[13.5px] font-bold text-ink-muted">فعلاً چالشی ثبت نشده است</p>
+              <p className="max-w-[260px] text-[11.5px] leading-5 text-ink-muted/80">
+                چالش‌ها را ادمین کل از پنل مدیریت ایجاد می‌کند — موضوع و جایزه مشخص می‌شود و برنده‌ها امتیاز ویژه می‌گیرند.
+              </p>
+            </div>
+          )}
           {state.challenges.map((c) => {
             const active = c.status === "active"
             return (

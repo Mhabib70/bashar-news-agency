@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react"
 import { useRouter } from "next/navigation"
-import { LogOut, SwitchCamera, Zap, Trophy, Flame, BellRing, ShieldCheck, Users2, Timer, Award, ChevronDown, BadgeCheck, Share2, FileDown, Camera, Trash2, Loader2, Landmark } from "lucide-react"
+import { LogOut, SwitchCamera, Zap, Trophy, Flame, BellRing, ShieldCheck, Users2, Timer, Award, ChevronDown, BadgeCheck, Share2, FileDown, Camera, Trash2, Loader2, Landmark, GraduationCap, MessagesSquare } from "lucide-react"
 import { useApp } from "@/lib/store"
 import { Ring, SectionHeader, Avatar, NeonAvatar } from "@/components/app/bits"
 import { fa, faNum, jalali } from "@/lib/format"
@@ -301,6 +301,20 @@ export function ProfileScreen({ onOpenAdmin }: { onOpenAdmin?: () => void }) {
             پنل مدیریت
           </button>
         )}
+        <button
+          onClick={() => router.push("/training")}
+          className="flex flex-1 items-center justify-center gap-2 rounded-full border border-line bg-surface py-3.5 text-[13.5px] font-bold text-ink transition-colors hover:bg-surface-2"
+        >
+          <GraduationCap className="h-4.5 w-4.5" />
+          آموزش
+        </button>
+        <button
+          onClick={() => router.push("/forum")}
+          className="flex flex-1 items-center justify-center gap-2 rounded-full border border-line bg-surface py-3.5 text-[13.5px] font-bold text-ink transition-colors hover:bg-surface-2"
+        >
+          <MessagesSquare className="h-4.5 w-4.5" />
+          تالار گفتگو
+        </button>
         {(user.role === "admin" || user.role === "district_manager") && (
           <button
             onClick={() => router.push("/organization")}
