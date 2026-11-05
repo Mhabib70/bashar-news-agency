@@ -32,6 +32,22 @@ export const BADGES: Record<string, { emoji: string; title: string; desc: string
   champion: { emoji: "🥇", title: "قهرمان چالش", desc: "قهرمانی در یک چالش" },
 }
 
+// ── نشان‌های تالار گفتگو (محاسباتی — از روی فعالیت واقعی) ──
+export const FORUM_BADGES: Record<string, { emoji: string; title: string; desc: string }> = {
+  star_week: { emoji: "🌟", title: "ستاره هفته", desc: "صدرنشین تخته افتخار این هفته" },
+  hot_chat: { emoji: "🔥", title: "گفتگوی داغ", desc: "۱۰ واکنش دریافتی روی پیام‌ها" },
+  talkative: { emoji: "💬", title: "پرگفتگو", desc: "۲۰ پیام در تالار" },
+  helper: { emoji: "🤝", title: "پاسخگوی نمونه", desc: "۱۰ پاسخ به هم‌تیمی‌ها" },
+  starter: { emoji: "🚀", title: "راه‌انداز", desc: "۳ تاپیک جدید" },
+}
+
+// امتیازهای تالار گفتگو — هم به امتیاز کل و هم به امتیاز تالار اضافه می‌شود
+export const FORUM_POINTS = {
+  MESSAGE: 2, // هر پیام
+  TOPIC: 5, // هر تاپیک جدید
+  REACTION_RECEIVED: 1, // هر واکنشی که پیام شما می‌گیرد
+}
+
 export const EDUCATION_LEVEL_LABELS: { key: string; label: string }[] = [
   { key: "under_diploma", label: "زیر دیپلم" },
   { key: "diploma", label: "دیپلم" },

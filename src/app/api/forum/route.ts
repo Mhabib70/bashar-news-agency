@@ -1,22 +1,25 @@
 import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
-import { levelFor } from "@/lib/domain"
+import { levelFor, FORUM_POINTS } from "@/lib/domain"
+import { addForumPoints } from "@/lib/server/state"
 import { notifyUser } from "@/lib/server/notify"
 import type { Prisma } from "@prisma/client"
 
-// تالار گفتگو v2 — تاپیک‌های نوع‌دار + پیام با ریپلای/منشن + واکنش + نظرسنجی
-// GET (بدون topicId)  → فهرست تاپیک‌ها (نوع، تعداد پیام، شرکت‌کنندگان، آخرین فعالیت) + اعضای فعال برای منشن
+// تالار گفتگو v3 — سبک تلگرامی + امتیاز تالار + تخته افتخار هفته + نشان‌ها + سوال هفته ادمین
+// GET (بدون topicId)  → فهرست تاپیک‌ها + اعضا + تخته افتخار هفته + سوال هفته + آمار من
 // GET (با topicId)    → پیام‌ها (متادیتای نویسنده، واکنش‌ها، نقل‌قول) + نظرسنجی‌ها + اعضا
 // POST actions:
-//   topic       → ایجاد تاپیک { userId, title, type }
-//   message     → ارسال پیام { userId, topicId, body, fileUrl?, replyToId? } (+ اعلان منشن/پاسخ)
-//   react       → toggle واکنش { userId, messageId, emoji }
-//   poll_create → نظرسنجی جدید { userId, topicId, question, options[] } (ادمین/مدیر حوزه)
-//   poll_vote   → رأی { userId, pollId, optionIndex } (قابل تغییر)
-//   poll_delete → حذف نظرسنجی { userId, pollId } (ادمین/سازنده)
+//   topic           → ایجاد تاپیک { userId, title, type } (+۵ امتیاز)
+//   message         → ارسال پیام { userId, topicId, body, fileUrl?, replyToId? } (+۲ امتیاز، اعلان منشن/پاسخ)
+//   react           → toggle واکنش { userId, messageId, emoji } (+۱ امتیاز به نویسنده پیام)
+//   poll_create     → نظرسنجی جدید { userId, topicId, question, options[] } (ادمین/مدیر حوزه)
+//   poll_vote       → رأی { userId, pollId, optionIndex } (قابل تغییر)
+//   poll_delete     → حذف نظرسنجی { userId, pollId } (ادمین/سازنده)
+//   weekly_question → سوال هفته { userId, question } (ادمین) — تاپیک سنجاق‌شده + اعلان به همه
 //   delete_topic / delete_message / pin → مانند قبل
 
 const ONLINE_WINDOW_MS = 5 * 60 * 1000
+const WEEK_MS = 7 * 24 * 3600 * 1000
 const REACTION_EMOJIS = ["😍", "👍", "🔥", "💡"] as const
 const TOPIC_TYPES = ["class", "brainstorm", "announce", "challenge"] as const
 
@@ -33,6 +36,77 @@ function serializePoll(p: { id: number; question: string; options: unknown; vote
   }
 }
 
+// ── نشان‌های تالار (محاسباتی): کل پیام/پاسخ/تاپیک/واکنش‌دریافتی هر کاربر ──
+type ForumAgg = { msgs: Map<string, number>; replies: Map<string, number>; topics: Map<string, number>; rxGot: Map<string, number> }
+
+async function forumAggregates(): Promise<ForumAgg> {
+  const [msgs, replies, topics, rx] = await Promise.all([
+    db.forumMessage.groupBy({ by: ["userId"], _count: { _all: true } }),
+    db.forumMessage.groupBy({ by: ["userId"], where: { replyToId: { not: null } }, _count: { _all: true } }),
+    db.forumTopic.groupBy({ by: ["createdBy"], _count: { _all: true } }),
+    db.forumReaction.findMany({ select: { message: { select: { userId: true } } } }),
+  ])
+  const agg: ForumAgg = { msgs: new Map(), replies: new Map(), topics: new Map(), rxGot: new Map() }
+  for (const r of msgs) agg.msgs.set(r.userId, r._count._all)
+  for (const r of replies) agg.replies.set(r.userId, r._count._all)
+  for (const r of topics) agg.topics.set(r.createdBy, r._count._all)
+  for (const r of rx) {
+    const uid = r.message.userId
+    agg.rxGot.set(uid, (agg.rxGot.get(uid) ?? 0) + 1)
+  }
+  return agg
+}
+
+function badgesFor(agg: ForumAgg, userId: string, starWeek: boolean): string[] {
+  const out: string[] = []
+  if (starWeek) out.push("star_week")
+  if ((agg.rxGot.get(userId) ?? 0) >= 10) out.push("hot_chat")
+  if ((agg.msgs.get(userId) ?? 0) >= 20) out.push("talkative")
+  if ((agg.replies.get(userId) ?? 0) >= 10) out.push("helper")
+  if ((agg.topics.get(userId) ?? 0) >= 3) out.push("starter")
+  return out
+}
+
+// ── تخته افتخار هفته: فعالیت ۷ روز اخیر = پیام×۲ + واکنش‌دریافتی×۱ + تاپیک×۵ ──
+type HonorRow = { id: string; fullName: string; avatar: string; role: string; levelEmoji: string; weeklyScore: number; messages: number; badges: string[] }
+
+async function honorBoard(since: Date): Promise<{ rows: HonorRow[]; weekly: Map<string, { score: number; msgs: number }> }> {
+  const [wMsgs, wTopics, wRx] = await Promise.all([
+    db.forumMessage.findMany({ where: { createdAt: { gte: since } }, select: { userId: true } }),
+    db.forumTopic.findMany({ where: { createdAt: { gte: since } }, select: { createdBy: true } }),
+    db.forumReaction.findMany({ where: { createdAt: { gte: since } }, select: { message: { select: { userId: true } } } }),
+  ])
+  const weekly = new Map<string, { score: number; msgs: number }>()
+  const bump = (uid: string, score: number, msg = 0) => {
+    const cur = weekly.get(uid) ?? { score: 0, msgs: 0 }
+    cur.score += score
+    cur.msgs += msg
+    weekly.set(uid, cur)
+  }
+  for (const m of wMsgs) bump(m.userId, FORUM_POINTS.MESSAGE, 1)
+  for (const t of wTopics) bump(t.createdBy, FORUM_POINTS.TOPIC)
+  for (const r of wRx) bump(r.message.userId, FORUM_POINTS.REACTION_RECEIVED)
+
+  const top = [...weekly.entries()].sort((a, b) => b[1].score - a[1].score).slice(0, 5)
+  if (top.length === 0) return { rows: [], weekly }
+  const users = await db.user.findMany({
+    where: { id: { in: top.map(([id]) => id) } },
+    select: { id: true, fullName: true, avatar: true, role: true, points: true },
+  })
+  const uMap = new Map(users.map((u) => [u.id, u]))
+  const agg = await forumAggregates()
+  const rows: HonorRow[] = top.map(([id, v], i) => {
+    const u = uMap.get(id)
+    return {
+      id, fullName: u?.fullName ?? "عضو", avatar: u?.avatar ?? "", role: u?.role ?? "reporter",
+      levelEmoji: levelFor(u?.points ?? 0).emoji,
+      weeklyScore: v.score, messages: v.msgs,
+      badges: badgesFor(agg, id, i === 0 && v.score > 0),
+    }
+  })
+  return { rows, weekly }
+}
+
 export async function GET(req: NextRequest) {
   const sp = req.nextUrl.searchParams
   const userId = sp.get("userId")
@@ -45,12 +119,14 @@ export async function GET(req: NextRequest) {
 
   const members = await db.user.findMany({
     where: { status: "active" },
-    select: { id: true, fullName: true, avatar: true, role: true, points: true, levelKey: true, lastSeenAt: true },
+    select: { id: true, fullName: true, avatar: true, role: true, points: true, forumPoints: true, levelKey: true, lastSeenAt: true },
     orderBy: { fullName: "asc" },
   })
   const membersPayload = members.map((m) => ({
     id: m.id, fullName: m.fullName, avatar: m.avatar, role: m.role,
     online: Date.now() - m.lastSeenAt.getTime() < ONLINE_WINDOW_MS,
+    forumPoints: m.forumPoints,
+    levelEmoji: levelFor(m.points).emoji,
   }))
 
   if (topicId) {
@@ -136,17 +212,38 @@ export async function GET(req: NextRequest) {
     })
   }
 
-  // فهرست تاپیک‌ها
-  const topics = await db.forumTopic.findMany({
-    include: { messages: { orderBy: { createdAt: "desc" }, take: 1 } },
-    orderBy: [{ pinned: "desc" }, { createdAt: "desc" }],
-    take: 40,
-  })
-  const counts = await db.forumMessage.groupBy({ by: ["topicId"], _count: { _all: true } })
+  // ── فهرست تاپیک‌ها + افتخارات + سوال هفته ──
+  const [topics, counts, participantRows, honor, wq] = await Promise.all([
+    db.forumTopic.findMany({
+      include: { messages: { orderBy: { createdAt: "desc" }, take: 1 } },
+      orderBy: [{ pinned: "desc" }, { createdAt: "desc" }],
+      take: 40,
+    }),
+    db.forumMessage.groupBy({ by: ["topicId"], _count: { _all: true } }),
+    db.forumMessage.groupBy({ by: ["topicId", "userId"] }),
+    honorBoard(new Date(Date.now() - WEEK_MS)),
+    db.forumWeeklyQuestion.findFirst({ orderBy: { createdAt: "desc" } }),
+  ])
   const countMap = new Map(counts.map((c) => [c.topicId, c._count._all]))
-  const participantRows = await db.forumMessage.groupBy({ by: ["topicId", "userId"] })
   const participantMap = new Map<number, number>()
   for (const row of participantRows) participantMap.set(row.topicId, (participantMap.get(row.topicId) ?? 0) + 1)
+
+  // آمار و رتبه خودم در این هفته
+  const myWeek = honor.weekly.get(user.id) ?? { score: 0, msgs: 0 }
+  const ranked = [...honor.weekly.entries()].sort((a, b) => b[1].score - a[1].score)
+  const myRank = ranked.findIndex(([id, v]) => id === user.id && v.score > 0)
+  const agg = await forumAggregates()
+  const myBadges = badgesFor(agg, user.id, ranked.length > 0 && ranked[0][0] === user.id && ranked[0][1].score > 0)
+
+  let weeklyQuestion: { id: number; question: string; topicId: number; topicTitle: string; creatorName: string; createdAt: string } | null = null
+  if (wq) {
+    const wTopic = await db.forumTopic.findUnique({ where: { id: wq.topicId }, select: { title: true, creatorName: true } })
+    weeklyQuestion = {
+      id: wq.id, question: wq.question, topicId: wq.topicId,
+      topicTitle: wTopic?.title ?? "", creatorName: wTopic?.creatorName ?? "",
+      createdAt: wq.createdAt.toISOString(),
+    }
+  }
 
   return NextResponse.json({
     topics: topics.map((t) => ({
@@ -160,6 +257,14 @@ export async function GET(req: NextRequest) {
     })),
     members: membersPayload,
     viewer: { id: user.id, role: user.role },
+    honorBoard: honor.rows,
+    viewerStats: {
+      weeklyScore: myWeek.score, weeklyMessages: myWeek.msgs,
+      rank: myRank >= 0 ? myRank + 1 : null,
+      totalForumPoints: user.forumPoints,
+      badges: myBadges,
+    },
+    weeklyQuestion,
   })
 }
 
@@ -177,7 +282,8 @@ export async function POST(req: NextRequest) {
       const type = TOPIC_TYPES.includes(body.type) ? body.type : "class"
       if (title.length < 3) return NextResponse.json({ error: "عنوان تاپیک حداقل ۳ کاراکتر باشد" }, { status: 400 })
       const t = await db.forumTopic.create({ data: { title, type, createdBy: user.id, creatorName: user.fullName } })
-      return NextResponse.json({ ok: true, id: t.id, message: `تاپیک «${title}» ساخته شد.` })
+      await addForumPoints(user.id, FORUM_POINTS.TOPIC, "تاپیک جدید در تالار گفتگو", `forum-topic:${t.id}`)
+      return NextResponse.json({ ok: true, id: t.id, message: `تاپیک «${title}» ساخته شد · +${FORUM_POINTS.TOPIC} امتیاز تالار` })
     }
 
     if (action === "message") {
@@ -202,6 +308,7 @@ export async function POST(req: NextRequest) {
           replyToId: replyTo?.id ?? null,
         },
       })
+      await addForumPoints(user.id, FORUM_POINTS.MESSAGE, "پیام در تالار گفتگو", `forum-msg:${m.id}`)
 
       // اعلان‌ها: پاسخ به پیام + منشن‌های @نام (بدون تکرار، بدون اعلان به خود)
       const notified = new Set<string>([user.id])
@@ -231,7 +338,7 @@ export async function POST(req: NextRequest) {
         }
       }
 
-      return NextResponse.json({ ok: true, id: m.id })
+      return NextResponse.json({ ok: true, id: m.id, message: `پیام ارسال شد · +${FORUM_POINTS.MESSAGE} امتیاز` })
     }
 
     if (action === "react") {
@@ -250,6 +357,9 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ ok: true, active: false, message: "واکنش برداشته شد" })
       }
       await db.forumReaction.create({ data: { messageId: mid, userId: user.id, emoji } })
+      if (m.userId !== user.id) {
+        await addForumPoints(m.userId, FORUM_POINTS.REACTION_RECEIVED, "واکنش به پیام شما در تالار", `forum-msg:${m.id}`)
+      }
       return NextResponse.json({ ok: true, active: true, message: "واکنش ثبت شد" })
     }
 
@@ -297,6 +407,28 @@ export async function POST(req: NextRequest) {
       }
       await db.forumPoll.delete({ where: { id: pid } })
       return NextResponse.json({ ok: true, message: "نظرسنجی حذف شد." })
+    }
+
+    if (action === "weekly_question") {
+      if (!isAdmin) return NextResponse.json({ error: "فقط ادمین کل می‌تواند سوال هفته بگذارد" }, { status: 403 })
+      const question = String(body.question ?? "").trim().slice(0, 300)
+      if (question.length < 5) return NextResponse.json({ error: "متن سوال حداقل ۵ کاراکتر باشد" }, { status: 400 })
+      // تاپیک گفتگو برای این سوال — سنجاق‌شده و بالای فهرست
+      const t = await db.forumTopic.create({
+        data: { title: `❓ سوال هفته: ${question.slice(0, 110)}`, type: "brainstorm", pinned: true, createdBy: user.id, creatorName: user.fullName },
+      })
+      const wq = await db.forumWeeklyQuestion.create({ data: { question, topicId: t.id, createdBy: user.id } })
+      // اعلان به همه اعضای فعال
+      const members = await db.user.findMany({ where: { status: "active", id: { not: user.id } }, select: { id: true } })
+      for (const mem of members) {
+        await notifyUser(
+          mem.id, "forum", "❓ سوال هفته ادمین",
+          `${user.fullName} سوال هفته را مطرح کرد: ${question.slice(0, 120)}`,
+          `forum-topic:${t.id}`,
+          { force: true },
+        ).catch(() => {})
+      }
+      return NextResponse.json({ ok: true, id: wq.id, topicId: t.id, message: "سوال هفته ثبت شد و به همه اطلاع‌رسانی شد." })
     }
 
     if (action === "delete_topic") {

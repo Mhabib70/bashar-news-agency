@@ -20,6 +20,7 @@ model User {
   age             String    @default("")
   education       String    @default("")
   points          Int       @default(0)
+  forumPoints     Int       @default(0) // امتیاز تالار گفتگو — پاداش پیام/تاپیک/واکنش‌گیری
   levelKey        String    @default("rookie") // rookie | follower | active | pro | expert
   currentStreak   Int       @default(0)
   bestStreak      Int       @default(0)
@@ -245,4 +246,15 @@ model ForumPoll {
   createdAt DateTime   @default(now())
 
   @@index([topicId])
+}
+
+// سوال هفته ادمین — پرچم بالای تالار؛ با یک تاپیک گفتگو گره می‌خورد
+model ForumWeeklyQuestion {
+  id        Int    @id @default(autoincrement())
+  question  String
+  topicId   Int    // تاپیک گفتگویی که برای این سوال ساخته می‌شود
+  createdBy String
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
 }

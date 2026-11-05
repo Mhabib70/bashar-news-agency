@@ -335,6 +335,17 @@ export async function addPoints(userId: string, amount: number, reason: string, 
   await db.user.update({ where: { id: userId }, data: { points: newPoints, levelKey } })
 }
 
+// امتیاز تالار گفتگو — همزمان به امتیاز کل و شمارنده امتیاز تالار اضافه می‌کند
+export async function addForumPoints(userId: string, amount: number, reason: string, ref = "") {
+  const user = await db.user.findUnique({ where: { id: userId } })
+  if (!user) return
+  await db.pointsLog.create({ data: { userId, amount, reason, ref } })
+  const newPoints = user.points + amount
+  const nx = nextLevel(user.levelKey)
+  const levelKey = nx && newPoints >= nx.min ? nx.key : user.levelKey
+  await db.user.update({ where: { id: userId }, data: { points: newPoints, forumPoints: { increment: amount }, levelKey } })
+}
+
 export async function recordActivity(userId: string) {
   const user = await db.user.findUnique({ where: { id: userId } })
   if (!user) return

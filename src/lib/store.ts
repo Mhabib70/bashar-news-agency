@@ -63,6 +63,8 @@ export type ForumMessageItem = {
 
 export type ForumMemberItem = {
   id: string; fullName: string; avatar: string; role: string; online: boolean
+  forumPoints?: number
+  levelEmoji?: string
 }
 
 export type ForumPollItem = {
@@ -71,10 +73,29 @@ export type ForumPollItem = {
   createdBy: string; createdAt: string
 }
 
+// تخته افتخار هفته — برترین‌های فعال تالار در ۷ روز اخیر
+export type ForumHonorRow = {
+  id: string; fullName: string; avatar: string; role: string
+  levelEmoji: string; weeklyScore: number; messages: number; badges: string[]
+}
+
+export type ForumWeeklyQuestionItem = {
+  id: number; question: string; topicId: number; topicTitle: string
+  creatorName: string; createdAt: string
+}
+
+export type ForumViewerStats = {
+  weeklyScore: number; weeklyMessages: number
+  rank: number | null; totalForumPoints: number; badges: string[]
+}
+
 export type ForumTopicsResult = {
   topics: ForumTopicItem[]
   members: ForumMemberItem[]
   viewer: { id: string; role: string }
+  honorBoard?: ForumHonorRow[]
+  viewerStats?: ForumViewerStats
+  weeklyQuestion?: ForumWeeklyQuestionItem | null
 }
 
 export type ForumThreadResult = {
@@ -133,6 +154,7 @@ type Store = {
   deleteForumTopic: (topicId: number) => Promise<Result>
   deleteForumMessage: (messageId: number) => Promise<Result>
   pinForumTopic: (topicId: number) => Promise<Result>
+  setForumWeeklyQuestion: (question: string) => Promise<Result>
   uploadMedia: (file: File) => Promise<{ ok: boolean; url?: string; mediaType?: string; message?: string }>
   uploadAvatar: (dataUrl: string) => Promise<Result>
   fetchUserDetail: (targetId: string) => Promise<AdminUserDetail | null>
@@ -584,6 +606,20 @@ export const useApp = create<Store>((set, get) => ({
       const r = await api<Result & { message: string }>("/api/forum", {
         method: "POST",
         body: JSON.stringify({ userId: uid, action: "pin", topicId }),
+      })
+      return { ok: true, message: r.message }
+    } catch (e) {
+      return { ok: false, message: (e as Error).message }
+    }
+  },
+
+  setForumWeeklyQuestion: async (question) => {
+    const uid = get().userId
+    if (!uid) return { ok: false }
+    try {
+      const r = await api<Result & { message: string }>("/api/forum", {
+        method: "POST",
+        body: JSON.stringify({ userId: uid, action: "weekly_question", question }),
       })
       return { ok: true, message: r.message }
     } catch (e) {
