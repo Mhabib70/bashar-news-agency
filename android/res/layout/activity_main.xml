@@ -9,6 +9,19 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
+    <!-- دکمه شناور تغییر سرور — همیشه در دسترس، پایین‌چپ -->
+    <Button
+        android:id="@+id/change_server_fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|start"
+        android:layout_margin="14dp"
+        android:alpha="0.55"
+        android:backgroundTint="@color/green_deep"
+        android:text="@string/change_server_btn"
+        android:textColor="@color/neon_text"
+        android:textSize="11sp" />
+
     <!-- پنجره خطای اتصال + تغییر آدرس سرور -->
     <LinearLayout
         android:id="@+id/error_box"
@@ -64,5 +77,14 @@
             android:text="@string/connect_btn"
             android:textColor="@color/neon_text"
             android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/panel_close_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:backgroundTint="@color/ink_muted"
+            android:text="@string/cancel_btn"
+            android:textColor="@color/neon_text" />
     </LinearLayout>
 </FrameLayout>

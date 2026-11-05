@@ -52,6 +52,8 @@ public class MainActivity extends Activity {
         s.setUseWideViewPort(true);
         s.setMediaPlaybackRequiresUserGesture(true);
         s.setAllowFileAccess(true);
+        // همیشه نسخه تازه از سرور — جلوگیری از کش‌شدن نسخه کهنه اپ در WebView
+        s.setCacheMode(WebSettings.LOAD_NO_CACHE);
 
         web.setWebViewClient(new WebViewClient() {
             @Override
@@ -104,6 +106,29 @@ public class MainActivity extends Activity {
                 errored = false;
                 errorBox.setVisibility(View.GONE);
                 web.loadUrl(u);
+            }
+        });
+
+        // دکمه شناور «تغییر سرور» — همیشه در دسترس؛ پنل آدرس را باز/بسته می‌کند
+        Button changeServerFab = findViewById(R.id.change_server_fab);
+        changeServerFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (errorBox.getVisibility() == View.VISIBLE) {
+                    errorBox.setVisibility(View.GONE);
+                } else {
+                    urlInput.setText(prefs.getString(KEY_URL, getString(R.string.default_server_url)));
+                    errorBox.setVisibility(View.VISIBLE);
+                }
+            }
+        });
+
+        // دکمه «بستن» پنل — بدون اتصال برگرد به اپ
+        Button panelCloseBtn = findViewById(R.id.panel_close_btn);
+        panelCloseBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                errorBox.setVisibility(View.GONE);
             }
         });
     }

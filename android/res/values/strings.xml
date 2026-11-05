@@ -7,4 +7,6 @@
     <string name="error_body">اینترنت خود را بررسی کنید یا آدرس سرور خبرگزاری را وارد کنید:</string>
     <string name="url_hint">http://80.91.208.240/</string>
     <string name="connect_btn">اتصال</string>
+    <string name="change_server_btn">تغییر سرور</string>
+    <string name="cancel_btn">بستن</string>
 </resources>
