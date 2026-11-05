@@ -31,7 +31,11 @@ export default function Page() {
   useEffect(() => {
     const uid = localStorage.getItem("newsapp_uid")
     if (uid) {
-      login(uid).catch(() => localStorage.removeItem("newsapp_uid"))
+      login(uid).catch(() => {
+        // سشن قدیمی/نامعتبر — پاک‌سازی و باز کردن صفحه ورود (جلوگیری از اسکلت بی‌پایان)
+        localStorage.removeItem("newsapp_uid")
+        useApp.setState({ booted: true })
+      })
     } else {
       useApp.setState({ booted: true })
     }

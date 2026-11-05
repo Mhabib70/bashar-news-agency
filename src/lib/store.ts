@@ -131,6 +131,11 @@ export const useApp = create<Store>((set, get) => ({
       if (state.districts?.length) applyOrgUnits(state.districts)
       localStorage.setItem("newsapp_uid", userId)
       set({ userId, state, tab: "home", booted: true })
+    } catch (e) {
+      // سشن نامعتبر/منقضی — پاک‌سازی و بازگشت به صفحه ورود (نه گیر کردن روی اسکلت)
+      localStorage.removeItem("newsapp_uid")
+      set({ userId: null, state: null, tab: "home", booted: true })
+      throw e
     } finally {
       set({ loading: false })
     }
