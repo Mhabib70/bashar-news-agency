@@ -41,14 +41,48 @@ export type TrainingItem = {
 }
 
 export type ForumTopicItem = {
-  id: number; title: string; pinned: boolean; createdBy: string; creatorName: string
-  createdAt: string; replies?: number
+  id: number; title: string; type: string; pinned: boolean; createdBy: string; creatorName: string
+  createdAt: string; replies?: number; participants?: number; lastActivity?: string
   lastMessage?: { body: string; authorName: string; at: string } | null
+}
+
+export type ForumReactionGroup = {
+  emoji: string; count: number; mine: boolean
+  users: { id: string; name: string; avatar: string }[]
 }
 
 export type ForumMessageItem = {
   id: number; userId: string; authorName: string; authorRole: string
   body: string; fileUrl: string; createdAt: string
+  replyTo?: { id: number; body: string; authorName: string } | null
+  reactions: ForumReactionGroup[]
+  authorAvatar?: string
+  authorLevelEmoji?: string
+  authorOnline?: boolean
+}
+
+export type ForumMemberItem = {
+  id: string; fullName: string; avatar: string; role: string; online: boolean
+}
+
+export type ForumPollItem = {
+  id: number; question: string; options: string[]
+  votes: Record<string, number>; counts: number[]; totalVotes: number
+  createdBy: string; createdAt: string
+}
+
+export type ForumTopicsResult = {
+  topics: ForumTopicItem[]
+  members: ForumMemberItem[]
+  viewer: { id: string; role: string }
+}
+
+export type ForumThreadResult = {
+  topic: ForumTopicItem
+  messages: ForumMessageItem[]
+  polls: ForumPollItem[]
+  members: ForumMemberItem[]
+  viewer: { id: string; role: string }
 }
 
 export type AdminOverview = {
@@ -88,10 +122,14 @@ type Store = {
   fetchTrainings: () => Promise<TrainingItem[]>
   createTraining: (p: { title: string; body: string; kind: string; fileUrl?: string }) => Promise<Result>
   deleteTraining: (id: number) => Promise<Result>
-  fetchForumTopics: () => Promise<ForumTopicItem[]>
-  fetchForumMessages: (topicId: number) => Promise<{ topic: ForumTopicItem; messages: ForumMessageItem[] } | null>
-  createForumTopic: (title: string) => Promise<Result & { id?: number }>
-  sendForumMessage: (p: { topicId: number; body: string; fileUrl?: string }) => Promise<Result>
+  fetchForumTopics: () => Promise<ForumTopicsResult | null>
+  fetchForumMessages: (topicId: number) => Promise<ForumThreadResult | null>
+  createForumTopic: (title: string, type: string) => Promise<Result & { id?: number }>
+  sendForumMessage: (p: { topicId: number; body: string; fileUrl?: string; replyToId?: number | null }) => Promise<Result>
+  reactForumMessage: (messageId: number, emoji: string) => Promise<Result & { active?: boolean }>
+  createForumPoll: (p: { topicId: number; question: string; options: string[] }) => Promise<Result>
+  voteForumPoll: (pollId: number, optionIndex: number) => Promise<Result>
+  deleteForumPoll: (pollId: number) => Promise<Result>
   deleteForumTopic: (topicId: number) => Promise<Result>
   deleteForumMessage: (messageId: number) => Promise<Result>
   pinForumTopic: (topicId: number) => Promise<Result>
@@ -409,12 +447,11 @@ export const useApp = create<Store>((set, get) => ({
 
   fetchForumTopics: async () => {
     const uid = get().userId
-    if (!uid) return []
+    if (!uid) return null
     try {
-      const r = await api<{ topics: ForumTopicItem[] }>(`/api/forum?userId=${encodeURIComponent(uid)}`)
-      return r.topics ?? []
+      return await api<ForumTopicsResult>(`/api/forum?userId=${encodeURIComponent(uid)}`)
     } catch {
-      return []
+      return null
     }
   },
 
@@ -422,19 +459,19 @@ export const useApp = create<Store>((set, get) => ({
     const uid = get().userId
     if (!uid) return null
     try {
-      return await api<{ topic: ForumTopicItem; messages: ForumMessageItem[] }>(`/api/forum?userId=${encodeURIComponent(uid)}&topicId=${topicId}`)
+      return await api<ForumThreadResult>(`/api/forum?userId=${encodeURIComponent(uid)}&topicId=${topicId}`)
     } catch {
       return null
     }
   },
 
-  createForumTopic: async (title) => {
+  createForumTopic: async (title, type) => {
     const uid = get().userId
     if (!uid) return { ok: false }
     try {
       const r = await api<Result & { id?: number; message: string }>("/api/forum", {
         method: "POST",
-        body: JSON.stringify({ userId: uid, action: "topic", title }),
+        body: JSON.stringify({ userId: uid, action: "topic", title, type }),
       })
       return { ok: true, id: r.id, message: r.message }
     } catch (e) {
@@ -448,9 +485,65 @@ export const useApp = create<Store>((set, get) => ({
     try {
       await api("/api/forum", {
         method: "POST",
-        body: JSON.stringify({ userId: uid, action: "message", topicId: p.topicId, body: p.body, fileUrl: p.fileUrl }),
+        body: JSON.stringify({ userId: uid, action: "message", topicId: p.topicId, body: p.body, fileUrl: p.fileUrl, replyToId: p.replyToId ?? null }),
       })
       return { ok: true, message: "پیام ارسال شد" }
+    } catch (e) {
+      return { ok: false, message: (e as Error).message }
+    }
+  },
+
+  reactForumMessage: async (messageId, emoji) => {
+    const uid = get().userId
+    if (!uid) return { ok: false }
+    try {
+      const r = await api<Result & { active?: boolean; message: string }>("/api/forum", {
+        method: "POST",
+        body: JSON.stringify({ userId: uid, action: "react", messageId, emoji }),
+      })
+      return { ok: true, active: r.active, message: r.message }
+    } catch (e) {
+      return { ok: false, message: (e as Error).message }
+    }
+  },
+
+  createForumPoll: async (p) => {
+    const uid = get().userId
+    if (!uid) return { ok: false }
+    try {
+      const r = await api<Result & { message: string }>("/api/forum", {
+        method: "POST",
+        body: JSON.stringify({ userId: uid, action: "poll_create", topicId: p.topicId, question: p.question, options: p.options }),
+      })
+      return { ok: true, message: r.message }
+    } catch (e) {
+      return { ok: false, message: (e as Error).message }
+    }
+  },
+
+  voteForumPoll: async (pollId, optionIndex) => {
+    const uid = get().userId
+    if (!uid) return { ok: false }
+    try {
+      const r = await api<Result & { message: string }>("/api/forum", {
+        method: "POST",
+        body: JSON.stringify({ userId: uid, action: "poll_vote", pollId, optionIndex }),
+      })
+      return { ok: true, message: r.message }
+    } catch (e) {
+      return { ok: false, message: (e as Error).message }
+    }
+  },
+
+  deleteForumPoll: async (pollId) => {
+    const uid = get().userId
+    if (!uid) return { ok: false }
+    try {
+      const r = await api<Result & { message: string }>("/api/forum", {
+        method: "POST",
+        body: JSON.stringify({ userId: uid, action: "poll_delete", pollId }),
+      })
+      return { ok: true, message: r.message }
     } catch (e) {
       return { ok: false, message: (e as Error).message }
     }

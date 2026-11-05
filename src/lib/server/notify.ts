@@ -32,7 +32,7 @@ function nextQuietEnd(quietEnd: string, now = new Date()): Date {
   return end
 }
 
-export type NotifyKind = keyof typeof KIND_FLAG | "user_status" | "demotion" | "points"
+export type NotifyKind = keyof typeof KIND_FLAG | "user_status" | "demotion" | "points" | "forum"
 
 /**
  * ایجاد اعلان درون‌برنامه‌ای برای یک کاربر.

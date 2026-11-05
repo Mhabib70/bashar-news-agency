@@ -27,6 +27,7 @@ model User {
   lastDemotionAt  DateTime?
   rejectReason    String    @default("")
   avatar          String    @default("") // عکس پروفایل (data URL بعد از تغییر اندازه در سمت کلاینت)
+  lastSeenAt      DateTime  @default(now()) // آخرین حضور در اپ — برای نقطه آنلاین تالار
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
@@ -192,11 +193,13 @@ model Training {
 model ForumTopic {
   id          Int      @id @default(autoincrement())
   title       String
+  type        String   @default("class") // class (کلاس تصویری) | brainstorm (هم‌فکری) | announce (اطلاع‌رسانی) | challenge (چالش)
   pinned      Boolean  @default(false)
   createdBy   String
   creatorName String   @default("")
   createdAt   DateTime @default(now())
   messages    ForumMessage[]
+  polls       ForumPoll[]
 }
 
 model ForumMessage {
@@ -208,7 +211,38 @@ model ForumMessage {
   authorRole String     @default("")
   body       String
   fileUrl    String     @default("")
+  replyToId  Int?
+  replyTo    ForumMessage?  @relation("ReplyTo", fields: [replyToId], references: [id], onDelete: SetNull)
+  replies    ForumMessage[] @relation("ReplyTo")
+  reactions  ForumReaction[]
   createdAt  DateTime   @default(now())
 
   @@index([topicId, createdAt])
+}
+
+// واکنش سریع به پیام — هر کاربر هر ایموجی فقط یک‌بار (toggle)
+model ForumReaction {
+  id        Int          @id @default(autoincrement())
+  messageId Int
+  message   ForumMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  userId    String
+  emoji     String // 😍 | 👍 | 🔥 | 💡
+  createdAt DateTime     @default(now())
+
+  @@unique([messageId, userId, emoji])
+  @@index([messageId])
+}
+
+// نظرسنجی داخل تاپیک — گزینه‌ها Json (آرایه رشته) و رأی‌ها Json (نقشه userId → شماره گزینه)
+model ForumPoll {
+  id        Int        @id @default(autoincrement())
+  topicId   Int
+  topic     ForumTopic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  question  String
+  options   Json
+  votes     Json // نقشه userId → شماره گزینه (در create همیشه {} می‌گذاریم)
+  createdBy String
+  createdAt DateTime   @default(now())
+
+  @@index([topicId])
 }

@@ -178,6 +178,9 @@ export async function getAppState(userId: string): Promise<AppState | null> {
     })
   }
 
+  // ضربان حضور برای «نقطه آنلاین» تالار گفتگو — هر بار state گرفته شود، کاربر آنلاین است
+  await db.user.update({ where: { id: u.id }, data: { lastSeenAt: new Date() } }).catch(() => {})
+
   const [day, week, month, ownNews, queue, challenges, allBadges, drafts] = await Promise.all([
     periodStat(userId, "day"),
     periodStat(userId, "week"),
