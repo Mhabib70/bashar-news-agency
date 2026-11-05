@@ -2,7 +2,8 @@
 
 
 import { useEffect, useState } from "react"
-import { Megaphone, ArrowLeft, Flame, Newspaper, Timer, ShieldCheck, ClipboardCheck } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { Megaphone, ArrowLeft, Flame, Newspaper, Timer, ShieldCheck, ClipboardCheck, MessagesSquare, GraduationCap } from "lucide-react"
 import { useApp } from "@/lib/store"
 import { SectionHeader, CountUp, Avatar } from "@/components/app/bits"
 import { StoryRow, ComposerCard, FeedPost, type FeedNews } from "@/components/app/social"
@@ -26,6 +27,7 @@ export function HomeScreen({
   onGotoReview: () => void
   onOpenAdmin: () => void
 }) {
+  const router = useRouter()
   const { state, userId } = useApp()
   if (!state || !userId) return null
   const { user, stats, challenges, reviewQueue, news } = state
@@ -48,6 +50,32 @@ export function HomeScreen({
         onQuickSubmit={onQuickSubmit}
         onGotoReview={onGotoReview}
       />
+
+      {/* تالار گفتگو و آموزش — دسترسی سریع از خانه */}
+      <div className="grid grid-cols-2 gap-2.5">
+        <button
+          onClick={() => router.push("/forum")}
+          className="group relative overflow-hidden rounded-2xl border border-[var(--neon)]/25 bg-gradient-to-bl from-[var(--neon)]/14 via-[var(--neon)]/7 to-transparent p-3.5 text-right transition-all duration-200 hover:border-[var(--neon)]/50 hover:shadow-[0_10px_28px_-14px_rgba(47,107,51,0.5)] active:scale-[0.98]"
+        >
+          <span className="btn-glow flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--neon)] text-[var(--neon-foreground)]">
+            <MessagesSquare className="h-5 w-5" />
+          </span>
+          <span className="mt-2.5 block text-[13.5px] font-black text-ink">تالار گفتگو</span>
+          <span className="mt-1 block text-[10.5px] leading-4 text-ink-muted">تجربه‌ها، پرسش‌ها و هم‌فکری خبرنگارها</span>
+          <ArrowLeft className="absolute left-3.5 top-3.5 h-4 w-4 text-[var(--neon)] transition-transform duration-200 group-hover:-translate-x-0.5" />
+        </button>
+        <button
+          onClick={() => router.push("/training")}
+          className="group relative overflow-hidden rounded-2xl border border-warn/25 bg-gradient-to-bl from-warn/14 via-warn/7 to-transparent p-3.5 text-right transition-all duration-200 hover:border-warn/50 hover:shadow-[0_10px_28px_-14px_rgba(180,83,9,0.45)] active:scale-[0.98]"
+        >
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--neon)] text-[var(--neon-foreground)] btn-glow">
+            <GraduationCap className="h-5 w-5" />
+          </span>
+          <span className="mt-2.5 block text-[13.5px] font-black text-ink">آموزش</span>
+          <span className="mt-1 block text-[10.5px] leading-4 text-ink-muted">راهنمای گام‌به‌گام خبرنگاری و رشد</span>
+          <ArrowLeft className="absolute left-3.5 top-3.5 h-4 w-4 text-warn transition-transform duration-200 group-hover:-translate-x-0.5" />
+        </button>
+      </div>
 
       {/* بنر صف بررسی (ارزیاب‌ها) */}
       {isReviewer && reviewQueue.length > 0 && (
