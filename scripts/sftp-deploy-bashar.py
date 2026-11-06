@@ -5,14 +5,11 @@ import json, os, sys, paramiko
 CFG = '/home/z/my-project/upload/deploy.json'
 REMOTE_ROOT = '/www/wwwroot/vodda/bashar'
 
-# فایل‌های نسخه v4 تالار — بازطراحی گرافیکی کامل
+# فایل‌های نسخه آکادمی v2 (بخش آموزش) + حذف دکمه تغییر سرور APK
 FILES = [
     'prisma/schema.prisma',
-    'src/app/api/forum/route.ts',
-    'src/app/forum/page.tsx',
-    'src/app/globals.css',
-    'src/lib/domain.ts',
-    'src/lib/server/state.ts',
+    'src/app/api/training/route.ts',
+    'src/app/training/page.tsx',
     'src/lib/store.ts',
 ]
 
