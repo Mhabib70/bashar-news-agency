@@ -5,11 +5,12 @@ import json, os, sys, paramiko
 CFG = '/home/z/my-project/upload/deploy.json'
 REMOTE_ROOT = '/www/wwwroot/vodda/bashar'
 
-# فایل‌های نسخه v3 تالار — سبک تلگرامی + امتیاز/افتخارات/سوال هفته
+# فایل‌های نسخه v4 تالار — بازطراحی گرافیکی کامل
 FILES = [
     'prisma/schema.prisma',
     'src/app/api/forum/route.ts',
     'src/app/forum/page.tsx',
+    'src/app/globals.css',
     'src/lib/domain.ts',
     'src/lib/server/state.ts',
     'src/lib/store.ts',

@@ -209,6 +209,69 @@ body {
   text-rendering: optimizeLegibility;
 }
 
+/* ---------- انیمیشن‌های تالار گفتگو v4 ---------- */
+/* شناور شدن حباب‌های ایموجی هیرو */
+@keyframes forumFloat {
+  0%, 100% { transform: translateY(0) rotate(var(--fr, 0deg)); }
+  50% { transform: translateY(-9px) rotate(var(--fr, 0deg)); }
+}
+.float-emoji {
+  animation: forumFloat 5.5s ease-in-out infinite;
+  animation-delay: var(--fd, 0s);
+}
+
+/* ورود پله‌ای کارت‌ها */
+@keyframes fadeUpIn {
+  from { opacity: 0; transform: translateY(16px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+.fade-up {
+  animation: fadeUpIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: var(--fd, 0s);
+}
+
+/* درخشش متحرک روی بنر سوال هفته */
+@keyframes forumShimmer {
+  0% { transform: translateX(160%) skewX(-18deg); }
+  100% { transform: translateX(-260%) skewX(-18deg); }
+}
+.shimmer-host { position: relative; overflow: hidden; }
+.shimmer-host::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 42%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.22), transparent);
+  animation: forumShimmer 3.2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* ورود پیام به چت */
+@keyframes msgPop {
+  from { opacity: 0; transform: translateY(10px) scale(0.96); }
+  to { opacity: 1; transform: none; }
+}
+.msg-pop { animation: msgPop 0.3s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+/* پوسته گرادیانی تایل نوع تاپیک */
+.type-tile {
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+  color: #fff;
+}
+.type-tile::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.34) 0%, transparent 46%);
+}
+
 /* اسکرول‌بار ظریف همرنگ تم */
 .nice-scroll::-webkit-scrollbar {
   width: 4px;

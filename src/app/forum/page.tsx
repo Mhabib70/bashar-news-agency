@@ -1,11 +1,11 @@
 "use client"
 
-import { Fragment, useEffect, useRef, useState } from "react"
+import { Fragment, useEffect, useRef, useState, type CSSProperties } from "react"
 import { useRouter } from "next/navigation"
 import {
   ArrowRight, MessagesSquare, Loader2, Plus, Trash2, Pin, PinOff, Send,
   Paperclip, X, Download, BarChart3, SmilePlus, Link2, Check, Reply, Image as ImageIcon,
-  Crown, Trophy, TrendingUp,
+  Crown, Trophy, TrendingUp, CheckCheck, Users, Medal,
 } from "lucide-react"
 import {
   useApp, type ForumTopicItem, type ForumMessageItem, type ForumMemberItem,
@@ -22,18 +22,42 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 
-// تالار گفتگو v3 — سبک تلگرامی: پروفایل کنار هر پیام، حباب زیبا، جداساز تاریخ، پس‌زمینه چت
-// + امتیاز تالار، تخته افتخار هفته، نشان‌ها و سوال هفته ادمین
+// تالار گفتگو v4 — فضای گرافیکی زنده: پس‌زمینه شور، هیرو پنل، سکوی افتخارات،
+// تایل‌های گرادیانی تاپیک، حباب‌های تلگرامی با دنباله و قرص واکنش شناور
 // ایجاد تاپیک و پیام: همه اعضای فعال · نظرسنجی: ادمین/مدیر حوزه · سوال هفته: ادمین · سنجاق/حذف تاپیک دیگران: ادمین
 
 const REACTION_EMOJIS = ["😍", "👍", "🔥", "💡"] as const
 const GROUP_WINDOW_MS = 5 * 60 * 1000 // پیام‌های پشت‌سرهم یک نفر گروه می‌شوند
 
-const TOPIC_TYPE_META: Record<string, { emoji: string; label: string; chip: string; border: string; dot: string }> = {
-  class: { emoji: "🎓", label: "کلاس تصویری", chip: "bg-neon/10 text-neon border-neon/30", border: "border-r-neon", dot: "bg-neon" },
-  brainstorm: { emoji: "🤝", label: "هم‌فکری", chip: "bg-[#38bdf8]/10 text-[#38bdf8] border-[#38bdf8]/30", border: "border-r-[#38bdf8]", dot: "bg-[#38bdf8]" },
-  announce: { emoji: "📣", label: "اطلاع‌رسانی", chip: "bg-[#fbbf24]/10 text-[#fbbf24] border-[#fbbf24]/30", border: "border-r-[#fbbf24]", dot: "bg-[#fbbf24]" },
-  challenge: { emoji: "🏆", label: "چالش", chip: "bg-[#fb923c]/10 text-[#fb923c] border-[#fb923c]/30", border: "border-r-[#fb923c]", dot: "bg-[#fb923c]" },
+const TOPIC_TYPE_META: Record<string, { emoji: string; label: string; chip: string; tile: string; tileShadow: string; activeChip: string }> = {
+  class: {
+    emoji: "🎓", label: "کلاس تصویری",
+    chip: "bg-neon/10 text-neon border-neon/30",
+    tile: "bg-gradient-to-br from-[#7bb661] to-[#2f6b33]",
+    tileShadow: "shadow-[0_10px_22px_-8px_rgba(47,107,51,0.65)]",
+    activeChip: "bg-[#2f6b33] text-white border-transparent",
+  },
+  brainstorm: {
+    emoji: "🤝", label: "هم‌فکری",
+    chip: "bg-[#38bdf8]/10 text-[#38bdf8] border-[#38bdf8]/30",
+    tile: "bg-gradient-to-br from-[#38bdf8] to-[#075985]",
+    tileShadow: "shadow-[0_10px_22px_-8px_rgba(7,89,133,0.65)]",
+    activeChip: "bg-[#075985] text-white border-transparent",
+  },
+  announce: {
+    emoji: "📣", label: "اطلاع‌رسانی",
+    chip: "bg-[#fbbf24]/10 text-[#fbbf24] border-[#fbbf24]/30",
+    tile: "bg-gradient-to-br from-[#fbbf24] to-[#92400e]",
+    tileShadow: "shadow-[0_10px_22px_-8px_rgba(146,64,14,0.65)]",
+    activeChip: "bg-[#92400e] text-white border-transparent",
+  },
+  challenge: {
+    emoji: "🏆", label: "چالش",
+    chip: "bg-[#fb923c]/10 text-[#fb923c] border-[#fb923c]/30",
+    tile: "bg-gradient-to-br from-[#fb923c] to-[#9a3412]",
+    tileShadow: "shadow-[0_10px_22px_-8px_rgba(154,52,18,0.65)]",
+    activeChip: "bg-[#9a3412] text-white border-transparent",
+  },
 }
 const typeMeta = (t: string) => TOPIC_TYPE_META[t] ?? TOPIC_TYPE_META.class
 
@@ -50,12 +74,11 @@ const ROLE_NAME_COLOR: Record<string, string> = {
   specialist: "text-[#c084fc]",
   admin: "text-neon",
 }
-const PODIUM_STYLE = [
-  "border-[#fbbf24]/60 bg-[#fbbf24]/10",
-  "border-slate-300/50 bg-slate-300/8",
-  "border-[#d97706]/50 bg-[#d97706]/8",
+const PODIUM = [
+  { medal: "🥇", h: 66, bar: "from-[#fbbf24]/45 to-[#fbbf24]/8 border-[#fbbf24]/70", ring: "ring-[#fbbf24]/70", glow: "shadow-[0_0_22px_rgba(251,191,36,0.35)]" },
+  { medal: "🥈", h: 46, bar: "from-slate-300/35 to-slate-300/8 border-slate-300/55", ring: "ring-slate-300/55", glow: "" },
+  { medal: "🥉", h: 34, bar: "from-[#d97706]/40 to-[#d97706]/8 border-[#d97706]/55", ring: "ring-[#d97706]/55", glow: "" },
 ]
-const PODIUM_MEDAL = ["🥇", "🥈", "🥉"]
 
 const IMG_RE = /\.(png|jpe?g|gif|webp|avif|bmp)(\?|$)/i
 const VIDEO_RE = /\.(mp4|webm|mov|m4v)(\?|$)/i
@@ -70,6 +93,7 @@ const dayLabel = (iso: string) => {
   if (d.toDateString() === new Date(Date.now() - 86400000).toDateString()) return "دیروز"
   return jalali(d)
 }
+const isActive = (iso?: string) => !!iso && Date.now() - new Date(iso).getTime() < 60 * 60 * 1000
 
 export default function ForumPage() {
   const router = useRouter()
@@ -375,7 +399,7 @@ export default function ForumPage() {
     </div>
   )
 
-  // ── ردیف پیام سبک تلگرام ──
+  // ── ردیف پیام سبک تلگرام v4: حباب دنباله‌دار + قرص واکنش شناور ──
   const messageRow = (m: ForumMessageItem, grouped: boolean) => {
     const mine = m.userId === user.id
     const hasReactions = m.reactions.length > 0
@@ -383,7 +407,7 @@ export default function ForumPage() {
       <div
         id={`msg-${m.id}`}
         className={cn(
-          "flex w-full gap-2",
+          "msg-pop flex w-full gap-2",
           mine ? "justify-end" : "items-start",
           flashId === m.id && "rounded-2xl bg-neon/8 ring-1 ring-neon/50",
         )}
@@ -407,38 +431,45 @@ export default function ForumPage() {
               {m.authorLevelEmoji && <span className="text-[10.5px]">{m.authorLevelEmoji}</span>}
             </div>
           )}
-          <div
-            className={cn(
-              "rounded-[20px] border px-3.5 py-2.5 shadow-sm",
-              mine
-                ? "rounded-tl-[6px] border-neon/40 bg-gradient-to-b from-neon/18 to-neon/7 shadow-[0_0_18px_rgba(201,247,58,0.10)]"
-                : "rounded-tr-[6px] border-line bg-surface",
-            )}
-          >
-            {m.replyTo && (
-              <button
-                onClick={() => jumpTo(m.replyTo!.id)}
-                className="mb-1.5 flex w-full items-start gap-1.5 rounded-xl border-r-2 border-neon/70 bg-neon/6 px-2 py-1.5 text-right"
-              >
-                <Reply className="mt-0.5 h-3 w-3 shrink-0 text-neon" />
-                <span className="min-w-0">
-                  <span className="block text-[10px] font-black text-neon">{m.replyTo.authorName}</span>
-                  <span className="block truncate text-[10.5px] text-ink-muted">{m.replyTo.body || "پیوست"}</span>
-                </span>
-              </button>
-            )}
-            {m.body && <div className="whitespace-pre-line text-[13px] leading-6 text-ink break-words">{renderBody(m.body)}</div>}
-            {m.fileUrl && renderAttachment(m.fileUrl)}
+          <div className="relative">
+            <div
+              className={cn(
+                "border px-3.5 pb-1.5 pt-2.5",
+                mine
+                  ? "rounded-[20px] rounded-tl-[6px] border-neon/45 bg-gradient-to-b from-neon/22 to-neon/6 shadow-[0_8px_22px_-10px_rgba(47,107,51,0.55)]"
+                  : "rounded-[20px] rounded-tr-[6px] border-line bg-surface/95 shadow-sm backdrop-blur",
+              )}
+            >
+              {m.replyTo && (
+                <button
+                  onClick={() => jumpTo(m.replyTo!.id)}
+                  className="mb-1.5 flex w-full items-start gap-1.5 rounded-xl border-r-2 border-neon/70 bg-neon/6 px-2 py-1.5 text-right"
+                >
+                  <Reply className="mt-0.5 h-3 w-3 shrink-0 text-neon" />
+                  <span className="min-w-0">
+                    <span className="block text-[10px] font-black text-neon">{m.replyTo.authorName}</span>
+                    <span className="block truncate text-[10.5px] text-ink-muted">{m.replyTo.body || "پیوست"}</span>
+                  </span>
+                </button>
+              )}
+              {m.body && <div className="whitespace-pre-line break-words text-[13px] leading-6 text-ink">{renderBody(m.body)}</div>}
+              {m.fileUrl && renderAttachment(m.fileUrl)}
+              <p className={cn("mt-1 flex items-center justify-end gap-1 text-[8.5px] font-semibold text-ink-muted/75")}>
+                {timeHM(m.createdAt)}
+                {mine && <CheckCheck className="h-3 w-3 text-neon" aria-label="تحویل شد" />}
+              </p>
+            </div>
+            {/* قرص واکنش‌ها — شناور روی لبه حباب، امضای تلگرام */}
             {hasReactions && (
-              <div className="mt-1.5 flex flex-wrap gap-1">
+              <div className={cn("absolute -bottom-3.5 z-10 flex gap-1", mine ? "left-2" : "right-2")}>
                 {m.reactions.map((g) => (
                   <button
                     key={g.emoji}
                     onClick={() => react(m.id, g.emoji)}
                     title={g.users.map((u) => u.name).join("، ")}
                     className={cn(
-                      "flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10.5px] font-bold shadow-sm transition-transform active:scale-95",
-                      g.mine ? "border-neon/60 bg-neon/15 text-neon" : "border-line bg-[var(--page)]/80 text-ink-muted",
+                      "flex items-center gap-1 rounded-full border px-1.5 py-0.5 text-[10px] font-bold shadow-md backdrop-blur transition-transform active:scale-95",
+                      g.mine ? "border-neon/60 bg-neon/20 text-neon" : "border-line bg-[var(--page)]/90 text-ink-muted",
                     )}
                   >
                     <span>{g.emoji}</span>
@@ -447,13 +478,10 @@ export default function ForumPage() {
                 ))}
               </div>
             )}
-            <p className={cn("mt-1 text-[9px] font-semibold text-ink-muted/70", hasReactions ? "text-end" : "text-end")}>
-              {timeHM(m.createdAt)}
-            </p>
           </div>
 
           {/* نوار ابزار پیام */}
-          <div className={cn("mt-1 flex items-center gap-1 px-1", mine && "flex-row-reverse")}>
+          <div className={cn("mt-1 flex items-center gap-1 px-1", mine && "flex-row-reverse", hasReactions && "mt-4.5")}>
             <button
               onClick={() => setPickerFor(pickerFor === m.id ? null : m.id)}
               className="flex h-6 w-6 items-center justify-center rounded-full border border-line bg-surface/80 text-ink-muted"
@@ -511,7 +539,7 @@ export default function ForumPage() {
     const voted = myVote !== undefined
     const canDelete = isAdmin || p.createdBy === user.id
     return (
-      <div className={cn("flex w-full gap-2", mineP ? "justify-end" : "items-start")}>
+      <div className={cn("msg-pop flex w-full gap-2", mineP ? "justify-end" : "items-start")}>
         {!mineP && (
           <span className="relative mt-5 shrink-0">
             <NeonAvatar name={creator?.fullName ?? "عضو"} src={creator?.avatar ?? ""} size={38} />
@@ -530,8 +558,13 @@ export default function ForumPage() {
               <span className="text-[11.5px] font-bold text-ink-muted">شما · نظرسنجی</span>
             </div>
           )}
-          <div className="w-full rounded-[20px] rounded-tr-[6px] border border-[#38bdf8]/40 bg-[#38bdf8]/6 p-3.5 shadow-sm">
-            <p className="text-[13.5px] font-black leading-6 text-ink">{p.question}</p>
+          <div className="w-full rounded-[20px] rounded-tr-[6px] border border-[#38bdf8]/40 bg-gradient-to-b from-[#38bdf8]/10 to-[#38bdf8]/4 p-3.5 shadow-[0_8px_22px_-10px_rgba(7,89,133,0.5)] backdrop-blur">
+            <div className="flex items-center gap-2">
+              <span className="type-tile h-9 w-9 bg-gradient-to-br from-[#38bdf8] to-[#075985] shadow-[0_6px_16px_-6px_rgba(7,89,133,0.6)]">
+                <BarChart3 className="h-4.5 w-4.5" />
+              </span>
+              <p className="flex-1 text-[13.5px] font-black leading-6 text-ink">{p.question}</p>
+            </div>
             <div className="mt-3 space-y-2">
               {p.options.map((opt, i) => {
                 const count = p.counts[i] ?? 0
@@ -542,7 +575,7 @@ export default function ForumPage() {
                     <button
                       key={i}
                       onClick={() => vote(p.id, i)}
-                      className="flex w-full items-center justify-between rounded-xl border border-line bg-surface px-3 py-2.5 text-right text-[12px] font-bold text-ink transition-colors active:bg-surface-2"
+                      className="flex w-full items-center justify-between rounded-xl border border-line bg-surface/90 px-3 py-2.5 text-right text-[12px] font-bold text-ink transition-colors active:bg-surface-2"
                     >
                       <span>{opt}</span>
                       <span className="text-[9.5px] font-bold text-[#38bdf8]">رأی بده</span>
@@ -552,9 +585,9 @@ export default function ForumPage() {
                 return (
                   <button key={i} onClick={() => vote(p.id, i)} className={cn(
                     "relative block w-full overflow-hidden rounded-xl border px-3 py-2.5 text-right",
-                    isMine ? "border-[#38bdf8]/60 bg-[#38bdf8]/12" : "border-line bg-surface",
+                    isMine ? "border-[#38bdf8]/60 bg-[#38bdf8]/12" : "border-line bg-surface/90",
                   )}>
-                    <span className={cn("absolute inset-y-0 right-0 rounded-xl transition-all", isMine ? "bg-[#38bdf8]/15" : "bg-ink/8")} style={{ width: `${pct}%` }} />
+                    <span className={cn("absolute inset-y-0 right-0 rounded-xl transition-all duration-500", isMine ? "bg-gradient-to-l from-[#38bdf8]/25 to-[#38bdf8]/10" : "bg-ink/8")} style={{ width: `${pct}%` }} />
                     <span className="relative flex items-center justify-between text-[12px] font-bold text-ink">
                       <span className="flex items-center gap-1.5 truncate">
                         {isMine && <Check className="h-3.5 w-3.5 shrink-0 text-[#38bdf8]" />}
@@ -580,23 +613,49 @@ export default function ForumPage() {
     )
   }
 
+  const onlineCount = members.filter((m) => m.online).length
+
   return (
-    <main className="min-h-dvh bg-[var(--page)]">
-      <header className="sticky top-0 z-40 border-b border-line bg-[var(--nav-bg)]/95 backdrop-blur-md">
-        <div className="mx-auto flex h-14 w-full max-w-[720px] items-center gap-3 px-4">
+    <main className="relative min-h-dvh bg-[var(--page)]">
+      {/* ── پس‌زمینه گرافیکی ثابت: هاله‌های نور + شبکه نقطه‌ای ── */}
+      <div aria-hidden className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+        <span className="absolute -top-24 right-[-15%] h-[340px] w-[340px] rounded-full bg-neon/14 blur-[90px]" />
+        <span className="absolute left-[-18%] top-1/3 h-[300px] w-[300px] rounded-full bg-[#38bdf8]/10 blur-[90px]" />
+        <span className="absolute bottom-[-12%] right-1/4 h-[260px] w-[260px] rounded-full bg-[#fbbf24]/8 blur-[90px]" />
+        <div
+          className="absolute inset-0 opacity-[0.55]"
+          style={{ backgroundImage: "radial-gradient(rgba(148,163,184,0.14) 1px, transparent 1.4px)", backgroundSize: "24px 24px" }}
+        />
+      </div>
+
+      <header className="sticky top-0 z-40 border-b border-line bg-[var(--nav-bg)]/85 backdrop-blur-xl">
+        <div className="relative z-10 mx-auto flex h-14 w-full max-w-[720px] items-center gap-3 px-4">
           <button
             onClick={() => (openTopic ? setOpenTopic(null) : router.push("/"))}
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-line bg-surface text-ink"
+            className="flex h-10 w-10 items-center justify-center rounded-xl border border-line bg-surface/90 text-ink backdrop-blur"
             aria-label="بازگشت"
           >
             <ArrowRight className="h-4.5 w-4.5" />
           </button>
           <div className="min-w-0 flex-1">
-            <p className="flex items-center gap-1.5 truncate text-[13.5px] font-black text-ink">
-              <MessagesSquare className="h-4 w-4 shrink-0 text-neon" />
-              {openTopic ? openTopic.topic.title : "تالار گفتگو"}
+            <p className="flex items-center gap-2 truncate text-[13.5px] font-black text-ink">
+              {openTopic ? (
+                <>
+                  <span className={cn("type-tile h-7 w-7 rounded-[9px] text-[13px]", typeMeta(openTopic.topic.type).tile)}>
+                    {typeMeta(openTopic.topic.type).emoji}
+                  </span>
+                  <span className="truncate">{openTopic.topic.title}</span>
+                </>
+              ) : (
+                <>
+                  <span className="type-tile h-7 w-7 rounded-[9px] bg-gradient-to-br from-[#7bb661] to-[#2f6b33] shadow-[0_6px_14px_-6px_rgba(47,107,51,0.6)]">
+                    <MessagesSquare className="h-3.5 w-3.5" />
+                  </span>
+                  تالار گفتگو
+                </>
+              )}
             </p>
-            <p className="flex items-center gap-1 text-[10px] font-semibold text-neon">
+            <p className="mt-0.5 flex items-center gap-1 text-[10px] font-semibold text-neon">
               {openTopic ? (
                 <>
                   <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-neon" />
@@ -613,12 +672,59 @@ export default function ForumPage() {
       </header>
 
       {!openTopic ? (
-        /* ──────────── فهرست تاپیک‌ها ──────────── */
-        <div className="mx-auto w-full max-w-[720px] space-y-3 px-4 py-5">
+        /* ───────────ه لابی تالار — فضای گرافیکی ─────────── */
+        <div className="relative z-10 mx-auto w-full max-w-[720px] space-y-3.5 px-4 py-5">
+          {/* هیرو پنل */}
+          <section className="fade-up relative overflow-hidden rounded-[28px] border border-neon/25 bg-gradient-to-l from-neon/14 via-surface/90 to-surface/75 p-5 shadow-[0_18px_44px_-20px_rgba(47,107,51,0.5)] backdrop-blur-xl">
+            <span className="float-emoji absolute left-4 top-3 text-[26px] opacity-90" style={{ "--fr": "-12deg", "--fd": "0.2s" } as CSSProperties}>💬</span>
+            <span className="float-emoji absolute left-1/3 top-2.5 text-[15px] opacity-60" style={{ "--fr": "8deg", "--fd": "1.3s" } as CSSProperties}>✨</span>
+            <span className="absolute -bottom-10 -right-8 h-36 w-36 rounded-full bg-neon/20 blur-3xl" aria-hidden />
+            <p className="relative flex items-center gap-2">
+              <span className="rounded-full border border-neon/40 bg-neon/12 px-2.5 py-0.5 text-[9.5px] font-black text-neon">
+                <span className="me-1 inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-neon align-middle" />
+                زنده
+              </span>
+              <span className="rounded-full border border-line bg-surface/70 px-2.5 py-0.5 text-[9.5px] font-bold text-ink-muted">
+                {toFa(members.length)} عضو · {toFa(onlineCount)} آنلاین
+              </span>
+            </p>
+            <h1 className="relative mt-2.5 text-[21px] font-black leading-8 text-ink">
+              صدای شما،
+              <span className="bg-gradient-to-l from-neon to-[#7bb661] bg-clip-text text-transparent"> فضای خبرگزاری </span>
+              را زنده نگه می‌دارد
+            </h1>
+            <p className="relative mt-1 text-[11.5px] leading-5 text-ink-muted">
+              کلاس تصویری بگذارید، هم‌فکری راه بیندازید و به پیام‌ها واکنش نشان بدهید — هر فعالیت، امتیاز تالار دارد.
+            </p>
+            {/* پشته آواتار اعضا */}
+            <div className="relative mt-3.5 flex flex-wrap items-center gap-y-2">
+              <div className="flex -space-x-2.5 space-x-reverse">
+                {members.slice(0, 5).map((m) => (
+                  <span key={m.id} className="relative inline-block rounded-[13px] ring-2 ring-[var(--page)]">
+                    <NeonAvatar name={m.fullName} src={m.avatar} size={32} />
+                    {m.online && <span className="absolute -bottom-0.5 -left-0.5 h-2.5 w-2.5 rounded-full border-2 border-[var(--page)] bg-[#22c55e]" />}
+                  </span>
+                ))}
+                {members.length > 5 && (
+                  <span className="flex h-8 w-8 items-center justify-center rounded-[11px] border-2 border-[var(--page)] bg-surface-2 text-[9.5px] font-black text-ink-muted">
+                    +{toFa(members.length - 5)}
+                  </span>
+                )}
+              </div>
+              {honor[0] && (
+                <span className="ms-auto flex max-w-full items-center gap-1.5 rounded-full border border-[#fbbf24]/40 bg-[#fbbf24]/10 px-2.5 py-1 text-[9.5px] font-black text-[#fbbf24]">
+                  <span className="shrink-0">👑</span>
+                  <span className="min-w-0 truncate">{honor[0].fullName} — صدرنشین هفته</span>
+                </span>
+              )}
+            </div>
+          </section>
+
+          {/* دکمه ساخت تاپیک + سوال هفته ادمین */}
           <div className="flex gap-2">
             <button
               onClick={() => setCreating(true)}
-              className="flex flex-1 items-center justify-center gap-2 rounded-full bg-neon py-3.5 text-[14px] font-bold text-neon-foreground btn-glow"
+              className="btn-glow flex flex-1 items-center justify-center gap-2 rounded-full bg-gradient-to-l from-neon to-[#4e9c5c] py-3.5 text-[14px] font-black text-neon-foreground shadow-[0_12px_28px_-10px_rgba(47,107,51,0.65)] transition-transform active:scale-[0.98]"
             >
               <Plus className="h-4.5 w-4.5" />
               تاپیک جدید (موضوع گفتگو)
@@ -626,7 +732,7 @@ export default function ForumPage() {
             {isAdmin && (
               <button
                 onClick={() => setWqOpen(true)}
-                className="flex items-center gap-1.5 rounded-full border border-[#fbbf24]/50 bg-[#fbbf24]/10 px-4 text-[12px] font-black text-[#fbbf24]"
+                className="flex items-center gap-1.5 rounded-full border border-[#fbbf24]/50 bg-[#fbbf24]/12 px-4 text-[12px] font-black text-[#fbbf24] backdrop-blur"
                 aria-label="سوال هفته"
               >
                 <Crown className="h-4 w-4" />
@@ -635,51 +741,54 @@ export default function ForumPage() {
             )}
           </div>
 
-          {/* نوار آمار خودم */}
+          {/* سه کارت آمار من */}
           {myStats && (
-            <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-line bg-surface px-3.5 py-2.5">
-              <span className="flex items-center gap-1 text-[11px] font-bold text-ink">
-                <TrendingUp className="h-3.5 w-3.5 text-neon" />
-                امتیاز تالار شما: <b className="text-neon">{toFa(myStats.totalForumPoints)}</b>
-              </span>
-              {myStats.weeklyScore > 0 && (
-                <span className="rounded-full bg-neon/10 px-2 py-0.5 text-[10px] font-black text-neon">
-                  این هفته +{toFa(myStats.weeklyScore)}
-                  {myStats.rank ? ` · رتبه ${toFa(myStats.rank)}` : ""}
+            <div className="grid grid-cols-3 gap-2">
+              {[
+                { icon: <TrendingUp className="h-4 w-4" />, label: "امتیاز تالار", value: toFa(myStats.totalForumPoints), tone: "text-neon", ring: "border-neon/30 bg-neon/10" },
+                { icon: <Trophy className="h-4 w-4" />, label: "امتیاز هفته", value: `+${toFa(myStats.weeklyScore)}`, tone: "text-[#fbbf24]", ring: "border-[#fbbf24]/30 bg-[#fbbf24]/10" },
+                { icon: <Medal className="h-4 w-4" />, label: "رتبه هفته", value: myStats.rank ? toFa(myStats.rank) : "—", tone: "text-[#c084fc]", ring: "border-[#c084fc]/30 bg-[#c084fc]/10" },
+              ].map((c) => (
+                <div key={c.label} className="fade-up rounded-2xl border border-line bg-surface/85 p-3 text-center backdrop-blur">
+                  <span className={cn("mx-auto flex h-8 w-8 items-center justify-center rounded-full border", c.ring, c.tone)}>{c.icon}</span>
+                  <p className={cn("mt-1.5 text-[16px] font-black leading-none", c.tone)}>{c.value}</p>
+                  <p className="mt-1 text-[9.5px] font-bold text-ink-muted">{c.label}</p>
+                </div>
+              ))}
+            </div>
+          )}
+          {myStats && myStats.badges.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="text-[9.5px] font-bold text-ink-muted">نشان‌های شما:</span>
+              {myStats.badges.map((b) => (
+                <span key={b} title={FORUM_BADGES[b]?.desc ?? ""} className="rounded-full border border-line bg-surface/85 px-2 py-0.5 text-[10px] font-bold text-ink backdrop-blur">
+                  {FORUM_BADGES[b]?.emoji} {FORUM_BADGES[b]?.title}
                 </span>
-              )}
-              {myStats.badges.length > 0 && (
-                <span className="flex items-center gap-1">
-                  {myStats.badges.map((b) => (
-                    <span key={b} title={FORUM_BADGES[b]?.desc ?? ""} className="rounded-full border border-line bg-surface-2 px-1.5 py-0.5 text-[10px]">
-                      {FORUM_BADGES[b]?.emoji} {FORUM_BADGES[b]?.title}
-                    </span>
-                  ))}
-                </span>
-              )}
+              ))}
             </div>
           )}
 
-          {/* بنر سوال هفته ادمین */}
+          {/* بنر سوال هفته */}
           {weeklyQ && (
             <button
               onClick={() => openT(weeklyQ.topicId)}
-              className="relative block w-full overflow-hidden rounded-[24px] border border-[#fbbf24]/50 bg-gradient-to-l from-[#fbbf24]/14 via-[#fbbf24]/5 to-transparent p-4 text-right shadow-[0_0_26px_rgba(251,191,36,0.10)]"
+              className="shimmer-host fade-up relative block w-full overflow-hidden rounded-[26px] border border-[#fbbf24]/55 bg-gradient-to-l from-[#fbbf24]/18 via-[#fbbf24]/7 to-transparent p-4 text-right shadow-[0_14px_36px_-18px_rgba(251,191,36,0.45)]"
             >
+              <span className="float-emoji absolute -left-2 -top-3 text-[64px] opacity-20" style={{ "--fr": "8deg", "--fd": "0.6s" } as CSSProperties}>❓</span>
               <span className="absolute -left-8 -top-8 h-28 w-28 rounded-full bg-[#fbbf24]/25 blur-2xl" aria-hidden />
               <p className="relative flex items-center gap-1.5 text-[11px] font-black text-[#fbbf24]">
                 ❓ سوال هفته
                 {weeklyQ.creatorName && <span className="opacity-75">· {weeklyQ.creatorName}</span>}
               </p>
               <p className="relative mt-1.5 text-[13.5px] font-black leading-6 text-ink">{weeklyQ.question}</p>
-              <span className="relative mt-2.5 inline-flex items-center gap-1 rounded-full bg-[#fbbf24] px-3.5 py-1.5 text-[11px] font-black text-[#3b2b00]">
+              <span className="relative mt-2.5 inline-flex items-center gap-1 rounded-full bg-gradient-to-l from-[#fbbf24] to-[#f59e0b] px-3.5 py-1.5 text-[11px] font-black text-[#3b2b00] shadow-[0_8px_18px_-8px_rgba(251,191,36,0.7)]">
                 به گفتگو بپیوندید ←
               </span>
             </button>
           )}
 
-          {/* تخته افتخار هفته */}
-          <div className="rounded-[24px] border border-line bg-surface p-4">
+          {/* سکوی افتخارات هفته */}
+          <section className="fade-up rounded-[26px] border border-line bg-surface/85 p-4 shadow-sm backdrop-blur">
             <div className="flex items-center justify-between gap-2">
               <p className="flex items-center gap-1.5 text-[13px] font-black text-ink">
                 <Trophy className="h-4 w-4 text-[#fbbf24]" />
@@ -693,36 +802,37 @@ export default function ForumPage() {
               </p>
             ) : (
               <>
-                {/* سکوی سه‌نفره */}
-                <div className="mt-3 grid grid-cols-3 items-end gap-2">
+                {/* سکوی سه‌ستونه با ارتفاع پله‌ای */}
+                <div className="mt-4 flex items-end justify-center gap-2.5">
                   {[1, 0, 2].map((slot) => {
                     const row = honor[slot]
-                    if (!row) return <span key={slot} />
+                    if (!row) return <span key={slot} className="flex-1" />
+                    const p = PODIUM[slot]
                     return (
-                      <div key={row.id} className={cn("flex flex-col items-center gap-1 rounded-2xl border p-2 text-center", PODIUM_STYLE[slot])}>
-                        <span className="text-[15px] leading-none">{PODIUM_MEDAL[slot]}</span>
-                        <span className="relative">
-                          <NeonAvatar name={row.fullName} src={row.avatar} size={slot === 0 ? 40 : 32} />
-                        </span>
-                        <p className="w-full truncate text-[10px] font-black text-ink">{row.fullName}</p>
-                        <span className="rounded-full bg-[var(--page)]/70 px-2 py-0.5 text-[9.5px] font-black text-neon">+{toFa(row.weeklyScore)}</span>
-                        <div className="flex gap-0.5 text-[9px]" title={row.badges.map((b) => FORUM_BADGES[b]?.title ?? "").join("، ")}>
-                          {row.badges.slice(0, 3).map((b) => <span key={b}>{FORUM_BADGES[b]?.emoji}</span>)}
-                        </div>
+                      <div key={row.id} className="flex min-w-0 flex-1 flex-col items-center gap-1">
+                        <span className="text-[16px] leading-none">{p.medal}</span>
+                        <NeonAvatar name={row.fullName} src={row.avatar} size={slot === 0 ? 44 : 34} className={cn("ring-2", p.ring, p.glow)} />
+                        <p className="w-full truncate text-center text-[9.5px] font-black text-ink">{row.fullName}</p>
+                        <span className="rounded-full bg-neon/10 px-2 py-0.5 text-[9px] font-black text-neon">+{toFa(row.weeklyScore)}</span>
+                        <div
+                          className={cn("mt-1 w-full rounded-t-2xl border-t-2 bg-gradient-to-b", p.bar)}
+                          style={{ height: p.h }}
+                          aria-hidden
+                        />
                       </div>
                     )
                   })}
                 </div>
-                {/* نفرات ۴ و ۵ */}
+                {/* نفرات بعدی */}
                 {honor.length > 3 && (
-                  <div className="mt-2 space-y-1.5">
+                  <div className="mt-3 space-y-1.5 border-t border-line pt-2.5">
                     {honor.slice(3).map((row, i) => (
-                      <div key={row.id} className="flex items-center gap-2 rounded-xl border border-line bg-[var(--page)]/40 px-2.5 py-1.5">
+                      <div key={row.id} className="flex items-center gap-2 rounded-xl border border-line bg-[var(--page)]/45 px-2.5 py-1.5">
                         <span className="flex h-5 w-5 items-center justify-center rounded-full bg-surface-2 text-[9.5px] font-black text-ink-muted">{toFa(i + 4)}</span>
                         <NeonAvatar name={row.fullName} src={row.avatar} size={22} />
                         <span className="min-w-0 flex-1 truncate text-[11px] font-bold text-ink">{row.fullName}</span>
                         <span className="text-[9px]" title={row.badges.map((b) => FORUM_BADGES[b]?.title ?? "").join("، ")}>
-                          {row.badges.slice(0, 3).map((b) => FORUM_BADGES[b]?.emoji).join(" ")}
+                          {row.badges.slice(0, 3).map((b) => <span key={b}>{FORUM_BADGES[b]?.emoji}</span>)}
                         </span>
                         <span className="rounded-full bg-neon/10 px-2 py-0.5 text-[9.5px] font-black text-neon">+{toFa(row.weeklyScore)}</span>
                       </div>
@@ -739,14 +849,14 @@ export default function ForumPage() {
                 </span>
               ))}
             </div>
-          </div>
+          </section>
 
-          {/* چیپ‌های فیلتر نوع */}
+          {/* چیپ‌های فیلتر نوع — هر نوع با رنگ خودش */}
           {topics && topics.length > 0 && (
-            <div className="nice-scroll flex gap-2 overflow-x-auto pb-1">
+            <div className="no-scrollbar flex gap-2 overflow-x-auto pb-1">
               <button
                 onClick={() => setFilter("all")}
-                className={cn("shrink-0 rounded-full border px-3.5 py-1.5 text-[11.5px] font-bold transition-colors", filter === "all" ? "border-neon bg-neon text-neon-foreground" : "border-line bg-surface text-ink-muted")}
+                className={cn("shrink-0 rounded-full border px-3.5 py-1.5 text-[11.5px] font-bold transition-all", filter === "all" ? "border-neon bg-neon text-neon-foreground shadow-[0_8px_18px_-8px_rgba(47,107,51,0.7)]" : "border-line bg-surface/85 text-ink-muted backdrop-blur")}
               >
                 همه ({toFa(topics.length)})
               </button>
@@ -757,13 +867,13 @@ export default function ForumPage() {
                     key={key}
                     onClick={() => setFilter(key)}
                     className={cn(
-                      "flex shrink-0 items-center gap-1 rounded-full border px-3.5 py-1.5 text-[11.5px] font-bold transition-colors",
-                      filter === key ? "border-neon bg-neon text-neon-foreground" : "border-line bg-surface text-ink-muted",
+                      "flex shrink-0 items-center gap-1 rounded-full border px-3.5 py-1.5 text-[11.5px] font-bold transition-all",
+                      filter === key ? cn(meta.activeChip, "shadow-md") : "border-line bg-surface/85 text-ink-muted backdrop-blur",
                     )}
                   >
                     <span>{meta.emoji}</span>
                     {meta.label}
-                    {n > 0 && <span className={cn("rounded-full px-1.5 text-[9px]", filter === key ? "bg-neon-foreground/20" : "bg-surface-2")}>{toFa(n)}</span>}
+                    {n > 0 && <span className={cn("rounded-full px-1.5 text-[9px]", filter === key ? "bg-white/25" : "bg-surface-2")}>{toFa(n)}</span>}
                   </button>
                 )
               })}
@@ -776,8 +886,10 @@ export default function ForumPage() {
             </div>
           ) : filteredTopics.length === 0 && (topics?.length ?? 0) === 0 ? (
             /* ── حالت خالی جذاب ── */
-            <div className="flex flex-col items-center gap-3 rounded-[26px] border border-dashed border-line py-10 px-4 text-center">
-              <img src="/img/hero.png" alt="تالار گفتگو" className="w-44 rounded-[22px] opacity-85 shadow-[0_0_40px_rgba(201,247,58,0.12)]" />
+            <div className="fade-up relative flex flex-col items-center gap-3 overflow-hidden rounded-[28px] border border-dashed border-line bg-surface/70 px-4 py-10 text-center backdrop-blur">
+              <span className="float-emoji absolute left-6 top-6 text-[22px] opacity-70" style={{ "--fr": "-10deg" } as CSSProperties}>💬</span>
+              <span className="float-emoji absolute right-8 top-10 text-[18px] opacity-60" style={{ "--fr": "8deg", "--fd": "0.8s" } as CSSProperties}>✨</span>
+              <img src="/img/hero.png" alt="تالار گفتگو" className="w-44 rounded-[22px] opacity-90 shadow-[0_0_44px_rgba(47,107,51,0.25)]" />
               <p className="mt-1 text-[15px] font-black text-ink">هنوز گفتگویی شروع نشده است</p>
               <p className="max-w-[320px] text-[11.5px] leading-5 text-ink-muted">
                 تالار را زنده کنید — کلاس تصویری بگذارید، هم‌فکری راه بیندازید یا اطلاع‌رسانی کنید.
@@ -791,7 +903,7 @@ export default function ForumPage() {
                   <button
                     key={b.type}
                     onClick={() => { setNewType(b.type); setCreating(true) }}
-                    className="flex items-center justify-between rounded-2xl border border-line bg-surface px-4 py-3 text-right transition-colors active:bg-surface-2"
+                    className="flex items-center justify-between rounded-2xl border border-line bg-surface/90 px-4 py-3 text-right backdrop-blur transition-colors active:bg-surface-2"
                   >
                     <span className="min-w-0">
                       <span className="block text-[12.5px] font-bold text-ink">{b.label}</span>
@@ -803,51 +915,72 @@ export default function ForumPage() {
               </div>
             </div>
           ) : filteredTopics.length === 0 ? (
-            <div className="flex flex-col items-center gap-2 rounded-[26px] border border-dashed border-line py-12 text-center">
+            <div className="fade-up flex flex-col items-center gap-2 rounded-[28px] border border-dashed border-line bg-surface/70 py-12 text-center backdrop-blur">
               <p className="text-[13px] font-bold text-ink">از این نوع تاپیکی نیست</p>
               <button onClick={() => { setNewType(filter); setCreating(true) }} className="rounded-full bg-neon px-4 py-2 text-[11.5px] font-bold text-neon-foreground">
                 اولین تاپیک این نوع را بساز
               </button>
             </div>
           ) : (
-            filteredTopics.map((t) => {
+            /* ── تایل‌های تاپیک — هر نوع با تایل گرادیانی خودش ── */
+            filteredTopics.map((t, i) => {
               const meta = typeMeta(t.type)
+              const live = isActive(t.lastActivity)
               return (
-                <div key={t.id} className={cn(
-                  "rounded-[24px] border border-r-[3px] p-4 transition-shadow",
-                  t.pinned ? "border-neon/40 border-r-neon bg-neon/5" : cn("border-line bg-surface", meta.border),
-                )}>
-                  <div className="flex items-start justify-between gap-2">
-                    <button onClick={() => openT(t.id)} className="min-w-0 flex-1 text-right">
-                      <div className="flex items-center gap-2">
-                        <span className={cn("shrink-0 rounded-full border px-2 py-0.5 text-[9.5px] font-bold", meta.chip)}>
-                          {meta.emoji} {meta.label}
+                <div key={t.id} className="fade-up" style={{ "--fd": `${Math.min(i, 6) * 55}ms` } as CSSProperties}>
+                  <div className={cn(
+                    "relative overflow-hidden rounded-[26px] border p-3.5 transition-all",
+                    t.pinned
+                      ? "border-neon/50 bg-gradient-to-l from-neon/10 to-surface/85 shadow-[0_12px_30px_-16px_rgba(47,107,51,0.55)]"
+                      : "border-line bg-surface/85 shadow-sm backdrop-blur",
+                    !t.pinned && live && "border-neon/30",
+                  )}>
+                    <div className="flex items-start gap-3">
+                      <button onClick={() => openT(t.id)} className="shrink-0" aria-label={`باز کردن ${t.title}`}>
+                        <span className={cn("type-tile relative h-[54px] w-[54px] text-[25px]", meta.tile, meta.tileShadow)}>
+                          {meta.emoji}
+                          {t.pinned && (
+                            <span className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full border border-neon/50 bg-[var(--page)] text-[9px] shadow">📌</span>
+                          )}
                         </span>
-                        {t.pinned && <Pin className="h-3.5 w-3.5 shrink-0 text-neon" />}
-                      </div>
-                      <p className="mt-1.5 text-[14px] font-black text-ink">{t.title}</p>
-                      <p className="mt-1 flex flex-wrap items-center gap-x-2 text-[10.5px] text-ink-muted">
-                        <span>{t.creatorName || "عضو"}</span>
-                        <span>· {jalali(t.createdAt, true)}</span>
-                        <span>· {toFa(t.replies ?? 0)} پیام</span>
-                        {(t.participants ?? 0) > 0 && <span>· {toFa(t.participants ?? 0)} نفر در گفتگو</span>}
-                      </p>
-                      {t.lastMessage && (
-                        <p className="mt-1.5 truncate text-[11.5px] text-ink-muted/80">
-                          {t.lastMessage.authorName}: {t.lastMessage.body}
+                      </button>
+                      <button onClick={() => openT(t.id)} className="min-w-0 flex-1 text-right">
+                        <p className="truncate text-[14.5px] font-black leading-6 text-ink">{t.title}</p>
+                        <p className="mt-0.5 flex items-center gap-1.5 text-[10px] text-ink-muted">
+                          <span className="font-bold text-ink/75">{t.creatorName || "عضو"}</span>
+                          <span>· {relTime(t.lastActivity ?? t.createdAt)}</span>
+                          {live && (
+                            <span className="flex items-center gap-1 rounded-full bg-neon/10 px-1.5 py-px text-[8.5px] font-black text-neon">
+                              <span className="h-1 w-1 animate-pulse rounded-full bg-neon" /> فعال
+                            </span>
+                          )}
                         </p>
+                        {t.lastMessage && (
+                          <p className="mt-1.5 flex items-center gap-1 truncate rounded-xl bg-surface-2/70 px-2 py-1 text-[11px] text-ink-muted">
+                            <span className="shrink-0 font-black text-ink/70">{t.lastMessage.authorName}:</span>
+                            <span className="truncate">{t.lastMessage.body}</span>
+                          </p>
+                        )}
+                        <p className="mt-2 flex flex-wrap items-center gap-1.5 text-[9.5px]">
+                          <span className={cn("rounded-full border px-2 py-0.5 font-bold", meta.chip)}>{meta.emoji} {meta.label}</span>
+                          <span className="rounded-full border border-line bg-[var(--page)]/50 px-2 py-0.5 font-bold text-ink-muted">💬 {toFa(t.replies ?? 0)} پیام</span>
+                          {(t.participants ?? 0) > 0 && (
+                            <span className="rounded-full border border-line bg-[var(--page)]/50 px-2 py-0.5 font-bold text-ink-muted">👥 {toFa(t.participants ?? 0)} نفر</span>
+                          )}
+                          <span className="text-ink-muted/70">{jalali(t.createdAt, true)}</span>
+                        </p>
+                      </button>
+                      {isAdmin && (
+                        <div className="flex shrink-0 flex-col gap-1.5">
+                          <button onClick={async () => { const r = await pinForumTopic(t.id); if (r.ok) { toast({ description: r.message }); loadTopics() } }} className="flex h-8 w-8 items-center justify-center rounded-full border border-line bg-surface/80 text-ink-muted" aria-label="سنجاق">
+                            {t.pinned ? <PinOff className="h-4 w-4" /> : <Pin className="h-4 w-4" />}
+                          </button>
+                          <button onClick={async () => { const r = await deleteForumTopic(t.id); if (r.ok) { toast({ description: r.message }); loadTopics() } else toast({ title: "خطا", description: r.message, variant: "destructive" }) }} className="flex h-8 w-8 items-center justify-center rounded-full border border-danger/30 bg-surface/80 text-danger-soft" aria-label="حذف">
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
                       )}
-                    </button>
-                    {isAdmin && (
-                      <div className="flex shrink-0 gap-1.5">
-                        <button onClick={async () => { const r = await pinForumTopic(t.id); if (r.ok) { toast({ description: r.message }); loadTopics() } }} className="flex h-8 w-8 items-center justify-center rounded-full border border-line text-ink-muted" aria-label="سنجاق">
-                          {t.pinned ? <PinOff className="h-4 w-4" /> : <Pin className="h-4 w-4" />}
-                        </button>
-                        <button onClick={async () => { const r = await deleteForumTopic(t.id); if (r.ok) { toast({ description: r.message }); loadTopics() } else toast({ title: "خطا", description: r.message, variant: "destructive" }) }} className="flex h-8 w-8 items-center justify-center rounded-full border border-danger/30 text-danger-soft" aria-label="حذف">
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
-                    )}
+                    </div>
                   </div>
                 </div>
               )
@@ -855,21 +988,14 @@ export default function ForumPage() {
           )}
         </div>
       ) : (
-        /* ──────────── گفتگوی تاپیک — سبک تلگرام ──────────── */
-        <div
-          className="mx-auto flex w-full max-w-[720px] flex-col px-3 py-4"
-          style={{
-            minHeight: "calc(100dvh - 120px)",
-            backgroundImage: "radial-gradient(rgba(148,163,184,0.13) 1px, transparent 1.4px), radial-gradient(circle at 15% 10%, rgba(201,247,58,0.045) 0, transparent 42%), radial-gradient(circle at 85% 85%, rgba(56,189,248,0.05) 0, transparent 42%)",
-            backgroundSize: "22px 22px, auto, auto",
-          }}
-        >
-          <div ref={threadRef} className="nice-scroll flex-1 space-y-2.5 overflow-y-auto pb-3" style={{ maxHeight: "calc(100dvh - 240px)" }}>
+        /* ───────────ه گفتگوی تاپیک — سبک تلگرام ─────────── */
+        <div className="relative z-10 mx-auto flex w-full max-w-[720px] flex-col px-3 py-4" style={{ minHeight: "calc(100dvh - 120px)" }}>
+          <div ref={threadRef} className="nice-scroll flex-1 space-y-3 overflow-y-auto pb-3" style={{ maxHeight: "calc(100dvh - 240px)" }}>
             {timeline.length === 0 && (
-              <div className="flex flex-col items-center gap-2 py-10 text-center">
-                <span className="text-[30px]">💬</span>
-                <p className="text-[13px] font-black text-ink">اولین پیام را بفرستید</p>
-                <p className="max-w-[280px] text-[11px] text-ink-muted">مثلاً لینک کلاس تصویری یا سوال خود را بپرسید — هر پیام ‎+۲ امتیاز تالار دارد.</p>
+              <div className="flex flex-col items-center gap-2 py-12 text-center">
+                <span className="float-emoji text-[42px]" style={{ "--fr": "-6deg" } as CSSProperties}>💬</span>
+                <p className="bg-gradient-to-l from-neon to-[#7bb661] bg-clip-text text-[15px] font-black text-transparent">اولین پیام را بفرستید</p>
+                <p className="max-w-[280px] text-[11px] leading-5 text-ink-muted">مثلاً لینک کلاس تصویری یا سوال خود را بپرسید — هر پیام ‎+۲ امتیاز تالار دارد.</p>
               </div>
             )}
             {timeline.map((item, idx) => {
@@ -885,7 +1011,7 @@ export default function ForumPage() {
                 <Fragment key={item.kind === "msg" ? `m${item.msg.id}` : `p${item.poll.id}`}>
                   {newDay && (
                     <div className="flex justify-center py-1.5">
-                      <span className="rounded-full border border-line bg-[var(--nav-bg)]/95 px-3.5 py-1 text-[10px] font-black text-ink-muted shadow-sm">
+                      <span className="rounded-full border border-line bg-[var(--nav-bg)]/90 px-3.5 py-1 text-[10px] font-black text-ink-muted shadow-sm backdrop-blur">
                         {dayLabel(item.at)}
                       </span>
                     </div>
@@ -897,9 +1023,9 @@ export default function ForumPage() {
           </div>
 
           {/* جعبه ارسال سبک تلگرام + پیش‌نمایش پاسخ + منشن */}
-          <div className="sticky bottom-0 space-y-2 bg-gradient-to-t from-[var(--page)] via-[var(--page)] to-transparent pt-3">
+          <div className="sticky bottom-0 space-y-2 bg-gradient-to-t from-[var(--page)] via-[var(--page)]/92 to-transparent pt-3">
             {replyTo && (
-              <div className="flex items-center justify-between gap-2 rounded-2xl border-r-2 border-neon bg-neon/8 px-3 py-2">
+              <div className="flex items-center justify-between gap-2 rounded-2xl border-r-2 border-neon bg-neon/10 px-3 py-2 backdrop-blur">
                 <span className="min-w-0 text-[10.5px] text-ink-muted">
                   <span className="font-bold text-neon">پاسخ به {replyTo.authorName}: </span>
                   <span className="truncate">{replyTo.body || "پیوست"}</span>
@@ -908,7 +1034,7 @@ export default function ForumPage() {
               </div>
             )}
             {fileUrl && (
-              <div className="flex items-center justify-between rounded-2xl border border-neon/35 bg-neon/8 px-3 py-2">
+              <div className="flex items-center justify-between rounded-2xl border border-neon/35 bg-neon/10 px-3 py-2 backdrop-blur">
                 <span className="flex items-center gap-1.5 truncate text-[11px] font-bold text-neon" dir="ltr">
                   <ImageIcon className="h-3.5 w-3.5 shrink-0" />
                   {fileUrl}
@@ -917,7 +1043,7 @@ export default function ForumPage() {
               </div>
             )}
             {mentionMatches.length > 0 && (
-              <div className="mx-1 rounded-2xl border border-line bg-popover p-1.5 shadow-lg">
+              <div className="mx-1 rounded-2xl border border-line bg-popover/95 p-1.5 shadow-xl backdrop-blur">
                 {mentionMatches.map((mem) => (
                   <button
                     key={mem.id}
@@ -939,13 +1065,13 @@ export default function ForumPage() {
               {canPoll && (
                 <button
                   onClick={() => setPollCreating(true)}
-                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[#38bdf8]/40 bg-surface text-[#38bdf8]"
+                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[#38bdf8]/40 bg-surface/90 text-[#38bdf8] backdrop-blur"
                   aria-label="نظرسنجی جدید"
                 >
                   <BarChart3 className="h-4.5 w-4.5" />
                 </button>
               )}
-              <div className="flex flex-1 items-end gap-1 rounded-[24px] border border-line bg-surface py-1.5 pl-2 pr-1.5 shadow-sm">
+              <div className="flex flex-1 items-end gap-1 rounded-[26px] border border-line bg-surface/95 py-1.5 pl-2 pr-1.5 shadow-lg backdrop-blur">
                 <label className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full text-ink-muted transition-colors active:bg-surface-2">
                   {uploading ? <Loader2 className="h-4.5 w-4.5 animate-spin text-neon" /> : <Paperclip className="h-4.5 w-4.5" />}
                   <input type="file" accept="image/*,video/*,application/pdf" className="hidden" onChange={(e) => onFile(e.target.files?.[0])} />
@@ -963,7 +1089,7 @@ export default function ForumPage() {
               <button
                 onClick={send}
                 disabled={busy || (!msg.trim() && !fileUrl)}
-                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-neon to-[#9bd623] text-neon-foreground shadow-[0_0_16px_rgba(201,247,58,0.35)] transition-transform active:scale-95 disabled:opacity-40 disabled:shadow-none"
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-neon to-[#2f6b33] text-neon-foreground shadow-[0_0_18px_rgba(47,107,51,0.45)] transition-transform active:scale-95 disabled:opacity-40 disabled:shadow-none"
                 aria-label="ارسال"
               >
                 <Send className="h-4.5 w-4.5 -translate-x-px" />
@@ -997,7 +1123,7 @@ export default function ForumPage() {
             ))}
           </div>
           <Input value={newTitle} onChange={(e) => setNewTitle(e.target.value)} onKeyDown={(e) => e.key === "Enter" && createTopic()} placeholder="عنوان تاپیک — مثلاً «کلاس تصویری اصول خبرنویسی»" className="mt-3 rounded-2xl border-line bg-surface text-ink" />
-          <button onClick={createTopic} disabled={busy || newTitle.trim().length < 3} className="mt-4 w-full rounded-full bg-neon py-3.5 text-[14px] font-bold text-neon-foreground disabled:opacity-50">
+          <button onClick={createTopic} disabled={busy || newTitle.trim().length < 3} className="mt-4 w-full rounded-full bg-gradient-to-l from-neon to-[#4e9c5c] py-3.5 text-[14px] font-black text-neon-foreground disabled:opacity-50">
             {busy ? "..." : "ایجاد تاپیک"}
           </button>
         </DialogContent>
