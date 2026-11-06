@@ -4,9 +4,6 @@
     <!-- آدرس پیش‌فرض سرور — سرور اصلی روی IP سرور ودا -->
     <string name="default_server_url">http://80.91.208.240/</string>
     <string name="error_title">اتصال به سرور برقرار نشد</string>
-    <string name="error_body">اینترنت خود را بررسی کنید یا آدرس سرور خبرگزاری را وارد کنید:</string>
-    <string name="url_hint">http://80.91.208.240/</string>
-    <string name="connect_btn">اتصال</string>
-    <string name="change_server_btn">تغییر سرور</string>
-    <string name="cancel_btn">بستن</string>
+    <string name="error_body">اینترنت خود را بررسی کنید و دوباره تلاش کنید.</string>
+    <string name="retry_btn">تلاش مجدد</string>
 </resources>

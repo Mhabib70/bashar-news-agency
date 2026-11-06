@@ -37,7 +37,13 @@ export type AdminUserDetail = {
 
 export type TrainingItem = {
   id: number; title: string; body: string; kind: string; fileUrl: string
-  authorName: string; createdAt: string
+  category: string; level: string; minutes: number; views: number
+  authorName: string; createdAt: string; readers: number; completed: boolean
+}
+
+export type TrainingFeed = {
+  trainings: TrainingItem[]
+  stats: { total: number; completed: number; minutes: number }
 }
 
 export type ForumTopicItem = {
@@ -140,9 +146,11 @@ type Store = {
   markNotificationsRead: () => Promise<void>
   fetchAllNews: () => Promise<NewsDTO[]>
   deleteNews: (newsId: number) => Promise<Result>
-  fetchTrainings: () => Promise<TrainingItem[]>
-  createTraining: (p: { title: string; body: string; kind: string; fileUrl?: string }) => Promise<Result>
+  fetchTrainings: () => Promise<TrainingFeed | null>
+  createTraining: (p: { title: string; body: string; kind: string; fileUrl?: string; category: string; level: string; minutes: number }) => Promise<Result>
   deleteTraining: (id: number) => Promise<Result>
+  viewTraining: (id: number) => Promise<void>
+  toggleTrainingComplete: (id: number) => Promise<Result & { completed?: boolean }>
   fetchForumTopics: () => Promise<ForumTopicsResult | null>
   fetchForumMessages: (topicId: number) => Promise<ForumThreadResult | null>
   createForumTopic: (title: string, type: string) => Promise<Result & { id?: number }>
@@ -430,12 +438,12 @@ export const useApp = create<Store>((set, get) => ({
 
   fetchTrainings: async () => {
     const uid = get().userId
-    if (!uid) return []
+    if (!uid) return null
     try {
-      const r = await api<{ trainings: TrainingItem[] }>(`/api/training?userId=${encodeURIComponent(uid)}`)
-      return r.trainings ?? []
+      const r = await api<TrainingFeed>(`/api/training?userId=${encodeURIComponent(uid)}`)
+      return { trainings: r.trainings ?? [], stats: r.stats ?? { total: 0, completed: 0, minutes: 0 } }
     } catch {
-      return []
+      return null
     }
   },
 
@@ -462,6 +470,28 @@ export const useApp = create<Store>((set, get) => ({
         body: JSON.stringify({ userId: uid, action: "delete", id }),
       })
       return { ok: true, message: r.message }
+    } catch (e) {
+      return { ok: false, message: (e as Error).message }
+    }
+  },
+
+  viewTraining: async (id) => {
+    const uid = get().userId
+    if (!uid) return
+    try {
+      await api("/api/training", { method: "POST", body: JSON.stringify({ userId: uid, action: "view", id }) })
+    } catch { /* بازدید غیرحیاتی است */ }
+  },
+
+  toggleTrainingComplete: async (id) => {
+    const uid = get().userId
+    if (!uid) return { ok: false }
+    try {
+      const r = await api<Result & { message: string; completed?: boolean }>("/api/training", {
+        method: "POST",
+        body: JSON.stringify({ userId: uid, action: "complete", id }),
+      })
+      return { ok: true, completed: r.completed, message: r.message }
     } catch (e) {
       return { ok: false, message: (e as Error).message }
     }

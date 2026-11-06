@@ -176,18 +176,37 @@ model OrgUnits {
   updatedAt DateTime @updatedAt
 }
 
-// بخش آموزش — محتوای آموزشی (متن/فایل/ویدئو) برای خبرنگاران
+// بخش آموزش (آکادمی) — محتوای آموزشی (متن/فایل/ویدئو) با دسته، سطح، مدت و بازدید
 model Training {
   id         Int      @id @default(autoincrement())
   title      String
   body       String   @default("")
   kind       String   @default("text") // text | file | video
   fileUrl    String   @default("")
+  category   String   @default("writing") // writing | photo | reporting | media | tech
+  level      String   @default("beginner") // beginner | intermediate | advanced
+  minutes    Int      @default(5) // زمان مطالعه (دقیقه)
+  views      Int      @default(0)
   authorId   String   @default("")
   authorName String   @default("")
   createdAt  DateTime @default(now())
 
+  progress TrainingProgress[]
+
   @@index([createdAt])
+  @@index([category])
+}
+
+// پیشرفت آموزشی هر کاربر — «خوانده شد»
+model TrainingProgress {
+  id          Int      @id @default(autoincrement())
+  trainingId  Int
+  training    Training @relation(fields: [trainingId], references: [id], onDelete: Cascade)
+  userId      String
+  completedAt DateTime @default(now())
+
+  @@unique([trainingId, userId])
+  @@index([userId])
 }
 
 // تالار گفتگو — تاپیک‌ها و پیام‌ها (کلاس تصویری، هم‌فکری و...)

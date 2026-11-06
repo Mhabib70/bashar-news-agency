@@ -2,7 +2,6 @@ package ir.basharnews.app;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -15,23 +14,19 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 
 /**
- * خبرگزاری بشر — WebView wrapper
- * آدرس سرور از strings.xml خوانده می‌شود و در صورت خطا قابل تغییر است.
+ * خبرگزاری بسیج رشت — WebView wrapper
+ * آدرس سرور از strings.xml خوانده می‌شود؛ هنگام خطای اتصال فقط «تلاش مجدد» پیشنهاد می‌شود.
  * پشتیبانی آپلود فایل (عکس/ویدیوی خبر) از طریق onShowFileChooser فراهم است.
  */
 public class MainActivity extends Activity {
 
-    private static final String PREFS = "bashar_prefs";
-    private static final String KEY_URL = "server_url";
     private static final int FILE_CHOOSER_REQUEST = 1001;
 
     private WebView web;
     private LinearLayout errorBox;
-    private EditText urlInput;
     private boolean errored = false;
     private ValueCallback<Uri[]> filePathCallback;
 
@@ -42,7 +37,6 @@ public class MainActivity extends Activity {
 
         web = findViewById(R.id.webview);
         errorBox = findViewById(R.id.error_box);
-        urlInput = findViewById(R.id.url_input);
 
         WebSettings s = web.getSettings();
         s.setJavaScriptEnabled(true);
@@ -90,45 +84,16 @@ public class MainActivity extends Activity {
             }
         });
 
-        SharedPreferences prefs = getSharedPreferences(PREFS, MODE_PRIVATE);
-        String url = prefs.getString(KEY_URL, getString(R.string.default_server_url));
-        urlInput.setText(url);
-        web.loadUrl(url);
+        web.loadUrl(getString(R.string.default_server_url));
 
-        Button connectBtn = findViewById(R.id.connect_btn);
-        connectBtn.setOnClickListener(new View.OnClickListener() {
+        // دکمه «تلاش مجدد» — فقط داخل پنل خطای اتصال؛ همیشه آدرس پیش‌فرض را بازمی‌گرداند
+        Button retryBtn = findViewById(R.id.retry_btn);
+        retryBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String u = urlInput.getText().toString().trim();
-                if (u.isEmpty()) return;
-                if (!u.startsWith("http://") && !u.startsWith("https://")) u = "http://" + u;
-                prefs.edit().putString(KEY_URL, u).apply();
                 errored = false;
                 errorBox.setVisibility(View.GONE);
-                web.loadUrl(u);
-            }
-        });
-
-        // دکمه شناور «تغییر سرور» — همیشه در دسترس؛ پنل آدرس را باز/بسته می‌کند
-        Button changeServerFab = findViewById(R.id.change_server_fab);
-        changeServerFab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (errorBox.getVisibility() == View.VISIBLE) {
-                    errorBox.setVisibility(View.GONE);
-                } else {
-                    urlInput.setText(prefs.getString(KEY_URL, getString(R.string.default_server_url)));
-                    errorBox.setVisibility(View.VISIBLE);
-                }
-            }
-        });
-
-        // دکمه «بستن» پنل — بدون اتصال برگرد به اپ
-        Button panelCloseBtn = findViewById(R.id.panel_close_btn);
-        panelCloseBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                errorBox.setVisibility(View.GONE);
+                web.loadUrl(getString(R.string.default_server_url));
             }
         });
     }
