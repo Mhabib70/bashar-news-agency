@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # ساخت APK اندروید خبرگزاری بشر — بدون Gradle، مستقیم با build-tools
+# استفاده: bash scripts/build-apk.sh [version]  مثال: bash scripts/build-apk.sh 2.8.0
 set -e
-# جاوا سیستمی (JRE 21) استفاده می‌شود
+VERSION=${1:-2.8.0}
 cd /home/z/my-project/android
 SDK=/home/z/my-project/android-sdk
 BT=$SDK/build-tools/34.0.0
@@ -47,7 +48,7 @@ if [ ! -f release.keystore ]; then
 fi
 "$BT/apksigner" sign --ks release.keystore \
   --ks-pass pass:basharnews2026 --key-pass pass:basharnews2026 \
-  --out /home/z/my-project/apk/BasijNews-v2.7.0.apk aligned.apk
+  --out /home/z/my-project/apk/BasijNews-v$VERSION.apk aligned.apk
 
-"$BT/apksigner" verify /home/z/my-project/apk/BasijNews-v2.7.0.apk && echo "APK_SIGNED_OK"
+"$BT/apksigner" verify /home/z/my-project/apk/BasijNews-v$VERSION.apk && echo "APK_SIGNED_OK"
 ls -la /home/z/my-project/apk/

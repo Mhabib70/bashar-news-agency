@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/theme-provider";
+import { UpdateBanner } from "@/components/app/update-banner";
 
 export const metadata: Metadata = {
   title: "خبرگزاری بسیج شهر رشت | اپ خبرنگاران",
@@ -27,6 +28,7 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} disableTransitionOnChange>
           {children}
           <Toaster />
+          <UpdateBanner />
         </ThemeProvider>
       </body>
     </html>
