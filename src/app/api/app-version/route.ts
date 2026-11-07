@@ -10,8 +10,7 @@ const FALLBACK = {
   versionCode: 12,
   versionName: "2.8.0",
   mandatory: true,
-  apkUrl:
-    "https://github.com/Mhabib70/bashar-news-agency/releases/download/v2.8.0/BasijNews-v2.8.0.apk",
+  apkUrl: "http://80.91.208.240/apk/BasijNews-v2.8.0.apk",
   notes:
     "به‌روزرسانی مهم: از این پس هر نسخه جدید، خودکار از داخل همین اپ نصب می‌شود — بدون نیاز به دریافت لینک جدید.",
 }
