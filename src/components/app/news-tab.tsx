@@ -38,9 +38,18 @@ export function NewsScreen({ onQuickSubmit, draftsView }: { onQuickSubmit: () =>
     setAllNews(rows)
     setLoadingAll(false)
   }
+  // بارگذاری فهرست «همه اخبار» هنگام ورود به این حالت.
+  // واکشی داخل continuation انجام می‌شود تا setState همگام در بدنهٔ effect رخ ندهد
+  // (قانون react-hooks/set-state-in-effect) و رندر آبشاری ایجاد نشود.
   useEffect(() => {
-    if (scope === "all") loadAll()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (scope !== "all") return
+    let cancelled = false
+    void fetchAllNews().then((rows) => {
+      if (!cancelled) setAllNews(rows)
+    })
+    return () => {
+      cancelled = true
+    }
   }, [scope])
 
   const base = scope === "all" ? allNews : (state?.news ?? [])

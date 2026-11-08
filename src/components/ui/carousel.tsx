@@ -1,5 +1,10 @@
 "use client"
 
+/* eslint-disable react-hooks/set-state-in-effect --
+   کامپوننت upstream از shadcn/ui است: همگام‌سازی اولیهٔ state با API امبلا
+   (onSelect) ذاتاً باید در اثرِ ساخته‌شدن اسلایدر انجام شود و الگوی
+   subscribe/unsubscribe دارد؛ بنابراین این قاعده برای این فایل کاربردی نیست. */
+
 import * as React from "react"
 import useEmblaCarousel, {
   type UseEmblaCarouselType,

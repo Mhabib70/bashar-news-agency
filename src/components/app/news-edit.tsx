@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { Pencil } from "lucide-react"
 import { useApp } from "@/lib/store"
 import { useToast } from "@/hooks/use-toast"
@@ -27,12 +27,19 @@ export function NewsEditDialog({
   const [content, setContent] = useState("")
   const [busy, setBusy] = useState(false)
 
-  useEffect(() => {
-    if (open && news) {
+  // همگام‌سازی فیلدها با خبرِ انتخاب‌شده هنگام باز شدن دیالوگ.
+  // به‌جای useEffect (که با هر رندرِ والد، متن تایپ‌شدهٔ کاربر را پاک می‌کرد)
+  // از الگوی رسمی React برای «تنظیم state هنگام تغییر prop» استفاده می‌شود:
+  // فقط وقتی خبرِ دیگری باز شود فیلدها بازنشانی می‌شوند.
+  const editKey = open && news ? String(news.id) : ""
+  const [prevEditKey, setPrevEditKey] = useState("")
+  if (editKey !== prevEditKey) {
+    setPrevEditKey(editKey)
+    if (news) {
       setTitle(news.title)
       setContent(news.content)
     }
-  }, [open, news])
+  }
 
   const titleOk = title.trim().length >= 8
   const contentOk = content.trim().length >= 30

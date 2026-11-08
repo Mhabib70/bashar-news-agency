@@ -98,3 +98,7 @@ server.log
 # Android SDK محلی و خروجی بیلد (build-apk-windows.sh)
 android/sdk/
 android/build/
+
+# دیتابیس محلی SQLite (مسیر واقعی نسبت به prisma/schema.prisma)
+prisma/db/
+docs/qa-fix/

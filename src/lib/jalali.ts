@@ -94,3 +94,22 @@ export function jalaliToday(): { jy: number; jm: number; jd: number } {
   const [gy, gm, gd] = parts.split("-").map(Number)
   return toJalali(gy, gm, gd)
 }
+
+// ── رابط‌های مبتنی بر Date (برای انتخابگر تاریخ) ──
+
+/** تبدیل تاریخ میلادی (اجزای محلی) به تاریخ جلالی */
+export function toJalaali(date: Date): { jy: number; jm: number; jd: number } {
+  return toJalali(date.getFullYear(), date.getMonth() + 1, date.getDate())
+}
+
+/** تبدیل تاریخ جلالی به Date محلی (ساعت ۰۰:۰۰) */
+export function jalaliToDate(jy: number, jm: number, jd: number): Date {
+  const g = toGregorian(jy, jm, jd)
+  return new Date(g.gy, g.gm - 1, g.gd)
+}
+
+/** شماره ستون روز اول ماه جلالی — ۰ = شنبه (شروع هفته جلالی) */
+export function jalaliMonthStartWeekday(jy: number, jm: number): number {
+  const d = jalaliToDate(jy, jm, 1)
+  return (d.getDay() + 1) % 7
+}

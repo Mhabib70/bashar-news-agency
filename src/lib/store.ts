@@ -4,6 +4,8 @@ import { create } from "zustand"
 import type { AppState, NewsDTO } from "@/lib/server/state"
 import { applyOrgUnits } from "@/lib/domain"
 
+export type { NewsDTO } from "@/lib/server/state"
+
 export type Tab = "home" | "news" | "activity" | "profile" | "review"
 
 type SubmitPayload = {

@@ -14,7 +14,6 @@ export function NotificationsSheet({ open, onClose }: { open: boolean; onClose: 
   // با باز شدن شیت، همهٔ اعلان‌های رسیده خوانده‌شده علامت می‌خورند تا بَج زنگوله پاک شود
   useEffect(() => {
     if (open) markNotificationsRead()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open])
   if (!state) return null
   const icon = (kind: string) =>
