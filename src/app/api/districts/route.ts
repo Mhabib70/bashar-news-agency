@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { getOrgUnits, saveOrgUnits, nextDistrictKey, type OrgDistrict } from "@/lib/server/orgunits"
+import { activeUser } from "@/lib/server/session"
 
 // مدیریت حوزه‌ها و پایگاه‌های سازمان — قابل استفاده برای ادمین کل و مدیر حوزه
 // GET  → فهرست حوزه‌ها و پایگاه‌ها (عمومی — فرم ثبت‌نام هم لازم دارد)
@@ -16,8 +17,8 @@ const clean = (s: unknown, max = 60) => String(s ?? "").trim().slice(0, max)
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { userId, action } = body ?? {}
-    const actor = await db.user.findUnique({ where: { id: String(userId ?? "") } })
+    const { action } = body ?? {}
+    const actor = await activeUser(req)
     if (!actor || !["admin", "district_manager"].includes(actor.role) || actor.status !== "active") {
       return NextResponse.json({ error: "فقط ادمین کل و مدیر حوزه می‌توانند حوزه‌ها و پایگاه‌ها را ویرایش کنند" }, { status: 403 })
     }

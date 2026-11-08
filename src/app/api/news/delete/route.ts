@@ -1,16 +1,17 @@
 import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
+import { activeUser } from "@/lib/server/session"
 
 // حذف خبر — خبرنگار می‌تواند خبر در انتظار بررسی یا ردشدهٔ خود را حذف کند؛
 // ادمین کل هر خبری را می‌تواند حذف کند.
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { userId, newsId } = body ?? {}
-    if (!userId || !newsId) return NextResponse.json({ error: "پارامترهای ناقص" }, { status: 400 })
+    const { newsId } = body ?? {}
+    if (!newsId) return NextResponse.json({ error: "پارامترهای ناقص" }, { status: 400 })
 
-    const user = await db.user.findUnique({ where: { id: userId } })
-    if (!user || user.status !== "active") return NextResponse.json({ error: "دسترسی مجاز نیست" }, { status: 403 })
+    const user = await activeUser(req)
+    if (!user) return NextResponse.json({ error: "نشست معتبر نیست — دوباره وارد شوید" }, { status: 401 })
 
     const news = await db.newsItem.findUnique({ where: { id: Number(newsId) } })
     if (!news) return NextResponse.json({ error: "خبر یافت نشد" }, { status: 404 })

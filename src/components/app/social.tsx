@@ -7,10 +7,11 @@ import { useRouter } from "next/navigation"
 import {
   Bell, Home, Newspaper, BarChart3, UserRound, ClipboardCheck, ShieldCheck, Search,
   Megaphone, Target, Trophy, Plus, ChevronLeft, Rss, CheckCircle2, PlayCircle, Smile, Landmark,
+  CalendarClock,
 } from "lucide-react"
 import { type Tab } from "@/lib/store"
 import type { AppState, AppUser, LeaderRow } from "@/lib/server/state"
-import { fa, faNum, relTime, durFmt, untilFmt } from "@/lib/format"
+import { fa, faNum, relTime, durFmt, untilFmt, preparedFmt } from "@/lib/format"
 import { CATEGORY_LABELS, DISTRICT_LABELS, LEVELS } from "@/lib/domain"
 import { Avatar } from "@/components/app/bits"
 import { ThemeToggle } from "@/components/app/theme-toggle"
@@ -440,6 +441,7 @@ export type FeedNews = {
   mediaType: string
   mediaUrl: string
   durationMin: number
+  preparedAt: string | null
   createdAt: string
   reporterName: string
   reporterAvatar: string
@@ -491,6 +493,12 @@ export function FeedPost({ n }: { n: FeedNews }) {
         <span className="rounded-full bg-surface-2 px-2.5 py-1">{CATEGORY_LABELS[n.category] ?? n.category}</span>
         <span className="rounded-full bg-surface-2 px-2.5 py-1" dir="ltr">{n.code}</span>
         {n.durationMin > 0 && <span className="rounded-full bg-surface-2 px-2.5 py-1">{durFmt(n.durationMin)}</span>}
+        {n.preparedAt && (
+          <span className="flex items-center gap-1 rounded-full bg-surface-2 px-2.5 py-1">
+            <CalendarClock className="h-3 w-3" />
+            {preparedFmt(n.preparedAt)}
+          </span>
+        )}
         {n.isMine && (
           <span className="mr-auto flex items-center gap-1 font-bold text-[var(--neon)]">
             <PlayCircle className="h-3.5 w-3.5" />

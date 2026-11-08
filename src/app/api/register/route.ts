@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
-import { EDUCATION_LABELS, isSuperAdminPhone } from "@/lib/domain"
+import { EDUCATION_LABELS } from "@/lib/domain"
 import { getOrgUnits } from "@/lib/server/orgunits"
 import { notifyUser } from "@/lib/server/notify"
+import { isSuperAdminPhone } from "@/lib/server/superadmin"
+import { attachSession } from "@/lib/server/session"
 
 // ثبت‌نام خبرنگار جدید (سناریوی ۱: نام ← شماره ← سن ← تحصیلات ← حوزه ← پایگاه)
 // فقط و فقط ثبت‌نام با شماره ادمین کل سامانه → ادمین فعال؛
@@ -62,13 +64,15 @@ export async function POST(req: NextRequest) {
     })
 
     if (boss) {
-      return NextResponse.json({
+      // ادمین کل بلافاصله وارد می‌شود — نشست او صادر می‌شود
+      const res = NextResponse.json({
         ok: true,
         userId: user.id,
         role,
         status,
         message: `ثبت‌نام کامل شد. ${fullName} عزیز، شما به‌عنوان ادمین کل خبرگزاری بسیج شهر رشت راه‌اندازی شدید!`,
       })
+      return attachSession(res, user.id, req)
     }
 
     // اعلان به ادمین‌ها: درخواست عضویت جدید

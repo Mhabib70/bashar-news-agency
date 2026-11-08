@@ -3,6 +3,7 @@ import { db } from "@/lib/db"
 import { addPoints, evaluateBadges } from "@/lib/server/state"
 import { notifyUser, notifyStageStaff } from "@/lib/server/notify"
 import { POINTS, nextReviewStage, reviewStageLabel, REJECT_REASONS, BADGES, ROLE_LABELS } from "@/lib/domain"
+import { activeUser } from "@/lib/server/session"
 
 // بررسی خبر (سناریوی ۳: چرخه سه‌مرحله‌ای — مدیر حوزه ← کارشناس ← ادمین کل)
 // امنیت: هر نقش فقط خبرِ مرحله خودش را می‌بیند و تصمیم می‌گیرد؛ مدیر حوزه فقط حوزه خودش.
@@ -11,12 +12,12 @@ import { POINTS, nextReviewStage, reviewStageLabel, REJECT_REASONS, BADGES, ROLE
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { userId, newsId, action, reason, note, mode } = body ?? {}
-    if (!userId || !newsId || !["approve", "reject"].includes(action)) {
+    const { newsId, action, reason, note, mode } = body ?? {}
+    if (!newsId || !["approve", "reject"].includes(action)) {
       return NextResponse.json({ error: "پارامترهای ناقص" }, { status: 400 })
     }
-    const reviewer = await db.user.findUnique({ where: { id: userId } })
-    if (!reviewer || reviewer.role === "reporter" || reviewer.status !== "active") {
+    const reviewer = await activeUser(req)
+    if (!reviewer || reviewer.role === "reporter") {
       return NextResponse.json({ error: "دسترسی مجاز نیست" }, { status: 403 })
     }
     const news = await db.newsItem.findUnique({ where: { id: Number(newsId) }, include: { reporter: true } })

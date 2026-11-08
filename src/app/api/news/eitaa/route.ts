@@ -4,6 +4,7 @@ import path from "path"
 import { db } from "@/lib/db"
 import { CATEGORY_LABELS, DISTRICT_LABELS, ROLE_LABELS } from "@/lib/domain"
 import { toJalali, JALALI_MONTHS } from "@/lib/jalali"
+import { activeUser } from "@/lib/server/session"
 
 // ارسال خبر به کانال ایتا — با حفظ الگوی متن + عکس خبر
 // پیش‌نیاز (متغیرهای محیطی سرویس bashar در docker-compose):
@@ -27,13 +28,13 @@ const MIME_BY_EXT: Record<string, string> = {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { userId, newsId } = body ?? {}
-    if (!userId || !newsId) {
+    const { newsId } = body ?? {}
+    if (!newsId) {
       return NextResponse.json({ error: "پارامترهای ناقص" }, { status: 400 })
     }
 
-    const sender = await db.user.findUnique({ where: { id: userId } })
-    if (!sender || !["admin", "specialist"].includes(sender.role) || sender.status !== "active") {
+    const sender = await activeUser(req)
+    if (!sender || !["admin", "specialist"].includes(sender.role)) {
       return NextResponse.json({ error: "فقط ادمین کل و کارشناس خبر می‌توانند به ایتا ارسال کنند" }, { status: 403 })
     }
 

@@ -1,7 +1,10 @@
 import { db } from "@/lib/db"
-import { LEVELS, levelFor, levelIndex, nextLevel, BADGES, POINTS, ROLE_STAGE, isSuperAdminPhone } from "@/lib/domain"
+import { LEVELS, levelFor, levelIndex, nextLevel, BADGES, POINTS, ROLE_STAGE } from "@/lib/domain"
+import { isSuperAdminPhone } from "./superadmin"
 import { tehranDayKey, tehranDayStart } from "./tz"
-import { challengeHousekeeping, applyInactivityPolicy, registrationHousekeeping } from "./challenges"
+import {
+  challengeHousekeeping, applyInactivityPolicy, registrationHousekeeping, pendingNudgeHousekeeping,
+} from "./challenges"
 import { getOrgUnits } from "./orgunits"
 import type { Prisma } from "@prisma/client"
 
@@ -26,6 +29,8 @@ export type AppUser = {
   currentStreak: number
   bestStreak: number
   avatar: string
+  /** حساب محافظت‌شدهٔ ادمین کل سامانه (شماره‌اش در کلاینت لو نمی‌رود) */
+  isSuperAdmin: boolean
   createdAt: string
 }
 
@@ -163,6 +168,7 @@ export async function getAppState(userId: string): Promise<AppState | null> {
   // نگهداری دوره‌ای lazy (معادل scheduler ربات): انقضای ثبت‌نام‌ها، پایان چالش‌ها، سقوط غیبت
   await registrationHousekeeping().catch(() => {})
   await challengeHousekeeping().catch(() => {})
+  await pendingNudgeHousekeeping().catch(() => {})
   await applyInactivityPolicy(userId).catch(() => {})
 
   let u = await db.user.findUnique({ where: { id: userId }, include: { notifSetting: true } })
@@ -255,7 +261,9 @@ export async function getAppState(userId: string): Promise<AppState | null> {
     district: u.district, base: u.base, phone: u.phone, age: u.age, education: u.education,
     points: u.points, levelKey: u.levelKey, levelTitle: lv.title, levelEmoji: lv.emoji,
     nextLevelTitle: nx?.title ?? null, nextLevelMin: nx?.min ?? null,
-    currentStreak: u.currentStreak, bestStreak: u.bestStreak, avatar: u.avatar, createdAt: u.createdAt.toISOString(),
+    currentStreak: u.currentStreak, bestStreak: u.bestStreak, avatar: u.avatar,
+    isSuperAdmin: isSuperAdminPhone(u.phone),
+    createdAt: u.createdAt.toISOString(),
   }
 
   const challengeDTOs: ChallengeDTO[] = challenges.map((c) => {

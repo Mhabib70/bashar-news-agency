@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react"
 import { Search, Check, X, Clock, RefreshCw, Phone, GraduationCap, CalendarDays, Activity, Flame, Trophy, Newspaper, ChevronLeft, ImageOff, Loader2, FileText, Award } from "lucide-react"
 import { useApp, type AdminUserDetail } from "@/lib/store"
 import { fa, faNum, relTime, jalali } from "@/lib/format"
-import { ROLE_LABELS, DISTRICT_LABELS, BASE_LISTS, USER_REJECT_TITLES, LEVELS, EDUCATION_LABELS, BADGES, isSuperAdminPhone } from "@/lib/domain"
+import { ROLE_LABELS, DISTRICT_LABELS, BASE_LISTS, USER_REJECT_TITLES, LEVELS, EDUCATION_LABELS, BADGES } from "@/lib/domain"
 import { NeonAvatar } from "@/components/app/bits"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
@@ -407,13 +407,13 @@ function UserDetailDialog({ userId, onClose, onChanged }: { userId: string | nul
             )}
 
             {/* نقش سازمانی — منصوب‌کردن چرخه سه‌مرحله‌ای + ارتقا به ادمین کل */}
-            {u.status === "active" && isSuperAdminPhone(u.phone) && (
+            {u.status === "active" && u.isSuperAdmin && (
               <div className="flex items-center justify-between rounded-[24px] border border-warn/35 bg-warn/6 p-4">
                 <p className="text-[12px] font-black text-warn">👑 حساب ادمین کل سامانه</p>
                 <p className="text-[10.5px] text-ink-muted">این حساب محافظت‌شده است؛ نقش و وضعیت آن قابل تغییر نیست.</p>
               </div>
             )}
-            {u.status === "active" && !isSuperAdminPhone(u.phone) && (
+            {u.status === "active" && !u.isSuperAdmin && (
               <div className="rounded-[24px] border border-line bg-surface p-4">
                 <div className="mb-1 flex items-center justify-between">
                   <p className="text-[13px] font-black text-ink">نقش در چرخه بررسی</p>

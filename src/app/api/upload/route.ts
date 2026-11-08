@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { mkdir, writeFile } from "fs/promises"
 import path from "path"
 import { db } from "@/lib/db"
+import { activeUser } from "@/lib/server/session"
 
 // آپلود رسانه (عکس/ویدیو/فایل آموزش) — ذخیره در public/uploads و سرو از همان مسیر
 // سقف عکس ۳۰MB و ویدیو ۳۰MB (انجینکس 64m است تا multipart بدون خطای 413 رد شود)
@@ -25,13 +26,13 @@ const EXT_BY_TYPE: Record<string, string> = {
 export async function POST(req: NextRequest) {
   try {
     const fd = await req.formData()
-    const userId = String(fd.get("userId") ?? "")
+    const user = await activeUser(req)
+    const userId = user?.id ?? ""
     const file = fd.get("file")
-    if (!userId || !(file instanceof File)) {
+    if (!user || !(file instanceof File)) {
       return NextResponse.json({ error: "فایل ارسال نشده است" }, { status: 400 })
     }
 
-    const user = await db.user.findUnique({ where: { id: userId } })
     if (!user || user.status !== "active") {
       return NextResponse.json({ error: "دسترسی مجاز نیست" }, { status: 403 })
     }

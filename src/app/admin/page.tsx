@@ -35,7 +35,8 @@ export default function AdminPage() {
   // بازیابی نشست از حافظه محلی (مشترک با اپ)
   useEffect(() => {
     const uid = localStorage.getItem("newsapp_uid")
-    if (uid) login(uid).catch(() => router.replace("/"))
+    // نشست از کوکی خوانده می‌شود؛ فقط تلاش برای بازیابی
+    if (uid) login().catch(() => router.replace("/"))
     else router.replace("/")
   }, [login, router])
 

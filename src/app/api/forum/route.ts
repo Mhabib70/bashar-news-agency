@@ -4,6 +4,7 @@ import { levelFor, FORUM_POINTS } from "@/lib/domain"
 import { addForumPoints } from "@/lib/server/state"
 import { notifyUser } from "@/lib/server/notify"
 import type { Prisma } from "@prisma/client"
+import { activeUser } from "@/lib/server/session"
 
 // تالار گفتگو v3 — سبک تلگرامی + امتیاز تالار + تخته افتخار هفته + نشان‌ها + سوال هفته ادمین
 // GET (بدون topicId)  → فهرست تاپیک‌ها + اعضا + تخته افتخار هفته + سوال هفته + آمار من
@@ -109,11 +110,10 @@ async function honorBoard(since: Date): Promise<{ rows: HonorRow[]; weekly: Map<
 
 export async function GET(req: NextRequest) {
   const sp = req.nextUrl.searchParams
-  const userId = sp.get("userId")
   const topicId = sp.get("topicId")
-  if (!userId) return NextResponse.json({ error: "userId لازم است" }, { status: 400 })
-  const user = await db.user.findUnique({ where: { id: userId } })
-  if (!user || user.status !== "active") return NextResponse.json({ error: "دسترسی مجاز نیست" }, { status: 403 })
+  const user = await activeUser(req)
+  if (!user) return NextResponse.json({ error: "نشست معتبر نیست — دوباره وارد شوید" }, { status: 401 })
+  const userId = user.id
   // ضربان حضور: هر تماس تالار = آنلاین
   await db.user.update({ where: { id: user.id }, data: { lastSeenAt: new Date() } }).catch(() => {})
 
@@ -271,9 +271,9 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { userId, action } = body ?? {}
-    const user = await db.user.findUnique({ where: { id: String(userId ?? "") } })
-    if (!user || user.status !== "active") return NextResponse.json({ error: "دسترسی مجاز نیست" }, { status: 403 })
+    const { action } = body ?? {}
+    const user = await activeUser(req)
+    if (!user) return NextResponse.json({ error: "نشست معتبر نیست — دوباره وارد شوید" }, { status: 401 })
     const isAdmin = user.role === "admin"
     await db.user.update({ where: { id: user.id }, data: { lastSeenAt: new Date() } }).catch(() => {})
 

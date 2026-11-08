@@ -50,7 +50,7 @@ export function Welcome() {
       })
       const d = await res.json().catch(() => ({}))
       if (d.ok && d.userId) {
-        await login(d.userId)
+        await login()
         toast({ title: `خوش آمدی ${d.fullName}!`, description: "ورود با موفقیت انجام شد." })
         setOpen(false)
         setPhone("")
@@ -157,8 +157,8 @@ export function Welcome() {
         open={regOpen}
         onOpenChange={setRegOpen}
         initialPhone={faToEn(phone).replace(/\D/g, "")}
-        onDone={(id, msg) => {
-          login(id).then(() => {
+        onDone={(_id, msg) => {
+          login().then(() => {
             toast({ title: msg })
           })
         }}

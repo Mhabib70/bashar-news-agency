@@ -1,14 +1,15 @@
 import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { notifyUser } from "@/lib/server/notify"
-import { USER_REJECT_TITLES, ROLE_LABELS, DISTRICT_LABELS, isSuperAdminPhone } from "@/lib/domain"
+import { USER_REJECT_TITLES, ROLE_LABELS, DISTRICT_LABELS } from "@/lib/domain"
+import { isSuperAdminPhone } from "@/lib/server/superadmin"
+import { activeUser } from "@/lib/server/session"
 
 // مدیریت کاربران — فقط ادمین کل
 // GET  بدون targetId: لیست همه اعضا | GET با targetId: پرونده کامل کاربر
 // POST: تایید/رد درخواست عضویت (معادل سناریوی ۱ ربات)
 export async function GET(req: NextRequest) {
-  const adminId = req.nextUrl.searchParams.get("userId")
-  const admin = await db.user.findUnique({ where: { id: adminId ?? "" } })
+  const admin = await activeUser(req)
   if (!admin || admin.role !== "admin") {
     return NextResponse.json({ error: "دسترسی مجاز نیست" }, { status: 403 })
   }
@@ -39,6 +40,7 @@ export async function GET(req: NextRequest) {
         rejectReason: u.rejectReason, district: u.district, base: u.base, phone: u.phone,
         age: u.age, education: u.education, points: u.points, levelKey: u.levelKey,
         currentStreak: u.currentStreak, bestStreak: u.bestStreak, avatar: u.avatar,
+        isSuperAdmin: isSuperAdminPhone(u.phone),
         lastActivityAt: u.lastActivityAt?.toISOString() ?? null,
         createdAt: u.createdAt.toISOString(),
       },
@@ -66,7 +68,7 @@ export async function GET(req: NextRequest) {
     },
     orderBy: [{ status: "asc" }, { createdAt: "desc" }], // pending اول
   })
-  return NextResponse.json({ users })
+  return NextResponse.json({ users: users.map((u) => ({ ...u, isSuperAdmin: isSuperAdminPhone(u.phone) })) })
 }
 
 export async function POST(req: NextRequest) {

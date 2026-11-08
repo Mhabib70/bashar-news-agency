@@ -47,6 +47,16 @@ export function durFmt(min: number): string {
   return `${fa(h)}س ${fa(m)}د`
 }
 
+/** تاریخ و ساعت تهیه خبر (شمسی) */
+export function preparedFmt(iso: string | null | undefined): string {
+  if (!iso) return ""
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return ""
+  return new Intl.DateTimeFormat("fa-IR", {
+    day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit",
+  }).format(d)
+}
+
 export function untilFmt(iso: string): string {
   const diff = new Date(iso).getTime() - Date.now()
   if (diff <= 0) return "پایان یافته"

@@ -3,22 +3,20 @@ import { db } from "@/lib/db"
 import { addPoints, recordActivity, nextNewsCode, evaluateBadges } from "@/lib/server/state"
 import { notifyStageStaff } from "@/lib/server/notify"
 import { POINTS, CATEGORY_LABELS } from "@/lib/domain"
+import { activeUser } from "@/lib/server/session"
 
 // جستجوی اخبار — خبرنگار: اخبار خودش؛ ارزیاب/ادمین: scope=all همه اخبار
 export async function GET(req: NextRequest) {
   const sp = req.nextUrl.searchParams
-  const userId = sp.get("userId")
   const q = (sp.get("q") ?? "").trim()
   const scope = sp.get("scope") === "all" ? "all" : "mine"
-  if (!userId) return NextResponse.json({ error: "userId لازم است" }, { status: 400 })
+  const user = await activeUser(req)
+  if (!user) return NextResponse.json({ error: "نشست معتبر نیست — دوباره وارد شوید" }, { status: 401 })
   if (q.length < 2) return NextResponse.json({ news: [] })
-
-  const user = await db.user.findUnique({ where: { id: userId } })
-  if (!user) return NextResponse.json({ error: "کاربر یافت نشد" }, { status: 404 })
 
   const canAll = scope === "all" && user.role !== "reporter"
   const where = {
-    ...(canAll ? {} : { reporterId: userId }),
+    ...(canAll ? {} : { reporterId: user.id }),
     OR: [
       { title: { contains: q } },
       { content: { contains: q } },
@@ -38,21 +36,20 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { userId, category, title, content, mediaType, mediaUrl, durationMin, challengeId, draftId } = body ?? {}
-    if (!userId || !title || !content) {
+    const { category, title, content, mediaType, mediaUrl, durationMin, preparedAt, challengeId, draftId } = body ?? {}
+    if (!title || !content) {
       return NextResponse.json({ error: "عنوان و متن خبر الزامی است" }, { status: 400 })
     }
     if (String(title).trim().length < 8) return NextResponse.json({ error: "تیتر باید حداقل ۸ کاراکتر باشد" }, { status: 400 })
     if (String(content).trim().length < 30) return NextResponse.json({ error: "متن خبر باید حداقل ۳۰ کاراکتر باشد" }, { status: 400 })
-    const user = await db.user.findUnique({ where: { id: userId } })
-    if (!user) return NextResponse.json({ error: "کاربر یافت نشد" }, { status: 404 })
-    if (user.status !== "active") return NextResponse.json({ error: "حساب شما فعال نیست" }, { status: 403 })
+    const user = await activeUser(req)
+    if (!user) return NextResponse.json({ error: "نشست معتبر نیست — دوباره وارد شوید" }, { status: 401 })
 
     const code = await nextNewsCode()
     const news = await db.newsItem.create({
       data: {
         code,
-        reporterId: userId,
+        reporterId: user.id,
         district: user.district,
         category: category || "none",
         title: String(title).slice(0, 200),
@@ -60,6 +57,7 @@ export async function POST(req: NextRequest) {
         mediaType: ["photo", "video"].includes(mediaType) ? mediaType : "none",
         mediaUrl: typeof mediaUrl === "string" && mediaUrl.startsWith("/uploads/") ? mediaUrl : "",
         durationMin: Math.max(1, Math.min(600, Number(durationMin) || 30)),
+        preparedAt: preparedAt ? new Date(String(preparedAt)) : null,
         status: "pending",
         reviewStage: "district",
         challengeId: challengeId ? Number(challengeId) : null,
@@ -67,8 +65,8 @@ export async function POST(req: NextRequest) {
     })
 
     // امتیاز ارسال + استریک
-    await addPoints(userId, POINTS.SUBMIT, "ارسال خبر", "submit")
-    await recordActivity(userId)
+    await addPoints(user.id, POINTS.SUBMIT, "ارسال خبر", "submit")
+    await recordActivity(user.id)
 
     // ردپای چرخه: رویداد ورود خبر (برای تایم‌لاین زنده)
     await db.newsEvent.create({
@@ -80,11 +78,11 @@ export async function POST(req: NextRequest) {
     if (challengeId) {
       const ch = await db.challenge.findUnique({ where: { id: Number(challengeId) }, include: { participations: true } })
       if (ch && ch.status === "active") {
-        const existing = ch.participations.find((p) => p.userId === userId)
+        const existing = ch.participations.find((p) => p.userId === user.id)
         if (existing) {
           await db.challengeParticipation.update({ where: { id: existing.id }, data: { count: { increment: 1 } } })
         } else {
-          await db.challengeParticipation.create({ data: { challengeId: ch.id, userId, count: 1 } })
+          await db.challengeParticipation.create({ data: { challengeId: ch.id, userId: user.id, count: 1 } })
         }
         challengeJoined = ch.title
       }
@@ -96,10 +94,10 @@ export async function POST(req: NextRequest) {
     // حذف پیش‌نویس پس از ارسال موفق (رفع ایراد: پیش‌نویس قبلاً فقط خالی می‌شد)
     if (draftId) {
       const d = await db.draft.findUnique({ where: { id: Number(draftId) } })
-      if (d && d.userId === userId) await db.draft.delete({ where: { id: d.id } })
+      if (d && d.userId === user.id) await db.draft.delete({ where: { id: d.id } })
     }
 
-    const awarded = await evaluateBadges(userId)
+    const awarded = await evaluateBadges(user.id)
     return NextResponse.json({
       ok: true,
       news: { id: news.id, code: news.code },

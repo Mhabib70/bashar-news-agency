@@ -61,6 +61,7 @@ model NewsItem {
   challengeId  Int?
   mediaUrl     String @default("") // آدرس فایل رسانه آپلودشده
   durationMin  Int    @default(0) // زمان صرف‌شده برای تهیه خبر (دقیقه)
+  preparedAt   DateTime? // تاریخ و ساعت تهیه خبر (انتخاب خبرنگار)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
