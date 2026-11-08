@@ -18,20 +18,23 @@ export function BottomNav({ onReview, className }: { onReview: () => void; class
   ]
 
   return (
-    <nav className={cn("fixed inset-x-0 bottom-0 z-40 border-t border-line bg-[var(--nav-bg)]/95 px-2 pb-2 pt-1.5 backdrop-blur-lg lg:hidden", className)} aria-label="ناوبری اصلی">
-      <div className={cn("flex items-end justify-around", isReviewer && "gap-0")}>
+    <nav
+      className={cn("fixed inset-x-4 bottom-3 z-40 lg:hidden", className)}
+      aria-label="ناوبری اصلی"
+    >
+      <div className="v3-navpill mx-auto flex max-w-[440px] items-end justify-around rounded-[26px] px-2.5 pb-2 pt-2">
         {items.slice(0, 2).map((it) => (
           <NavBtn key={it.id} label={it.label} icon={it.icon} active={tab === it.id} onClick={() => setTab(it.id)} />
         ))}
         {isReviewer ? (
           <button
             onClick={onReview}
-            className="relative -mt-7 flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-neon text-neon-foreground btn-glow-strong transition-transform hover:scale-105 active:scale-95"
+            className="relative -mt-8 flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-gradient-to-b from-[var(--v3-amber-2)] to-[var(--v3-amber)] text-[#42290a] shadow-[0_14px_30px_-8px_rgba(245,158,11,0.65)] ring-4 ring-[var(--v3-page)] transition-transform hover:scale-105 active:scale-95"
             aria-label="صف بررسی"
           >
             <ClipboardCheck className="h-6 w-6" />
             {state.reviewQueue.length > 0 && (
-              <span className="absolute -left-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-danger px-1 text-[10px] font-black text-white">
+              <span className="absolute -left-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#ef4444] px-1 text-[10px] font-black text-white">
                 {fa(state.reviewQueue.length)}
               </span>
             )}
@@ -51,15 +54,22 @@ function NavBtn({ label, icon, active, onClick }: { label: string; icon: React.R
   return (
     <button
       onClick={onClick}
-      className={cn(
-        "flex min-w-16 flex-col items-center gap-1 rounded-2xl py-1.5 transition-colors",
-        active ? "text-neon" : "text-ink-muted hover:text-ink",
-      )}
+      className="flex min-w-[62px] flex-col items-center gap-0.5 py-0.5 transition-colors"
       aria-current={active ? "page" : undefined}
     >
-      {icon}
-      <span className="text-[10px] font-bold">{label}</span>
-      <span className={cn("h-1 w-1 rounded-full", active ? "bg-neon" : "bg-transparent")} />
+      <span
+        className={cn(
+          "flex h-10 w-10 items-center justify-center rounded-full transition-all",
+          active
+            ? "bg-white text-[var(--v3-navy-deep)] shadow-[0_8px_18px_-6px_rgba(4,9,30,0.45)]"
+            : "bg-transparent text-white/55",
+        )}
+      >
+        {icon}
+      </span>
+      <span className={cn("text-[9.5px] leading-none font-bold", active ? "text-white" : "text-white/45")}>
+        {label}
+      </span>
     </button>
   )
 }

@@ -64,39 +64,40 @@ export function Welcome() {
   }
 
   return (
-    <div className="relative flex h-full flex-col overflow-hidden bg-background">
-      {/* هیرو — لوگوی خبرگزاری بسیج شهر رشت */}
-      <div className="relative h-[54%] w-full shrink-0 bg-black">
+    <div className="relative flex h-full flex-col overflow-hidden bg-[var(--v3-navy)]">
+      {/* هیرو — لوگوی خبرگزاری بسیج شهر رشت روی سرمه‌ای */}
+      <div className="relative h-[52%] w-full shrink-0">
         <Image src="/img/agency-logo.png" alt="خبرگزاری بسیج شهر رشت" fill priority sizes="430px" className="object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/25 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[var(--v3-navy-deep)]/45 via-transparent to-[var(--v3-navy)]" />
         <div className="absolute inset-x-0 top-0 flex items-center justify-between p-5">
-          <button className="flex h-10 w-10 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur transition-colors hover:bg-black/65" aria-label="منو">
+          <button className="flex h-10 w-10 items-center justify-center rounded-full border border-white/12 bg-white/10 text-white backdrop-blur transition-colors hover:bg-white/20" aria-label="منو">
             <Menu className="h-5 w-5" />
           </button>
-          <button className="relative flex h-10 w-10 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur transition-colors hover:bg-black/65" aria-label="اعلان‌ها">
+          <button className="relative flex h-10 w-10 items-center justify-center rounded-full border border-white/12 bg-white/10 text-white backdrop-blur transition-colors hover:bg-white/20" aria-label="اعلان‌ها">
             <Bell className="h-5 w-5" />
-            <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-neon" />
+            <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-[var(--v3-amber-2)]" />
           </button>
         </div>
       </div>
 
-      {/* شعار و دکمه */}
-      <div className="relative -mt-14 z-10 flex flex-1 flex-col px-6">
-        <h1 className="text-[34px] font-black leading-[1.25] text-ink">
+      {/* پنل روشنِ لغزان روی هیرو — شعار و دکمه */}
+      <div className="relative -mt-16 z-10 flex flex-1 flex-col rounded-t-[34px] bg-[var(--v3-page)] px-6 pt-7 shadow-[0_-18px_44px_-24px_rgba(9,14,35,0.5)]">
+        <span className="v3-chip mb-3 w-fit">خبرگزاری بسیج شهر رشت</span>
+        <h1 className="text-[33px] font-black leading-[1.25] text-[var(--v3-ink)]">
           روایت‌گرِ
           <br />
-          <span className="text-neon">حقیقت</span>
+          <span className="bg-gradient-to-l from-[var(--v3-azure-2)] to-[var(--v3-azure-deep)] bg-clip-text text-transparent">حقیقت</span>
           <br />
           صدای بسیج
         </h1>
-        <p className="mt-3 text-[13.5px] leading-6 text-ink-muted">
+        <p className="mt-3 text-[13.5px] leading-6 text-[var(--v3-ink-2)]">
           از قلبِ رویداد تا صفحهٔ خبر؛
           <br />
           روایتی معتبر با تعهّد به حقیقت و اعتماد.
         </p>
         <button
           onClick={() => setOpen(true)}
-          className="mt-5 flex w-[62%] items-center justify-between rounded-full bg-neon px-6 py-4 text-[15px] font-bold text-neon-foreground btn-glow transition-transform hover:scale-[1.02] active:scale-[0.98]"
+          className="v3-btn mt-6 flex w-[68%] items-center justify-between px-6 py-4 text-[15px]"
         >
           شروع کن
           <ArrowLeft className="h-5 w-5" />
@@ -105,16 +106,16 @@ export function Welcome() {
 
       {/* ورود — با شماره موبایل؛ هیچ فهرست حسابی نمایش داده نمی‌شود */}
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="bottom-3 top-auto translate-y-0 gap-0 rounded-[28px] border-line bg-popover p-5 data-[state=open]:slide-in-from-bottom-10 max-h-[82dvh] overflow-y-auto nice-scroll">
+        <DialogContent className="bottom-3 top-auto translate-y-0 gap-0 rounded-[28px] border-[var(--v3-line)] bg-[var(--v3-card)] p-5 data-[state=open]:slide-in-from-bottom-10 max-h-[82dvh] overflow-y-auto nice-scroll">
           <DialogHeader className="text-right">
-            <DialogTitle className="text-ink">ورود به حساب</DialogTitle>
-            <DialogDescription className="text-ink-muted">
+            <DialogTitle className="text-[var(--v3-ink)]">ورود به حساب</DialogTitle>
+            <DialogDescription className="text-[var(--v3-ink-2)]">
               شماره موبایل حساب خودتان را وارد کنید. حساب ندارید؟ ثبت‌نام کنید.
             </DialogDescription>
           </DialogHeader>
           <div className="mt-4 space-y-3">
             <div>
-              <label className="mb-1.5 block text-[12px] font-semibold text-ink-muted">شماره موبایل</label>
+              <label className="mb-1.5 block text-[12px] font-semibold text-[var(--v3-ink-2)]">شماره موبایل</label>
               <Input
                 value={phone}
                 onChange={(e) => {
@@ -125,16 +126,16 @@ export function Welcome() {
                 placeholder="۰۹۱۲۳۴۵۶۷۸۹"
                 dir="ltr"
                 inputMode="tel"
-                className="rounded-2xl border-line bg-surface text-right text-[15px] tracking-widest text-ink placeholder:text-ink-muted/50"
+                className="v3-input rounded-2xl text-right text-[15px] tracking-widest placeholder:text-[var(--v3-ink-2)]/50"
               />
             </div>
             {err && (
-              <p className="rounded-2xl border border-danger/30 bg-danger/8 px-4 py-3 text-[12px] leading-5 text-danger-soft">{err}</p>
+              <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-[12px] leading-5 text-red-600 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-400">{err}</p>
             )}
             <button
               onClick={doPhoneLogin}
               disabled={busy}
-              className="flex w-full items-center justify-center gap-2 rounded-full bg-neon px-4 py-3.5 text-[14px] font-bold text-neon-foreground transition-transform hover:scale-[1.01] disabled:opacity-50"
+              className="v3-btn flex w-full items-center justify-center gap-2 py-3.5 text-[14px] disabled:opacity-50"
             >
               <LogIn className="h-4.5 w-4.5" />
               {busy ? "در حال ورود..." : "ورود"}
@@ -144,7 +145,7 @@ export function Welcome() {
                 setOpen(false)
                 setRegOpen(true)
               }}
-              className="flex w-full items-center justify-center gap-2 rounded-2xl border border-line bg-surface px-4 py-3.5 text-[14px] font-bold text-ink transition-colors hover:border-neon/40"
+              className="v3-btn-ghost flex w-full items-center justify-center gap-2 py-3.5 text-[14px]"
             >
               <X className="hidden" />
               ثبت‌نام خبرنگار جدید
@@ -208,20 +209,20 @@ function RegisterDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="rounded-[28px] border-line bg-popover p-5">
+      <DialogContent className="rounded-[28px] border-[var(--v3-line)] bg-[var(--v3-card)] p-5">
         <DialogHeader className="text-right">
-          <DialogTitle className="text-ink">ثبت‌نام خبرنگار</DialogTitle>
-          <DialogDescription className="text-ink-muted">
+          <DialogTitle className="text-[var(--v3-ink)]">ثبت‌نام خبرنگار</DialogTitle>
+          <DialogDescription className="text-[var(--v3-ink-2)]">
             مرحله {toFa(step + 1)} از {toFa(steps.length)} — {steps[step]}
           </DialogDescription>
         </DialogHeader>
         <div className="mt-1 flex gap-1.5">
           {steps.map((_, i) => (
-            <span key={i} className={cn("h-1.5 flex-1 rounded-full", i <= step ? "bg-neon" : "bg-surface-2")} />
+            <span key={i} className={cn("h-1.5 flex-1 rounded-full", i <= step ? "bg-[var(--v3-azure)]" : "bg-[var(--v3-card-2)]")} />
           ))}
         </div>
         {step === 0 && (
-          <p className="rounded-2xl border border-line bg-surface px-4 py-3 text-[11.5px] leading-5 text-ink-muted">
+          <p className="rounded-2xl border border-[var(--v3-line)] bg-[var(--v3-card-2)] px-4 py-3 text-[11.5px] leading-5 text-[var(--v3-ink-2)]">
             ثبت‌نام شما به‌عنوان خبرنگار ثبت می‌شود و پس از تایید ادمین کل فعال خواهد شد.
           </p>
         )}
@@ -229,23 +230,23 @@ function RegisterDialog({
           {step === 0 && (
             <>
               <div>
-                <label className="mb-1.5 block text-[12px] font-semibold text-ink-muted">نام و نام خانوادگی</label>
-                <Input value={f.fullName} onChange={(e) => setF({ ...f, fullName: e.target.value })} placeholder="مثلاً: امون رضایی" className="rounded-2xl border-line bg-surface text-ink placeholder:text-ink-muted/50" />
+                <label className="mb-1.5 block text-[12px] font-semibold text-[var(--v3-ink-2)]">نام و نام خانوادگی</label>
+                <Input value={f.fullName} onChange={(e) => setF({ ...f, fullName: e.target.value })} placeholder="مثلاً: امون رضایی" className="v3-input rounded-2xl placeholder:text-[var(--v3-ink-2)]/50" />
               </div>
               <div>
-                <label className="mb-1.5 block text-[12px] font-semibold text-ink-muted">شماره تماس</label>
-                <Input value={f.phone} onChange={(e) => setF({ ...f, phone: e.target.value })} placeholder="۰۹۱۲..." dir="ltr" className="rounded-2xl border-line bg-surface text-right text-ink placeholder:text-ink-muted/50" />
+                <label className="mb-1.5 block text-[12px] font-semibold text-[var(--v3-ink-2)]">شماره تماس</label>
+                <Input value={f.phone} onChange={(e) => setF({ ...f, phone: e.target.value })} placeholder="۰۹۱۲..." dir="ltr" className="v3-input rounded-2xl text-right placeholder:text-[var(--v3-ink-2)]/50" />
               </div>
             </>
           )}
           {step === 1 && (
             <>
               <div>
-                <label className="mb-1.5 block text-[12px] font-semibold text-ink-muted">سن</label>
-                <Input value={f.age} onChange={(e) => setF({ ...f, age: e.target.value.replace(/[۰-۹]/g, (d) => String("۰۱۲۳۴۵۶۷۸۹".indexOf(d))) })} placeholder="۲۵" inputMode="numeric" className="rounded-2xl border-line bg-surface text-ink placeholder:text-ink-muted/50" />
+                <label className="mb-1.5 block text-[12px] font-semibold text-[var(--v3-ink-2)]">سن</label>
+                <Input value={f.age} onChange={(e) => setF({ ...f, age: e.target.value.replace(/[۰-۹]/g, (d) => String("۰۱۲۳۴۵۶۷۸۹".indexOf(d))) })} placeholder="۲۵" inputMode="numeric" className="v3-input rounded-2xl placeholder:text-[var(--v3-ink-2)]/50" />
               </div>
               <div>
-                <label className="mb-1.5 block text-[12px] font-semibold text-ink-muted">تحصیلات</label>
+                <label className="mb-1.5 block text-[12px] font-semibold text-[var(--v3-ink-2)]">تحصیلات</label>
                 <div className="flex flex-wrap gap-2">
                   {EDUCATION_LEVEL_LABELS.map((ed) => (
                     <button
@@ -253,7 +254,9 @@ function RegisterDialog({
                       onClick={() => setF({ ...f, education: ed.key })}
                       className={cn(
                         "rounded-full border px-3.5 py-2 text-[12px] font-semibold transition-colors",
-                        f.education === ed.key ? "border-neon bg-neon text-neon-foreground" : "border-line bg-surface text-ink-muted",
+                        f.education === ed.key
+                          ? "border-transparent bg-gradient-to-l from-[var(--v3-azure-2)] to-[var(--v3-azure-deep)] text-white shadow-[0_8px_18px_-8px_rgba(37,99,235,0.6)]"
+                          : "border-[var(--v3-line)] bg-[var(--v3-card-2)] text-[var(--v3-ink-2)]",
                       )}
                     >
                       {ed.label}
@@ -266,7 +269,7 @@ function RegisterDialog({
           {step === 2 && (
             <>
               <div>
-                <label className="mb-1.5 block text-[12px] font-semibold text-ink-muted">حوزه فعالیت</label>
+                <label className="mb-1.5 block text-[12px] font-semibold text-[var(--v3-ink-2)]">حوزه فعالیت</label>
                 <div className="grid grid-cols-2 gap-2">
                   {Object.entries(DISTRICT_LABELS).map(([k, label]) => (
                     <button
@@ -274,7 +277,9 @@ function RegisterDialog({
                       onClick={() => setF({ ...f, district: k, base: "" })}
                       className={cn(
                         "rounded-xl border px-3 py-2.5 text-[12px] font-semibold transition-colors",
-                        f.district === k ? "border-neon bg-neon/10 text-neon" : "border-line bg-surface text-ink-muted",
+                        f.district === k
+                          ? "border-[var(--v3-azure)] bg-[var(--v3-azure-soft)] text-[var(--v3-azure-deep)] dark:text-[#93c5fd]"
+                          : "border-[var(--v3-line)] bg-[var(--v3-card-2)] text-[var(--v3-ink-2)]",
                       )}
                     >
                       {label}
@@ -283,7 +288,7 @@ function RegisterDialog({
                 </div>
               </div>
               <div>
-                <label className="mb-1.5 block text-[12px] font-semibold text-ink-muted">پایگاه</label>
+                <label className="mb-1.5 block text-[12px] font-semibold text-[var(--v3-ink-2)]">پایگاه</label>
                 <div className="grid max-h-36 grid-cols-2 gap-2 overflow-y-auto nice-scroll pl-1">
                   {(BASE_LISTS[f.district] ?? []).map((b) => (
                     <button
@@ -291,7 +296,9 @@ function RegisterDialog({
                       onClick={() => setF({ ...f, base: b })}
                       className={cn(
                         "rounded-xl border px-3 py-2.5 text-[11.5px] font-semibold leading-4 transition-colors",
-                        f.base === b ? "border-neon bg-neon/10 text-neon" : "border-line bg-surface text-ink-muted",
+                        f.base === b
+                          ? "border-[var(--v3-azure)] bg-[var(--v3-azure-soft)] text-[var(--v3-azure-deep)] dark:text-[#93c5fd]"
+                          : "border-[var(--v3-line)] bg-[var(--v3-card-2)] text-[var(--v3-ink-2)]",
                       )}
                     >
                       {b}
@@ -305,7 +312,7 @@ function RegisterDialog({
 
         <div className="mt-5 flex gap-2">
           {step > 0 && (
-            <button onClick={() => setStep(step - 1)} className="rounded-full border border-line px-5 py-3 text-[13px] font-bold text-ink-muted">
+            <button onClick={() => setStep(step - 1)} className="rounded-full border border-[var(--v3-line)] px-5 py-3 text-[13px] font-bold text-[var(--v3-ink-2)]">
               قبلی
             </button>
           )}
@@ -313,7 +320,7 @@ function RegisterDialog({
             <button
               onClick={() => canNext && setStep(step + 1)}
               disabled={!canNext}
-              className="flex-1 rounded-full bg-neon py-3 text-[14px] font-bold text-neon-foreground disabled:opacity-40"
+              className="v3-btn flex-1 py-3 text-[14px] disabled:opacity-40"
             >
               مرحله بعد
             </button>
@@ -321,7 +328,7 @@ function RegisterDialog({
             <button
               onClick={submit}
               disabled={!canNext}
-              className="flex-1 rounded-full bg-neon py-3 text-[14px] font-bold text-neon-foreground disabled:opacity-40"
+              className="v3-btn flex-1 py-3 text-[14px] disabled:opacity-40"
             >
               تکمیل ثبت‌نام
             </button>
@@ -331,4 +338,3 @@ function RegisterDialog({
     </Dialog>
   )
 }
-

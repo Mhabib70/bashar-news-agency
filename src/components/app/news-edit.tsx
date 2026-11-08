@@ -54,38 +54,38 @@ export function NewsEditDialog({
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-h-[86dvh] overflow-y-auto nice-scroll rounded-[28px] border-line bg-popover p-5 sm:max-w-lg">
+      <DialogContent className="max-h-[86dvh] overflow-y-auto nice-scroll rounded-[24px] border-[var(--v3-line)] bg-[var(--v3-card)] p-5 sm:max-w-lg">
         <DialogHeader className="text-right">
-          <DialogTitle className="flex items-center gap-2 text-ink">
-            <Pencil className="h-4.5 w-4.5 text-neon" />
+          <DialogTitle className="flex items-center gap-2 text-[var(--v3-ink)]">
+            <Pencil className="h-4.5 w-4.5 text-[var(--v3-azure)]" />
             ویرایش متن خبر
           </DialogTitle>
-          <DialogDescription className="text-ink-muted">
+          <DialogDescription className="text-[var(--v3-ink-2)]">
             تیتر و متن کامل خبر را اصلاح کنید. این ویرایش در ردپای چرخه ثبت و به خبرنگار اعلان می‌شود.
           </DialogDescription>
         </DialogHeader>
 
         <div className="mt-3 space-y-3">
           <div>
-            <label className="mb-1.5 block text-[12px] font-semibold text-ink-muted">
-              تیتر خبر <span className={titleOk ? "text-neon" : "text-danger-soft"}>({title.trim().length}/۸)</span>
+            <label className="mb-1.5 block text-[12px] font-semibold text-[var(--v3-ink-2)]">
+              تیتر خبر <span className={titleOk ? "text-[var(--v3-azure)]" : "text-red-600 dark:text-red-400"}>({title.trim().length}/۸)</span>
             </label>
             <Input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="rounded-2xl border-line bg-surface text-ink"
+              className="v3-input rounded-2xl"
               placeholder="تیتر خبر"
             />
           </div>
           <div>
-            <label className="mb-1.5 block text-[12px] font-semibold text-ink-muted">
-              متن کامل خبر <span className={contentOk ? "text-neon" : "text-danger-soft"}>({content.trim().length}/۳۰)</span>
+            <label className="mb-1.5 block text-[12px] font-semibold text-[var(--v3-ink-2)]">
+              متن کامل خبر <span className={contentOk ? "text-[var(--v3-azure)]" : "text-red-600 dark:text-red-400"}>({content.trim().length}/۳۰)</span>
             </label>
             <Textarea
               value={content}
               onChange={(e) => setContent(e.target.value)}
               rows={10}
-              className="rounded-2xl border-line bg-surface text-[13px] leading-7 text-ink"
+              className="v3-input rounded-2xl text-[13px] leading-7"
               placeholder="متن کامل خبر..."
             />
           </div>
@@ -94,7 +94,7 @@ export function NewsEditDialog({
         <button
           onClick={save}
           disabled={busy || !titleOk || !contentOk}
-          className="mt-4 w-full rounded-full bg-neon py-3.5 text-[14px] font-bold text-neon-foreground disabled:opacity-50"
+          className="v3-btn mt-4 w-full py-3.5 text-[14px] disabled:opacity-50"
         >
           {busy ? "در حال ذخیره..." : "ذخیره ویرایش"}
         </button>

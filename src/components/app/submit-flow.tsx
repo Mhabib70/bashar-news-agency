@@ -120,67 +120,86 @@ export function SubmitFlow({
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && close()}>
-      <DialogContent className="flex max-h-[92dvh] flex-col gap-0 overflow-hidden rounded-[28px] border-line bg-popover p-5">
+      <DialogContent className="flex max-h-[92dvh] flex-col gap-0 overflow-hidden rounded-[24px] border-[var(--v3-line)] bg-[var(--v3-card)] p-5">
         {done ? (
-          <div className="flex flex-col items-center py-6 text-center stage-enter">
-            <span className="flex h-20 w-20 items-center justify-center rounded-full bg-neon/15 text-neon">
-              <CheckCircle2 className="h-10 w-10" />
-            </span>
-            <h3 className="mt-4 flex items-center gap-2 text-[18px] font-black text-ink">
-              خبر ثبت شد <PartyPopper className="h-5 w-5 text-neon" />
-            </h3>
-            <p className="mt-2 max-w-[280px] text-[12.5px] leading-6 text-ink-muted">{done.message}</p>
-            <div className="mt-4 flex items-center gap-2">
-              <span className="rounded-full bg-neon px-4 py-2 text-[13px] font-black text-neon-foreground">+{fa(done.points)} امتیاز</span>
-              <span className="rounded-full border border-line bg-surface px-4 py-2 text-[12px] font-bold text-ink-muted">مرحله ۱: مدیر حوزه</span>
+          <div className="stage-enter flex flex-col items-center py-4 text-center">
+            {/* کارت جشن موفقیت */}
+            <div className="v3-tile-blue w-full rounded-[22px] p-5 shadow-[0_18px_40px_-18px_rgba(37,99,235,0.7)]">
+              <span className="relative mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-white/18 shadow-[inset_0_1px_0_rgba(255,255,255,0.25)]">
+                <CheckCircle2 className="h-10 w-10" />
+              </span>
+              <h3 className="relative mt-4 flex items-center justify-center gap-2 text-[18px] font-black">
+                خبر ثبت شد <PartyPopper className="h-5 w-5" />
+              </h3>
+              <p className="relative mt-2 text-[12.5px] leading-6 text-white/85">{done.message}</p>
+              <div className="relative mt-4 flex flex-wrap items-center justify-center gap-2">
+                <span className="v3-num rounded-full bg-white/20 px-4 py-2 text-[16px] font-black backdrop-blur-sm">+{fa(done.points)} امتیاز</span>
+                <span className="rounded-full bg-black/25 px-4 py-2 text-[11.5px] font-bold text-white/90">مرحله ۱: مدیر حوزه</span>
+              </div>
+              {done.badges.length > 0 && (
+                <div className="relative mt-3 flex flex-wrap items-center justify-center gap-1.5">
+                  <span className="text-[11.5px] font-bold text-white/85">نشان جدید:</span>
+                  {done.badges.map((b, i) => (
+                    <span key={i} className="rounded-full bg-[var(--v3-amber)] px-3 py-1 text-[11px] font-black text-[#42290a] shadow-[0_6px_16px_-6px_rgba(245,158,11,0.7)]">
+                      {b}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
-            {done.badges.length > 0 && (
-              <p className="mt-3 text-[12px] font-bold text-warn">نشان جدید: {done.badges.join("، ")}</p>
-            )}
-            <button onClick={close} className="mt-6 w-full rounded-full bg-neon py-3.5 text-[14px] font-bold text-neon-foreground">
+            <button onClick={close} className="v3-btn mt-4 w-full py-3.5 text-[14px]">
               عالیه، متوجه شدم
             </button>
           </div>
         ) : (
           <>
             <DialogHeader className="text-right">
-              <DialogTitle className="text-ink">ارسال خبر جدید</DialogTitle>
-              <DialogDescription className="text-ink-muted">
+              <DialogTitle className="text-[var(--v3-ink)]">ارسال خبر جدید</DialogTitle>
+              <DialogDescription className="text-[var(--v3-ink-2)]">
                 مرحله {toFa(step + 1)} از {toFa(4)} — {STEPS[step]}
               </DialogDescription>
             </DialogHeader>
 
             {challengeId && (
-              <div className="mt-3 flex items-center justify-between rounded-2xl border border-neon/30 bg-neon/8 px-4 py-2.5">
-                <p className="text-[12px] font-bold text-neon">
+              <div className="mt-3 flex items-center justify-between rounded-[14px] border border-[var(--v3-azure)]/30 bg-[var(--v3-azure-soft)] px-4 py-2.5">
+                <p className="text-[12px] font-bold text-[var(--v3-azure-deep)] dark:text-[#93c5fd]">
                   🎯 ثبت محتوا برای چالش: {activeChallenges.find((c) => c.id === challengeId)?.title ?? "چالش"}
                 </p>
-                <button onClick={() => setChallengeId(null)} className="text-[11px] font-bold text-ink-muted">
+                <button onClick={() => setChallengeId(null)} className="text-[11px] font-bold text-[var(--v3-ink-2)] transition-colors hover:text-[var(--v3-ink)]">
                   برداشتن
                 </button>
               </div>
             )}
 
+            {/* نشانگر مراحل — کامل: آبی / فعلی: آبی پالس‌دار / بعدی: خنثی */}
             <div className="mt-3 flex gap-1.5">
               {STEPS.map((_, i) => (
-                <span key={i} className={cn("h-1.5 flex-1 rounded-full transition-colors", i <= step ? "bg-neon" : "bg-surface-2")} />
+                <span
+                  key={i}
+                  className={cn(
+                    "h-1.5 flex-1 rounded-full transition-colors",
+                    i < step ? "bg-[var(--v3-azure)]" : i === step ? "animate-pulse bg-[var(--v3-azure)]" : "bg-[var(--v3-card-2)]",
+                  )}
+                />
               ))}
             </div>
 
             <div className="mt-4 min-h-0 flex-1 overflow-y-auto nice-scroll pl-0.5">
               {step === 0 && (
                 <div className="grid grid-cols-3 gap-2">
-                  {NEWS_CATEGORIES.map((c) => (
+                  {NEWS_CATEGORIES.map((c, i) => (
                     <button
                       key={c.code}
                       onClick={() => setCategory(c.code)}
                       className={cn(
-                        "flex flex-col items-center gap-1.5 rounded-2xl border px-2 py-3 text-[11.5px] font-bold transition-colors",
-                        category === c.code ? "border-neon bg-neon/10 text-neon" : "border-line bg-surface text-ink-muted hover:text-ink",
+                        "flex flex-col items-center gap-1.5 rounded-[14px] border px-2 py-3 text-[11.5px] font-bold transition-colors",
+                        category === c.code
+                          ? "border-[var(--v3-azure)] bg-[var(--v3-azure-soft)] text-[var(--v3-azure-deep)] dark:text-[#93c5fd]"
+                          : "border-[var(--v3-line)] bg-[var(--v3-card-2)] text-[var(--v3-ink-2)] hover:text-[var(--v3-ink)]",
                       )}
                     >
-                      <span className="relative h-10 w-10 overflow-hidden rounded-xl">
-                        <img src={`/img/cat-${c.code === "none" ? "local" : c.code}.png`} alt="" className="h-full w-full object-cover" />
+                      <span className={cn("relative h-10 w-10 overflow-hidden rounded-[12px] p-[3px]", i % 2 === 0 ? "bg-[var(--v3-azure-soft)]" : "bg-[var(--v3-amber-soft)]")}>
+                        <img src={`/img/cat-${c.code === "none" ? "local" : c.code}.png`} alt="" className="h-full w-full rounded-[9px] object-cover" />
                       </span>
                       {c.label}
                     </button>
@@ -188,11 +207,13 @@ export function SubmitFlow({
                   <button
                     onClick={() => setCategory("none")}
                     className={cn(
-                      "flex flex-col items-center justify-center gap-1.5 rounded-2xl border px-2 py-3 text-[11.5px] font-bold transition-colors",
-                      category === "none" ? "border-neon bg-neon/10 text-neon" : "border-line bg-surface text-ink-muted",
+                      "flex flex-col items-center justify-center gap-1.5 rounded-[14px] border px-2 py-3 text-[11.5px] font-bold transition-colors",
+                      category === "none"
+                        ? "border-[var(--v3-azure)] bg-[var(--v3-azure-soft)] text-[var(--v3-azure-deep)] dark:text-[#93c5fd]"
+                        : "border-[var(--v3-line)] bg-[var(--v3-card-2)] text-[var(--v3-ink-2)] hover:text-[var(--v3-ink)]",
                     )}
                   >
-                    <ImageOff className="h-10 w-10 rounded-xl bg-surface-2 p-2.5" />
+                    <ImageOff className="h-10 w-10 rounded-[12px] bg-[var(--v3-azure-soft)] p-2.5 text-[var(--v3-azure)]" />
                     بدون دسته
                   </button>
                 </div>
@@ -201,20 +222,20 @@ export function SubmitFlow({
               {step === 1 && (
                 <div className="space-y-3">
                   <div>
-                    <label className="mb-1.5 block text-[12px] font-semibold text-ink-muted">تیتر خبر</label>
-                    <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="تیتر جذاب و استاندارد خبر..." className="rounded-2xl border-line bg-surface text-ink placeholder:text-ink-muted/50" />
-                    <p className="mt-1 text-[10px] text-ink-muted/70">{title.trim().length >= 8 ? "✓ تیتر مناسب است" : "حداقل ۸ کاراکتر"}</p>
+                    <label className="mb-1.5 block text-[12px] font-semibold text-[var(--v3-ink-2)]">تیتر خبر</label>
+                    <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="تیتر جذاب و استاندارد خبر..." className="v3-input rounded-2xl text-[var(--v3-ink)] placeholder:text-[var(--v3-ink-2)]/50" />
+                    <p className="mt-1 text-[10px] text-[var(--v3-ink-2)]/70">{title.trim().length >= 8 ? "✓ تیتر مناسب است" : "حداقل ۸ کاراکتر"}</p>
                   </div>
                   <div>
-                    <label className="mb-1.5 block text-[12px] font-semibold text-ink-muted">متن کامل خبر</label>
-                    <Textarea value={content} onChange={(e) => setContent(e.target.value)} rows={7} placeholder="لید: مهم‌ترین بخش خبر... سپس جزئیات، نقل‌قول و اطلاعات تکمیلی." className="rounded-2xl border-line bg-surface text-ink leading-7 placeholder:text-ink-muted/50" />
-                    <p className="mt-1 text-[10px] text-ink-muted/70">{content.trim().length >= 30 ? `✓ ${fa(content.trim().length)} کاراکتر` : "حداقل ۳۰ کاراکتر"}</p>
+                    <label className="mb-1.5 block text-[12px] font-semibold text-[var(--v3-ink-2)]">متن کامل خبر</label>
+                    <Textarea value={content} onChange={(e) => setContent(e.target.value)} rows={7} placeholder="لید: مهم‌ترین بخش خبر... سپس جزئیات، نقل‌قول و اطلاعات تکمیلی." className="v3-input rounded-2xl text-[var(--v3-ink)] leading-7 placeholder:text-[var(--v3-ink-2)]/50" />
+                    <p className="mt-1 text-[10px] text-[var(--v3-ink-2)]/70">{content.trim().length >= 30 ? `✓ ${fa(content.trim().length)} کاراکتر` : "حداقل ۳۰ کاراکتر"}</p>
                   </div>
-                  <div>
-                    <label className="mb-1.5 block text-[12px] font-semibold text-ink-muted">زمان تهیه خبر: {fa(duration)} دقیقه</label>
-                    <Slider value={[duration]} onValueChange={(v) => setDuration(v[0])} min={5} max={120} step={5} className="[&_[data-slot=slider-range]]:bg-neon [&_[data-slot=slider-thumb]]:border-neon" />
+                  <div className="v3-card-flat p-4">
+                    <label className="mb-3 block text-[12px] font-semibold text-[var(--v3-ink-2)]">زمان تهیه خبر: {fa(duration)} دقیقه</label>
+                    <Slider value={[duration]} onValueChange={(v) => setDuration(v[0])} min={5} max={120} step={5} className="[&_[data-slot=slider-range]]:bg-[var(--v3-azure)] [&_[data-slot=slider-track]]:bg-[var(--v3-line)] [&_[data-slot=slider-thumb]]:border-[var(--v3-azure)]" />
                   </div>
-                  <button onClick={saveDraftNow} className="flex items-center gap-2 text-[12px] font-bold text-neon">
+                  <button onClick={saveDraftNow} className="flex items-center gap-2 text-[12px] font-bold text-[var(--v3-azure)] transition-opacity hover:opacity-80">
                     <Save className="h-4 w-4" />
                     ذخیره پیش‌نویس
                   </button>
@@ -224,7 +245,7 @@ export function SubmitFlow({
               {step === 2 && (
                 <div className="space-y-2.5">
                   {["none", "photo", "video"].includes(mediaType) && mediaUrl && (
-                    <div className="relative overflow-hidden rounded-2xl border border-neon/30">
+                    <div className="relative overflow-hidden rounded-[18px] border border-[var(--v3-azure)]/30">
                       {mediaType === "photo" ? (
                         <img src={mediaUrl} alt="پیش‌نمایش" className="max-h-44 w-full object-cover" />
                       ) : (
@@ -240,11 +261,11 @@ export function SubmitFlow({
                     <button
                       onClick={() => fileRef.current?.click()}
                       disabled={uploading}
-                      className="flex w-full flex-col items-center gap-2 rounded-2xl border border-dashed border-neon/40 bg-neon/5 px-4 py-6 text-center transition-colors hover:bg-neon/10 disabled:opacity-60"
+                      className="flex w-full flex-col items-center gap-2 rounded-[18px] border border-dashed border-[var(--v3-azure)]/40 bg-[var(--v3-azure-soft)]/40 px-4 py-6 text-center transition-colors hover:bg-[var(--v3-azure-soft)]/70 disabled:opacity-60"
                     >
-                      {uploading ? <Loader2 className="h-6 w-6 animate-spin text-neon" /> : <UploadCloud className="h-6 w-6 text-neon" />}
-                      <span className="text-[13px] font-bold text-ink">{uploading ? "در حال بارگذاری..." : "انتخاب عکس یا ویدیو از دستگاه"}</span>
-                      <span className="text-[10.5px] text-ink-muted">عکس (JPG/PNG/WebP/HEIC — خودکار فشرده می‌شود) · ویدیو تا ۳۰MB</span>
+                      {uploading ? <Loader2 className="h-6 w-6 animate-spin text-[var(--v3-azure)]" /> : <UploadCloud className="h-6 w-6 text-[var(--v3-azure)]" />}
+                      <span className="text-[13px] font-bold text-[var(--v3-ink)]">{uploading ? "در حال بارگذاری..." : "انتخاب عکس یا ویدیو از دستگاه"}</span>
+                      <span className="text-[10.5px] text-[var(--v3-ink-2)]">عکس (JPG/PNG/WebP/HEIC — خودکار فشرده می‌شود) · ویدیو تا ۳۰MB</span>
                     </button>
                   )}
                   <input ref={fileRef} type="file" accept="image/*,video/mp4,video/webm,video/quicktime,.heic,.heif" className="hidden" onChange={(e) => onPickFile(e.target.files?.[0])} />
@@ -253,35 +274,39 @@ export function SubmitFlow({
                     { key: "none", label: "بدون رسانه", desc: "فقط متن خبر", icon: <ImageOff className="h-5 w-5" /> },
                     { key: "photo", label: "عکس", desc: "تصویر میدانی از رویداد", icon: <ImageIcon className="h-5 w-5" /> },
                     { key: "video", label: "ویدیو", desc: "کلیپ کوتاه گزارش", icon: <Video className="h-5 w-5" /> },
-                  ].map((m) => (
+                  ].map((m, i) => (
                     <button
                       key={m.key}
                       onClick={() => setMediaType(m.key)}
                       className={cn(
-                        "flex w-full items-center gap-3 rounded-2xl border px-4 py-3.5 text-right transition-colors",
-                        mediaType === m.key ? "border-neon bg-neon/8" : "border-line bg-surface hover:bg-surface-2",
+                        "flex w-full items-center gap-3 rounded-[14px] border px-4 py-3.5 text-right transition-colors",
+                        mediaType === m.key
+                          ? "border-[var(--v3-azure)] bg-[var(--v3-azure-soft)]"
+                          : "border-[var(--v3-line)] bg-[var(--v3-card-2)] hover:border-[var(--v3-azure)]/30",
                       )}
                     >
-                      <span className={cn("flex h-10 w-10 items-center justify-center rounded-full", mediaType === m.key ? "bg-neon/15 text-neon" : "bg-surface-2 text-ink-muted")}>{m.icon}</span>
+                      <span className={cn("flex h-10 w-10 items-center justify-center rounded-[12px]", mediaType === m.key ? "bg-[var(--v3-azure)] text-white" : i % 2 === 0 ? "bg-[var(--v3-azure-soft)] text-[var(--v3-azure)]" : "bg-[var(--v3-amber-soft)] text-[var(--v3-amber)]")}>{m.icon}</span>
                       <span className="flex-1">
-                        <span className="block text-[13.5px] font-bold text-ink">{m.label}</span>
-                        <span className="block text-[11px] text-ink-muted">{m.desc}</span>
+                        <span className="block text-[13.5px] font-bold text-[var(--v3-ink)]">{m.label}</span>
+                        <span className="block text-[11px] text-[var(--v3-ink-2)]">{m.desc}</span>
                       </span>
-                      {mediaType === m.key && <CheckCircle2 className="h-5 w-5 text-neon" />}
+                      {mediaType === m.key && <CheckCircle2 className="h-5 w-5 text-[var(--v3-azure)]" />}
                     </button>
                   ))}
 
                   {activeChallenges.length > 0 && (
                     <div className="pt-2">
-                      <p className="mb-2 text-[12px] font-semibold text-ink-muted">ثبت در چالش (اختیاری)</p>
+                      <p className="mb-2 text-[12px] font-semibold text-[var(--v3-ink-2)]">ثبت در چالش (اختیاری)</p>
                       <div className="flex flex-wrap gap-2">
                         {activeChallenges.map((c) => (
                           <button
                             key={c.id}
                             onClick={() => setChallengeId(challengeId === c.id ? null : c.id)}
                             className={cn(
-                              "rounded-full border px-3.5 py-2 text-[11.5px] font-bold transition-colors",
-                              challengeId === c.id ? "border-neon bg-neon text-neon-foreground" : "border-line bg-surface text-ink-muted",
+                              "rounded-full px-3.5 py-2 text-[11.5px] font-bold transition-colors",
+                              challengeId === c.id
+                                ? "bg-gradient-to-l from-[var(--v3-azure-2)] to-[var(--v3-azure-deep)] text-white shadow-[0_8px_18px_-8px_rgba(37,99,235,0.6)]"
+                                : "border border-[var(--v3-line)] bg-[var(--v3-card-2)] text-[var(--v3-ink-2)] hover:text-[var(--v3-ink)]",
                             )}
                           >
                             {c.title}
@@ -294,19 +319,19 @@ export function SubmitFlow({
               )}
 
               {step === 3 && (
-                <div className="rounded-[24px] border border-line bg-surface p-4">
+                <div className="v3-card p-4">
                   <div className="flex items-center justify-between">
-                    <span className="rounded-full bg-neon/12 px-3 py-1 text-[11px] font-bold text-neon">{CATEGORY_LABELS[category]}</span>
-                    <span className="text-[10.5px] text-ink-muted">{mediaType === "none" ? "بدون رسانه" : mediaType === "photo" ? "با عکس" : "با ویدیو"} · {fa(duration)} دقیقه</span>
+                    <span className="v3-chip px-3 py-1 text-[11px]">{CATEGORY_LABELS[category]}</span>
+                    <span className="text-[10.5px] text-[var(--v3-ink-2)]">{mediaType === "none" ? "بدون رسانه" : mediaType === "photo" ? "با عکس" : "با ویدیو"} · {fa(duration)} دقیقه</span>
                   </div>
                   {mediaUrl && mediaType === "photo" && (
-                    <img src={mediaUrl} alt="" className="mt-3 max-h-40 w-full rounded-2xl object-cover" />
+                    <img src={mediaUrl} alt="" className="mt-3 max-h-40 w-full rounded-[14px] object-cover" />
                   )}
-                  {mediaUrl && mediaType === "video" && <video src={mediaUrl} controls className="mt-3 max-h-40 w-full rounded-2xl bg-black" />}
-                  <h4 className="mt-3 text-[15.5px] font-black leading-7 text-ink">{title}</h4>
-                  <p className="mt-2 line-clamp-6 whitespace-pre-line text-[12.5px] leading-6 text-ink-muted">{content}</p>
+                  {mediaUrl && mediaType === "video" && <video src={mediaUrl} controls className="mt-3 max-h-40 w-full rounded-[14px] bg-black" />}
+                  <h4 className="mt-3 text-[15.5px] font-black leading-7 text-[var(--v3-ink)]">{title}</h4>
+                  <p className="mt-2 line-clamp-6 whitespace-pre-line text-[12.5px] leading-6 text-[var(--v3-ink-2)]">{content}</p>
                   {challengeId && (
-                    <p className="mt-3 rounded-xl bg-neon/8 px-3 py-2 text-[11px] font-bold text-neon">
+                    <p className="mt-3 rounded-[12px] bg-[var(--v3-azure-soft)] px-3 py-2 text-[11px] font-bold text-[var(--v3-azure-deep)] dark:text-[#93c5fd]">
                       ثبت‌شده برای چالش: {activeChallenges.find((c) => c.id === challengeId)?.title}
                     </p>
                   )}
@@ -314,9 +339,9 @@ export function SubmitFlow({
               )}
             </div>
 
-            <div className="mt-4 flex gap-2 border-t border-line pt-4">
+            <div className="mt-4 flex gap-2 border-t border-[var(--v3-line)] pt-4">
               {step > 0 && (
-                <button onClick={() => setStep(step - 1)} className="flex items-center gap-1 rounded-full border border-line px-5 py-3 text-[13px] font-bold text-ink-muted transition-colors hover:text-ink">
+                <button onClick={() => setStep(step - 1)} className="v3-btn-ghost flex items-center gap-1 px-5 py-3 text-[13px]">
                   <ArrowRight className="h-4 w-4" />
                   قبلی
                 </button>
@@ -325,13 +350,13 @@ export function SubmitFlow({
                 <button
                   onClick={() => canNext && setStep(step + 1)}
                   disabled={!canNext}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-full bg-neon py-3 text-[14px] font-bold text-neon-foreground transition-transform hover:scale-[1.01] disabled:opacity-40"
+                  className="v3-btn flex flex-1 items-center justify-center gap-2 py-3 text-[14px] disabled:opacity-40"
                 >
                   مرحله بعد
                   <ArrowLeft className="h-4 w-4" />
                 </button>
               ) : (
-                <button onClick={submit} disabled={busy} className="flex flex-1 items-center justify-center gap-2 rounded-full bg-neon py-3 text-[14px] font-bold text-neon-foreground disabled:opacity-50">
+                <button onClick={submit} disabled={busy} className="v3-btn flex flex-1 items-center justify-center gap-2 py-3 text-[14px] disabled:opacity-50">
                   {busy ? "در حال ارسال..." : "ثبت نهایی خبر"}
                   <ArrowLeft className="h-4 w-4" />
                 </button>

@@ -64,16 +64,16 @@ export default function Page() {
   const loggedIn = !!(userId && state && user && user.status === "active")
 
   return (
-    <main className="flex min-h-dvh flex-col bg-[var(--page)]">
+    <main className="flex min-h-dvh flex-col bg-[var(--v3-page)]">
       {!booted ? (
         <div className="mx-auto flex w-full max-w-[520px] flex-1 flex-col gap-6 p-6">
-          <Skeleton className="h-[54%] w-full rounded-[28px] bg-surface" />
-          <Skeleton className="h-10 w-2/3 rounded-full bg-surface" />
-          <Skeleton className="h-44 w-full rounded-[28px] bg-surface" />
+          <Skeleton className="h-[54%] w-full rounded-[28px] bg-[var(--v3-card-2)]" />
+          <Skeleton className="h-10 w-2/3 rounded-full bg-[var(--v3-card-2)]" />
+          <Skeleton className="h-44 w-full rounded-[28px] bg-[var(--v3-card-2)]" />
         </div>
       ) : !userId || !state ? (
         /* ورود: در موبایل تمام‌صفحه، در دسکتاپ قاب مرکزی */
-        <div className="mx-auto flex h-dvh w-full max-w-[460px] flex-col overflow-hidden sm:my-6 sm:h-[min(880px,94dvh)] sm:rounded-[36px] sm:border sm:border-[var(--frame-border)] sm:shadow-[0_40px_120px_-40px_rgba(23,50,31,0.45)]">
+        <div className="mx-auto flex h-dvh w-full max-w-[460px] flex-col overflow-hidden sm:my-6 sm:h-[min(880px,94dvh)] sm:rounded-[36px] sm:border sm:border-[var(--v3-line)] sm:shadow-[0_40px_120px_-40px_rgba(16,33,84,0.4)]">
           <Welcome />
         </div>
       ) : user?.status === "pending" ? (
@@ -90,7 +90,7 @@ export default function Page() {
           action={
             <button
               onClick={logout}
-              className="mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-[var(--neon)] py-3.5 text-[14px] font-bold text-[var(--neon-foreground)]"
+              className="v3-btn mt-6 flex w-full items-center justify-center gap-2 py-3.5 text-[14px]"
             >
               <LogOut className="h-4.5 w-4.5" />
               بازگشت و ثبت‌نام مجدد
@@ -166,9 +166,9 @@ export default function Page() {
 function GateScreen({ icon, title, body, action }: { icon: React.ReactNode; title: string; body: string; action?: React.ReactNode }) {
   return (
     <div className="mx-auto flex w-full max-w-[460px] flex-1 flex-col items-center justify-center gap-4 px-8 text-center stage-enter">
-      <span className="flex h-24 w-24 items-center justify-center rounded-full bg-surface border border-line">{icon}</span>
-      <h2 className="text-[19px] font-black text-ink">{title}</h2>
-      <p className="max-w-[280px] text-[12.5px] leading-6 text-ink-muted">{body}</p>
+      <span className="flex h-24 w-24 items-center justify-center rounded-[26px] border border-[var(--v3-line)] bg-[var(--v3-card)] shadow-[var(--v3-shadow-sm)]">{icon}</span>
+      <h2 className="text-[19px] font-black text-[var(--v3-ink)]">{title}</h2>
+      <p className="max-w-[280px] text-[12.5px] leading-6 text-[var(--v3-ink-2)]">{body}</p>
       {action}
     </div>
   )

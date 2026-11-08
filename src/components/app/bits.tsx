@@ -6,15 +6,15 @@ import { fa, faNum, relTime } from "@/lib/format"
 import { REVIEW_STAGES, NEWS_EVENT_META, STAGE_ROLE_ICON, ROLE_LABELS } from "@/lib/domain"
 import { cn } from "@/lib/utils"
 
-// ---------- حلقه پیشرفت ----------
+// ---------- حلقه پیشرفت (v3 — آبی/کهربایی) ----------
 export function Ring({
   value,
   max,
   size = 168,
   stroke = 12,
   children,
-  trackClass = "stroke-line",
-  barClass = "stroke-neon",
+  trackClass = "stroke-[var(--v3-line)]",
+  barClass = "stroke-[var(--v3-azure)]",
 }: {
   value: number
   max: number
@@ -47,7 +47,7 @@ export function Ring({
           strokeDasharray={c}
           strokeDashoffset={offset}
           className={cn(barClass)}
-          style={{ filter: "drop-shadow(0 0 8px rgba(47,107,51,0.45))" }}
+          style={{ filter: "drop-shadow(0 0 8px rgba(37,99,235,0.4))" }}
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center">{children}</div>
@@ -59,9 +59,9 @@ export function Ring({
 export function SectionHeader({ title, action, onAction }: { title: string; action?: string; onAction?: () => void }) {
   return (
     <div className="mb-3 flex items-center justify-between">
-      <h2 className="text-[17px] font-bold text-ink">{title}</h2>
+      <h2 className="text-[17px] font-black text-[var(--v3-ink)]">{title}</h2>
       {action && (
-        <button onClick={onAction} className="text-[13px] font-semibold text-neon transition-opacity hover:opacity-80">
+        <button onClick={onAction} className="text-[13px] font-bold text-[var(--v3-azure)] transition-opacity hover:opacity-80">
           {action}
         </button>
       )}
@@ -72,13 +72,13 @@ export function SectionHeader({ title, action, onAction }: { title: string; acti
 // ---------- چیپ وضعیت خبر ----------
 export function StatusChip({ status, small }: { status: string; small?: boolean }) {
   const map = {
-    approved: { label: "تایید شده", cls: "bg-neon/12 text-neon border-neon/25" },
-    rejected: { label: "رد شده", cls: "bg-danger/10 text-danger-soft border-danger/25" },
-    pending: { label: "در بررسی", cls: "bg-warn/10 text-warn border-warn/25" },
+    approved: { label: "تایید شده", cls: "bg-[var(--v3-azure-soft)] text-[var(--v3-azure-deep)] border-transparent dark:text-[#93c5fd]" },
+    rejected: { label: "رد شده", cls: "bg-red-50 text-red-600 border-transparent dark:bg-red-500/12 dark:text-red-400" },
+    pending: { label: "در بررسی", cls: "bg-[var(--v3-amber-soft)] text-amber-600 border-transparent dark:text-amber-400" },
   } as const
   const it = map[status as keyof typeof map] ?? map.pending
   return (
-    <span className={cn("inline-flex items-center gap-1 rounded-full border font-semibold", it.cls, small ? "px-2 py-0.5 text-[10px]" : "px-2.5 py-1 text-[11px]")}>
+    <span className={cn("inline-flex items-center gap-1 rounded-full border font-bold", it.cls, small ? "px-2 py-0.5 text-[10px]" : "px-2.5 py-1 text-[11px]")}>
       {status === "approved" ? <CheckCircle2 className={small ? "h-3 w-3" : "h-3.5 w-3.5"} /> : status === "rejected" ? <XCircle className={small ? "h-3 w-3" : "h-3.5 w-3.5"} /> : <Clock className={small ? "h-3 w-3" : "h-3.5 w-3.5"} />}
       {it.label}
     </span>
@@ -91,7 +91,7 @@ export function StageDots({ status, stage }: { status: string; stage: string }) 
     return (
       <div className="flex items-center gap-1.5">
         {REVIEW_STAGES.map((s) => (
-          <span key={s.key} className="h-1.5 w-6 rounded-full bg-neon/80" />
+          <span key={s.key} className="h-1.5 w-6 rounded-full bg-[var(--v3-azure)]/80" />
         ))}
       </div>
     )
@@ -99,9 +99,9 @@ export function StageDots({ status, stage }: { status: string; stage: string }) 
   if (status === "rejected") {
     return (
       <div className="flex items-center gap-1.5">
-        <span className="h-1.5 w-6 rounded-full bg-danger/70" />
-        <span className="h-1.5 w-6 rounded-full bg-line" />
-        <span className="h-1.5 w-6 rounded-full bg-line" />
+        <span className="h-1.5 w-6 rounded-full bg-red-500/70" />
+        <span className="h-1.5 w-6 rounded-full bg-[var(--v3-line)]" />
+        <span className="h-1.5 w-6 rounded-full bg-[var(--v3-line)]" />
       </div>
     )
   }
@@ -111,7 +111,7 @@ export function StageDots({ status, stage }: { status: string; stage: string }) 
       {REVIEW_STAGES.map((s, i) => (
         <span
           key={s.key}
-          className={cn("h-1.5 w-6 rounded-full", i < idx ? "bg-neon/50" : i === idx ? "bg-warn" : "bg-line")}
+          className={cn("h-1.5 w-6 rounded-full", i < idx ? "bg-[var(--v3-azure)]/50" : i === idx ? "bg-[var(--v3-amber)]" : "bg-[var(--v3-line)]")}
         />
       ))}
     </div>
@@ -135,12 +135,12 @@ export function StatCard({
   return (
     <button
       onClick={onClick}
-      className="flex flex-1 flex-col items-center gap-1.5 rounded-3xl bg-surface px-2 py-4 text-center transition-colors hover:bg-surface-2"
+      className="v3-card flex flex-1 flex-col items-center gap-1.5 px-2 py-4 text-center transition-transform hover:scale-[1.02] active:scale-[0.98]"
     >
-      <span className="flex h-9 w-9 items-center justify-center rounded-full bg-neon/12 text-neon">{icon}</span>
-      <span className="text-[19px] font-black leading-none text-ink">{value}</span>
-      <span className="text-[11px] font-medium text-ink-muted">{label}</span>
-      {sub && <span className="text-[9.5px] text-ink-muted/70">{sub}</span>}
+      <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--v3-azure-soft)] text-[var(--v3-azure)]">{icon}</span>
+      <span className="v3-num text-[19px] leading-none text-[var(--v3-ink)]">{value}</span>
+      <span className="text-[11px] font-medium text-[var(--v3-ink-2)]">{label}</span>
+      {sub && <span className="text-[9.5px] text-[var(--v3-ink-2)]/70">{sub}</span>}
     </button>
   )
 }
@@ -152,7 +152,7 @@ export function Avatar({ name, size = 44, tone = "neon", src }: { name: string; 
       <img
         src={src}
         alt={name}
-        className="shrink-0 rounded-full border border-line object-cover"
+        className="shrink-0 rounded-full border border-[var(--v3-line)] object-cover"
         style={{ width: size, height: size }}
       />
     )
@@ -162,7 +162,9 @@ export function Avatar({ name, size = 44, tone = "neon", src }: { name: string; 
     <span
       className={cn(
         "flex shrink-0 items-center justify-center rounded-full font-bold",
-        tone === "neon" ? "bg-neon text-neon-foreground" : "bg-surface-2 text-ink border border-line",
+        tone === "neon"
+          ? "bg-gradient-to-br from-[var(--v3-azure-2)] to-[var(--v3-azure-deep)] text-white"
+          : "bg-[var(--v3-card-2)] text-[var(--v3-ink)] border border-[var(--v3-line)]",
       )}
       style={{ width: size, height: size, fontSize: size * 0.34 }}
       aria-hidden
@@ -173,6 +175,7 @@ export function Avatar({ name, size = 44, tone = "neon", src }: { name: string; 
 }
 
 // ---------- کادر آواتار نئونی: مربع کج با حاشیه قرمز نئونی (کادر حرفه‌ای) ----------
+// ⚠️ این کامپوننت توسط تالار و آکادمی استفاده می‌شود — دست نمی‌خورد.
 export function NeonAvatar({ name, src, size = 56, className }: { name: string; src?: string; size?: number; className?: string }) {
   const parts = name.trim().split(/\s+/).slice(0, 2).map((p) => p[0] ?? "").join("")
   return (
@@ -262,35 +265,35 @@ export function StageTimeline({ news, compact }: { news: TimelineNews; compact?:
   const waitingMs = now - new Date(lastActivity).getTime()
 
   return (
-    <div className="rounded-3xl border border-line bg-surface p-4">
+    <div className="v3-card p-4">
       {/* نوار پیشرفت + وضعیت زنده */}
       <div className="mb-1 flex items-center justify-between">
-        <p className="flex items-center gap-1.5 text-[12.5px] font-black text-ink">
+        <p className="flex items-center gap-1.5 text-[12.5px] font-black text-[var(--v3-ink)]">
           <span className="relative flex h-2 w-2">
             {news.status === "pending" && (
               <>
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-warn opacity-60" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-warn" />
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--v3-amber)] opacity-60" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-[var(--v3-amber)]" />
               </>
             )}
-            {news.status === "approved" && <span className="inline-flex h-2 w-2 rounded-full bg-neon" />}
-            {news.status === "rejected" && <span className="inline-flex h-2 w-2 rounded-full bg-danger" />}
+            {news.status === "approved" && <span className="inline-flex h-2 w-2 rounded-full bg-[var(--v3-azure)]" />}
+            {news.status === "rejected" && <span className="inline-flex h-2 w-2 rounded-full bg-red-500" />}
           </span>
           {news.status === "pending" ? "در جریان چرخه بررسی" : news.status === "approved" ? "چرخه کامل شد — منتشر شد" : "چرخه متوقف شد"}
         </p>
-        <span className={cn("text-[10.5px] font-black", news.status === "approved" ? "text-neon" : news.status === "rejected" ? "text-danger-soft" : "text-warn")}>
+        <span className={cn("text-[10.5px] font-black", news.status === "approved" ? "text-[var(--v3-azure)]" : news.status === "rejected" ? "text-red-500" : "text-[var(--v3-amber)]")}>
           {fa(progress)}٪
         </span>
       </div>
-      <div className="mb-3.5 h-1.5 overflow-hidden rounded-full bg-surface-2">
+      <div className="mb-3.5 h-1.5 overflow-hidden rounded-full bg-[var(--v3-card-2)]">
         <div
-          className={cn("h-full rounded-full transition-all duration-700", news.status === "approved" ? "bg-neon" : news.status === "rejected" ? "bg-danger/70" : "bg-warn")}
+          className={cn("h-full rounded-full transition-all duration-700", news.status === "approved" ? "bg-[var(--v3-azure)]" : news.status === "rejected" ? "bg-red-500/70" : "bg-[var(--v3-amber)]")}
           style={{ width: `${Math.max(4, progress)}%` }}
         />
       </div>
 
       {news.status === "pending" && (
-        <p className="mb-3 rounded-xl bg-warn/8 px-3 py-2 text-[11px] font-semibold text-warn">
+        <p className="mb-3 rounded-xl bg-[var(--v3-amber-soft)] px-3 py-2 text-[11px] font-semibold text-amber-600 dark:text-amber-400">
           ⏱ {waitFmt(waitingMs)} است که در مرحله «{REVIEW_STAGES[currentIdx]?.label}» منتظر تصمیم است
         </p>
       )}
@@ -368,20 +371,20 @@ function TimelineRow({
   first?: boolean
 }) {
   const styles = {
-    done: { dot: "bg-neon text-neon-foreground", title: "text-ink", sub: "text-ink-muted" },
-    current: { dot: "bg-warn text-black animate-pulse", title: "text-ink font-black", sub: "text-warn" },
-    failed: { dot: "bg-danger text-white", title: "text-danger-soft", sub: "text-ink-muted" },
-    waiting: { dot: "bg-surface-2 text-ink-muted/50 border border-line", title: "text-ink-muted/60", sub: "text-ink-muted/50" },
-    muted: { dot: "bg-surface-2 text-ink-muted border border-line", title: "text-ink-muted", sub: "text-ink-muted/70" },
-    final: { dot: "bg-neon text-neon-foreground", title: "text-neon", sub: "text-ink-muted" },
+    done: { dot: "bg-[var(--v3-azure)] text-white", title: "text-[var(--v3-ink)]", sub: "text-[var(--v3-ink-2)]" },
+    current: { dot: "bg-[var(--v3-amber)] text-[#42290a] animate-pulse", title: "text-[var(--v3-ink)] font-black", sub: "text-[var(--v3-amber)]" },
+    failed: { dot: "bg-red-500 text-white", title: "text-red-500", sub: "text-[var(--v3-ink-2)]" },
+    waiting: { dot: "bg-[var(--v3-card-2)] text-[var(--v3-ink-2)]/50 border border-[var(--v3-line)]", title: "text-[var(--v3-ink-2)]/60", sub: "text-[var(--v3-ink-2)]/50" },
+    muted: { dot: "bg-[var(--v3-card-2)] text-[var(--v3-ink-2)] border border-[var(--v3-line)]", title: "text-[var(--v3-ink-2)]", sub: "text-[var(--v3-ink-2)]/70" },
+    final: { dot: "bg-[var(--v3-azure)] text-white", title: "text-[var(--v3-azure)]", sub: "text-[var(--v3-ink-2)]" },
   }[tone]
   return (
     <div className={cn("relative flex gap-3 pr-0.5", first ? "" : "mt-3")}>
-      <span className={cn("z-10 mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full shadow-[0_0_0_3px_var(--surface)]", styles.dot)}>{icon}</span>
-      <div className="min-w-0 flex-1 border-b border-line/60 pb-2.5 last:border-0">
+      <span className={cn("z-10 mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full shadow-[0_0_0_3px_var(--v3-card)]", styles.dot)}>{icon}</span>
+      <div className="min-w-0 flex-1 border-b border-[var(--v3-line)]/60 pb-2.5 last:border-0">
         <p className={cn("text-[12.5px] font-bold leading-5", styles.title)}>{title}</p>
         <p className={cn("text-[10.5px] leading-5", styles.sub)}>{sub}</p>
-        {note && <p className="mt-0.5 rounded-lg bg-surface-2 px-2 py-1 text-[10.5px] leading-5 text-ink-muted">{note}</p>}
+        {note && <p className="mt-0.5 rounded-lg bg-[var(--v3-card-2)] px-2 py-1 text-[10.5px] leading-5 text-[var(--v3-ink-2)]">{note}</p>}
       </div>
     </div>
   )
@@ -391,19 +394,19 @@ function TimelineRow({
 export function StageChip({ status, stage }: { status: string; stage: string }) {
   if (status === "approved")
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-neon/12 px-2 py-0.5 text-[9.5px] font-black text-neon">
+      <span className="inline-flex items-center gap-1 rounded-full bg-[var(--v3-azure-soft)] px-2 py-0.5 text-[9.5px] font-black text-[var(--v3-azure-deep)] dark:text-[#93c5fd]">
         <CheckCircle2 className="h-2.5 w-2.5" /> منتشر شد
       </span>
     )
   if (status === "rejected")
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-danger/10 px-2 py-0.5 text-[9.5px] font-black text-danger-soft">
+      <span className="inline-flex items-center gap-1 rounded-full bg-red-50 px-2 py-0.5 text-[9.5px] font-black text-red-600 dark:bg-red-500/12 dark:text-red-400">
         <XCircle className="h-2.5 w-2.5" /> بازگشت به خبرنگار
       </span>
     )
   const idx = Math.max(0, REVIEW_STAGES.findIndex((s) => s.key === stage))
   return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-warn/10 px-2 py-0.5 text-[9.5px] font-black text-warn">
+    <span className="inline-flex items-center gap-1 rounded-full bg-[var(--v3-amber-soft)] px-2 py-0.5 text-[9.5px] font-black text-amber-600 dark:text-amber-400">
       <Clock className="h-2.5 w-2.5" /> مرحله {fa(idx + 1)} از {fa(3)}: {REVIEW_STAGES[idx]?.label}
     </span>
   )

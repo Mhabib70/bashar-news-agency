@@ -111,6 +111,7 @@ export function UpdateBanner() {
   }
 
   const startDownload = () => {
+    if (!info) return
     markDone(info.versionCode) // از همین لحظه تا نسخه بعدی دیگر نمایش نده
     if (hasNativeDownloader(UA())) {
       // دانلود بومی: DownloadListener اپ می‌گیرد، DownloadManager دانلود و صفحه نصب باز می‌شود
@@ -142,19 +143,21 @@ export function UpdateBanner() {
   if (!info && guide) {
     return (
       <div dir="rtl" className="fixed inset-x-3 bottom-3 z-[100] animate-[fadeUp_.35s_ease-out]">
-        <div className="rounded-2xl border border-[#7bb661]/50 bg-gradient-to-l from-[#0d2b14] via-[#123c1b] to-[#0d2b14] p-3.5 text-[11.5px] leading-6 text-white/90 shadow-[0_14px_38px_-12px_rgba(47,107,51,0.75)] backdrop-blur">
+        <div className="rounded-2xl border border-[#3b82f6]/40 bg-gradient-to-l from-[#202c56] via-[#17203c] to-[#101731] p-3.5 text-[11.5px] leading-6 text-white/90 shadow-[0_14px_38px_-12px_rgba(23,32,60,0.85)] backdrop-blur">
           {guide}
         </div>
       </div>
     )
   }
 
+  if (!info) return null
+
   return (
     <div dir="rtl" className="fixed inset-x-3 bottom-3 z-[100] animate-[fadeUp_.45s_ease-out]">
-      <div className="relative overflow-hidden rounded-2xl border border-[#7bb661]/50 bg-gradient-to-l from-[#0d2b14] via-[#123c1b] to-[#0d2b14] p-3.5 shadow-[0_14px_38px_-12px_rgba(47,107,51,0.75)] backdrop-blur">
-        {/* هاله نئونی پس‌زمینه */}
-        <div className="pointer-events-none absolute -left-8 -top-10 h-28 w-28 rounded-full bg-[#7bb661]/25 blur-2xl" />
-        <div className="pointer-events-none absolute -bottom-12 -right-6 h-24 w-24 rounded-full bg-[#38bdf8]/15 blur-2xl" />
+      <div className="relative overflow-hidden rounded-2xl border border-[#3b82f6]/40 bg-gradient-to-l from-[#202c56] via-[#17203c] to-[#101731] p-3.5 shadow-[0_14px_38px_-12px_rgba(23,32,60,0.85)] backdrop-blur">
+        {/* هاله پس‌زمینه */}
+        <div className="pointer-events-none absolute -left-8 -top-10 h-28 w-28 rounded-full bg-[#3b82f6]/30 blur-2xl" />
+        <div className="pointer-events-none absolute -bottom-12 -right-6 h-24 w-24 rounded-full bg-[#f59e0b]/20 blur-2xl" />
 
         <button
           onClick={dismiss}
@@ -165,7 +168,7 @@ export function UpdateBanner() {
         </button>
 
         <div className="flex items-start gap-3">
-          <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-[#7bb661] to-[#2f6b33] text-xl shadow-[0_6px_16px_-6px_rgba(47,107,51,0.8)]">
+          <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-[#3b82f6] to-[#1d4ed8] text-xl shadow-[0_6px_16px_-6px_rgba(37,99,235,0.8)]">
             🎉
           </div>
           <div className="min-w-0 flex-1 pl-6">
@@ -179,12 +182,13 @@ export function UpdateBanner() {
             <div className="mt-2.5 flex items-center gap-2">
               <button
                 onClick={startDownload}
-                className="flex-1 rounded-xl bg-gradient-to-l from-[#7bb661] to-[#2f6b33] px-4 py-2 text-center text-[12.5px] font-black text-white shadow-[0_6px_18px_-6px_rgba(123,182,97,0.9)] transition active:scale-[0.97]"
+                className="flex-1 rounded-xl bg-gradient-to-l from-[#3b82f6] to-[#1d4ed8] px-4 py-2 text-center text-[12.5px] font-black text-white shadow-[0_6px_18px_-6px_rgba(37,99,235,0.9)] transition active:scale-[0.97]"
               >
                 ⬇️ دانلود و نصب به‌روزرسانی
               </button>
               <button
                 onClick={() => {
+                  if (!info) return
                   copyToClipboard(info.apkUrl)
                   setGuide("✓ لینک کپی شد — آن را در مرورگر (کروم) باز کنید تا نصب شروع شود.")
                   markDone(info.versionCode)

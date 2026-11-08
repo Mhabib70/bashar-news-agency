@@ -70,20 +70,20 @@ export function ReviewScreen() {
     <div className="stage-enter flex flex-col gap-4 px-5 pb-4 pt-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-[22px] font-black text-ink">صف بررسی</h1>
-          <p className="mt-1 text-[11.5px] text-ink-muted">
+          <h1 className="text-[22px] font-black text-[var(--v3-ink)]">صف بررسی</h1>
+          <p className="mt-1 text-[11.5px] text-[var(--v3-ink-2)]">
             {stageIdx >= 0 && `مرحله ${fa(stageIdx + 1)} از ${fa(3)}: ${reviewStageLabel(stageKey)}`}
             {role === "district_manager" && ` · محدود به ${DISTRICT_LABELS[state.user.district] ?? ""}`}
             {isAdmin && " · دید کامل همه مراحل"}
           </p>
         </div>
-        <span className="flex h-11 w-11 items-center justify-center rounded-full bg-neon/12 text-neon">
+        <span className="flex h-11 w-11 items-center justify-center rounded-full bg-[var(--v3-azure-soft)] text-[var(--v3-azure)]">
           <ClipboardCheck className="h-5 w-5" />
         </span>
       </div>
 
       {/* نقشه چرخه — نمایش زنده سه مرحله و نیروی هر کدام */}
-      <div className="rounded-3xl border border-line bg-surface p-3.5">
+      <div className="v3-card p-3.5">
         <div className="flex items-center justify-between gap-2">
           {REVIEW_STAGES.map((s, i) => {
             const count = queue.filter((n) => n.status === "pending" && n.reviewStage === s.key).length
@@ -94,18 +94,18 @@ export function ReviewScreen() {
                 <div
                   className={cn(
                     "flex-1 rounded-2xl border px-2.5 py-2.5 text-center transition-colors",
-                    isMine ? "border-neon/45 bg-neon/8" : "border-line bg-surface-2/60",
+                    isMine ? "border-[var(--v3-azure)]/45 bg-[var(--v3-azure-soft)]" : "border-[var(--v3-line)] bg-[var(--v3-card-2)]/60",
                   )}
                 >
-                  <p className="text-[10.5px] font-bold text-ink-muted">
+                  <p className="text-[10.5px] font-bold text-[var(--v3-ink-2)]">
                     {fa(i + 1)}. {s.label}
                   </p>
-                  <p className={cn("mt-0.5 text-[16px] font-black leading-6", count > 0 ? "text-warn" : "text-ink-muted/50")}>{fa(count)}</p>
-                  <p className={cn("text-[9px] font-bold", hasStaff ? "text-neon" : "text-danger-soft")}>
+                  <p className={cn("v3-num mt-0.5 text-[16px] leading-6", count > 0 ? "text-[var(--v3-amber)]" : "text-[var(--v3-ink-2)]/50")}>{fa(count)}</p>
+                  <p className={cn("text-[9px] font-bold", hasStaff ? "text-[var(--v3-azure)]" : "text-red-600 dark:text-red-400")}>
                     {hasStaff ? `${fa(s.key === "district" ? staff.district : s.key === "specialist" ? staff.specialist : staff.admin)} نیرو` : "بدون نیرو!"}
                   </p>
                 </div>
-                {i < 2 && <ChevronLeft className="h-4 w-4 shrink-0 text-line" />}
+                {i < 2 && <ChevronLeft className="h-4 w-4 shrink-0 text-[var(--v3-line)]" />}
               </div>
             )
           })}
@@ -114,9 +114,9 @@ export function ReviewScreen() {
 
       {/* هشدار توقف چرخه */}
       {stuckStages.length > 0 && (
-        <div className="flex items-start gap-2.5 rounded-2xl border border-danger/30 bg-danger/8 px-4 py-3">
-          <AlertTriangle className="mt-0.5 h-4.5 w-4.5 shrink-0 text-danger-soft" />
-          <div className="text-[11.5px] leading-5 text-danger-soft">
+        <div className="flex items-start gap-2.5 rounded-2xl border border-[var(--v3-amber)]/30 bg-[var(--v3-amber-soft)] px-4 py-3">
+          <AlertTriangle className="mt-0.5 h-4.5 w-4.5 shrink-0 text-amber-600 dark:text-amber-400" />
+          <div className="text-[11.5px] leading-5 text-amber-600 dark:text-amber-400">
             <p className="font-black">چرخه در مرحله «{stuckStages.map(reviewStageLabel).join("، ")}» متوقف است</p>
             <p className="mt-0.5 opacity-80">
               هیچ نیروی فعالی برای این مرحله وجود ندارد. از پنل مدیریت، یک کاربر را به این نقش منصوب کنید یا خودتان تصمیم بگیرید.
@@ -126,53 +126,53 @@ export function ReviewScreen() {
       )}
 
       {queue.length === 0 ? (
-        <div className="flex flex-col items-center gap-2 rounded-[26px] border border-dashed border-line py-14 text-center">
-          <Inbox className="h-9 w-9 text-neon/60" />
-          <p className="text-[14px] font-bold text-ink">صف بررسی خالی است</p>
-          <p className="max-w-[240px] text-[11.5px] leading-5 text-ink-muted">
+        <div className="v3-card flex flex-col items-center gap-2 border-dashed py-14 text-center">
+          <Inbox className="h-9 w-9 text-[var(--v3-azure)]/60" />
+          <p className="text-[14px] font-bold text-[var(--v3-ink)]">صف بررسی خالی است</p>
+          <p className="max-w-[240px] text-[11.5px] leading-5 text-[var(--v3-ink-2)]">
             همه خبرهای رسیده به مرحله شما رسیدگی شده‌اند. کارت عالی!
           </p>
         </div>
       ) : (
         <>
-          <div className="flex items-center justify-between rounded-2xl border border-warn/25 bg-warn/8 px-4 py-3">
-            <span className="text-[12.5px] font-bold text-warn">{fa(queue.length)} خبر در انتظار تصمیم است</span>
-            <span className="text-[10.5px] text-ink-muted">پیش‌نمایش زنده مراحل</span>
+          <div className="flex items-center justify-between rounded-2xl border border-[var(--v3-amber)]/25 bg-[var(--v3-amber-soft)] px-4 py-3">
+            <span className="text-[12.5px] font-bold text-amber-600 dark:text-amber-400">{fa(queue.length)} خبر در انتظار تصمیم است</span>
+            <span className="text-[10.5px] text-[var(--v3-ink-2)]">پیش‌نمایش زنده مراحل</span>
           </div>
 
           <div className="space-y-3">
             {queue.map((n) => (
-              <div key={n.id} className="rounded-[26px] border border-line bg-surface p-4">
+              <div key={n.id} className="v3-card p-4">
                 <div className="flex items-center justify-between">
-                  <span className="rounded-full bg-surface-2 px-2.5 py-0.5 text-[10px] font-bold text-ink-muted">{CATEGORY_LABELS[n.category]}</span>
-                  <span className="text-[10px] text-ink-muted">
+                  <span className="rounded-full bg-[var(--v3-card-2)] px-2.5 py-0.5 text-[10px] font-bold text-[var(--v3-ink-2)]">{CATEGORY_LABELS[n.category]}</span>
+                  <span className="text-[10px] text-[var(--v3-ink-2)]">
                     {n.code} · {relTime(n.createdAt)} · {durFmt(n.durationMin)}
                   </span>
                 </div>
-                <p className="mt-2 text-[14px] font-bold leading-6 text-ink">{n.title}</p>
+                <p className="mt-2 text-[14px] font-bold leading-6 text-[var(--v3-ink)]">{n.title}</p>
                 {n.mediaUrl && n.mediaType === "photo" && (
-                  <img src={n.mediaUrl} alt="رسانه خبر" className="mt-2.5 max-h-44 w-full rounded-2xl border border-line object-cover" />
+                  <img src={n.mediaUrl} alt="رسانه خبر" className="mt-2.5 max-h-44 w-full rounded-2xl border border-[var(--v3-line)] object-cover" />
                 )}
                 {n.mediaUrl && n.mediaType === "video" && (
-                  <video src={n.mediaUrl} controls className="mt-2.5 max-h-44 w-full rounded-2xl border border-line bg-black" />
+                  <video src={n.mediaUrl} controls className="mt-2.5 max-h-44 w-full rounded-2xl border border-[var(--v3-line)] bg-black" />
                 )}
-                <p className="mt-1.5 line-clamp-3 text-[12px] leading-6 text-ink-muted">{n.content}</p>
+                <p className="mt-1.5 line-clamp-3 text-[12px] leading-6 text-[var(--v3-ink-2)]">{n.content}</p>
 
                 {/* چیپ مرحله فعلی — پیش‌نمایش زنده موقعیت خبر در چرخه */}
                 <div className="mt-3 flex items-center justify-between">
                   <StageChip status={n.status} stage={n.reviewStage} />
                   <button
                     onClick={() => setDetail(n.id)}
-                    className="flex items-center gap-1 text-[11px] font-bold text-neon transition-opacity hover:opacity-75"
+                    className="flex items-center gap-1 text-[11px] font-bold text-[var(--v3-azure)] transition-opacity hover:opacity-75"
                   >
                     <Eye className="h-3.5 w-3.5" />
                     ردپای چرخه
                   </button>
                 </div>
 
-                <div className="mt-3 flex items-center gap-2 border-t border-line pt-3">
+                <div className="mt-3 flex items-center gap-2 border-t border-[var(--v3-line)] pt-3">
                   <Avatar name={n.reporterName} src={n.reporterAvatar} size={32} />
-                  <span className="flex-1 text-[11px] text-ink-muted">
+                  <span className="flex-1 text-[11px] text-[var(--v3-ink-2)]">
                     {n.reporterName} · {DISTRICT_LABELS[n.district] ?? n.district}
                   </span>
                 </div>
@@ -184,7 +184,7 @@ export function ReviewScreen() {
                       <button
                         onClick={() => act(n.id, "approve", undefined, undefined, "advance")}
                         disabled={busy !== null}
-                        className="flex flex-1 items-center justify-center gap-1.5 rounded-full border border-neon/45 bg-neon/10 py-3 text-[12.5px] font-bold text-neon transition-transform hover:scale-[1.01] disabled:opacity-50"
+                        className="flex flex-1 items-center justify-center gap-1.5 rounded-full border border-[var(--v3-azure)]/35 bg-[var(--v3-azure-soft)] py-3 text-[12.5px] font-bold text-[var(--v3-azure-deep)] transition-transform hover:scale-[1.01] disabled:opacity-50 dark:text-[#93c5fd]"
                       >
                         <ArrowUpCircle className="h-4 w-4" />
                         {busy === n.id ? "..." : "تایید و ارجاع"}
@@ -193,7 +193,7 @@ export function ReviewScreen() {
                       <button
                         onClick={() => act(n.id, "approve", undefined, undefined, "final")}
                         disabled={busy !== null}
-                        className="flex flex-1 items-center justify-center gap-1.5 rounded-full bg-neon py-3 text-[12.5px] font-bold text-neon-foreground transition-transform hover:scale-[1.01] disabled:opacity-50"
+                        className="v3-btn flex flex-1 items-center justify-center gap-1.5 py-3 text-[12.5px] transition-transform hover:scale-[1.01] disabled:opacity-50"
                       >
                         <Rocket className="h-4 w-4" />
                         {busy === n.id ? "..." : "انتشار فوری"}
@@ -203,7 +203,7 @@ export function ReviewScreen() {
                     <button
                       onClick={() => act(n.id, "approve")}
                       disabled={busy !== null}
-                      className="flex flex-1 items-center justify-center gap-1.5 rounded-full bg-neon py-3 text-[13px] font-bold text-neon-foreground transition-transform hover:scale-[1.01] disabled:opacity-50"
+                      className="v3-btn flex flex-1 items-center justify-center gap-1.5 py-3 text-[13px] transition-transform hover:scale-[1.01] disabled:opacity-50"
                     >
                       <Check className="h-4 w-4" />
                       {busy === n.id ? "..." : isAdmin ? "تایید نهایی و انتشار" : "تایید و ارجاع به مرحله بعد"}
@@ -215,7 +215,7 @@ export function ReviewScreen() {
                       setReason("insufficient")
                     }}
                     disabled={busy !== null}
-                    className="flex flex-1 items-center justify-center gap-1.5 rounded-full border border-danger/40 py-3 text-[13px] font-bold text-danger-soft transition-colors hover:bg-danger/8 disabled:opacity-50"
+                    className="flex flex-1 items-center justify-center gap-1.5 rounded-[14px] bg-red-50 py-3 text-[13px] font-bold text-red-600 transition-colors hover:bg-red-100 disabled:opacity-50 dark:bg-red-500/12 dark:text-red-400 dark:hover:bg-red-500/20"
                   >
                     <X className="h-4 w-4" />
                     رد با دلیل
@@ -229,35 +229,35 @@ export function ReviewScreen() {
 
       {/* دیالوگ ردپای چرخه (پیش‌نمایش آنلاین برای مدیر) */}
       <Dialog open={detail !== null} onOpenChange={(v) => !v && setDetail(null)}>
-        <DialogContent className="max-h-[84dvh] overflow-y-auto nice-scroll rounded-[28px] border-line bg-popover p-5">
+        <DialogContent className="max-h-[84dvh] overflow-y-auto nice-scroll rounded-[24px] border-[var(--v3-line)] bg-[var(--v3-card)] p-5">
           {detailNews && (
             <>
               <DialogHeader className="text-right">
-                <DialogTitle className="text-right text-[16px] leading-7 text-ink">{detailNews.title}</DialogTitle>
-                <DialogDescription className="text-[11px] text-ink-muted">
+                <DialogTitle className="text-right text-[16px] leading-7 text-[var(--v3-ink)]">{detailNews.title}</DialogTitle>
+                <DialogDescription className="text-[11px] text-[var(--v3-ink-2)]">
                   {detailNews.code} · {detailNews.reporterName} · {DISTRICT_LABELS[detailNews.district] ?? detailNews.district}
                 </DialogDescription>
               </DialogHeader>
               {/* پیش‌نمایش خبر — همان شکلی که منتشر می‌شود */}
-              <div className="mt-3 rounded-[22px] border border-line bg-surface p-4">
-                <p className="mb-2.5 flex items-center gap-1.5 text-[11px] font-black text-ink-muted">
-                  <Eye className="h-3.5 w-3.5 text-neon" />
+              <div className="v3-card-flat mt-3 p-4">
+                <p className="mb-2.5 flex items-center gap-1.5 text-[11px] font-black text-[var(--v3-ink-2)]">
+                  <Eye className="h-3.5 w-3.5 text-[var(--v3-azure)]" />
                   پیش‌نمایش خبر (پیش از تصمیم)
                 </p>
                 {detailNews.mediaUrl && detailNews.mediaType === "photo" && (
-                  <img src={detailNews.mediaUrl} alt="رسانه خبر" className="mb-3 max-h-52 w-full rounded-2xl border border-line object-cover" />
+                  <img src={detailNews.mediaUrl} alt="رسانه خبر" className="mb-3 max-h-52 w-full rounded-2xl border border-[var(--v3-line)] object-cover" />
                 )}
                 {detailNews.mediaUrl && detailNews.mediaType === "video" && (
-                  <video src={detailNews.mediaUrl} controls className="mb-3 max-h-52 w-full rounded-2xl border border-line bg-black" />
+                  <video src={detailNews.mediaUrl} controls className="mb-3 max-h-52 w-full rounded-2xl border border-[var(--v3-line)] bg-black" />
                 )}
                 <div className="flex items-center justify-between">
-                  <span className="rounded-full bg-surface-2 px-2.5 py-0.5 text-[10px] font-bold text-ink-muted">{CATEGORY_LABELS[detailNews.category]}</span>
-                  <span className="text-[10px] text-ink-muted">
+                  <span className="rounded-full bg-[var(--v3-card-2)] px-2.5 py-0.5 text-[10px] font-bold text-[var(--v3-ink-2)]">{CATEGORY_LABELS[detailNews.category]}</span>
+                  <span className="text-[10px] text-[var(--v3-ink-2)]">
                     {detailNews.reporterName} · {DISTRICT_LABELS[detailNews.district] ?? detailNews.district} · {durFmt(detailNews.durationMin)}
                   </span>
                 </div>
-                <p className="mt-2 text-[15px] font-black leading-7 text-ink">{detailNews.title}</p>
-                <p className="mt-1.5 whitespace-pre-line text-[13px] leading-7 text-ink/90">{detailNews.content}</p>
+                <p className="mt-2 text-[15px] font-black leading-7 text-[var(--v3-ink)]">{detailNews.title}</p>
+                <p className="mt-1.5 whitespace-pre-line text-[13px] leading-7 text-[var(--v3-ink)]/90">{detailNews.content}</p>
               </div>
               <div className="mt-3">
                 <StageTimeline news={detailNews} />
@@ -266,7 +266,7 @@ export function ReviewScreen() {
                 <div className="mt-3 grid grid-cols-2 gap-2">
                   <button
                     onClick={() => setEditing(detailNews.id)}
-                    className="flex items-center justify-center gap-1.5 rounded-full border border-line bg-surface py-3 text-[12px] font-bold text-ink transition-colors hover:border-neon/40 hover:text-neon"
+                    className="v3-btn-ghost flex items-center justify-center gap-1.5 py-3 text-[12px]"
                   >
                     <Pencil className="h-4 w-4" />
                     ویرایش متن خبر
@@ -274,7 +274,7 @@ export function ReviewScreen() {
                   <button
                     onClick={() => doEitaa(detailNews.id)}
                     disabled={eitaaBusy !== null}
-                    className="flex items-center justify-center gap-1.5 rounded-full border border-neon/45 bg-neon/10 py-3 text-[12px] font-bold text-neon transition-colors hover:bg-neon/20 disabled:opacity-50"
+                    className="v3-btn v3-btn-amber flex items-center justify-center gap-1.5 py-3 text-[12px] disabled:opacity-50"
                   >
                     <Send className="h-4 w-4" />
                     {eitaaBusy === detailNews.id ? "در حال ارسال..." : "ارسال به ایتا"}
@@ -286,14 +286,14 @@ export function ReviewScreen() {
                   <button
                     onClick={() => act(detailNews.id, "approve", undefined, undefined, "advance")}
                     disabled={busy !== null}
-                    className="rounded-full border border-neon/45 bg-neon/10 py-3 text-[12.5px] font-bold text-neon disabled:opacity-50"
+                    className="rounded-full border border-[var(--v3-azure)]/35 bg-[var(--v3-azure-soft)] py-3 text-[12.5px] font-bold text-[var(--v3-azure-deep)] disabled:opacity-50 dark:text-[#93c5fd]"
                   >
                     تایید و ارجاع به بعدی
                   </button>
                   <button
                     onClick={() => act(detailNews.id, "approve", undefined, undefined, "final")}
                     disabled={busy !== null}
-                    className="rounded-full bg-neon py-3 text-[12.5px] font-bold text-neon-foreground disabled:opacity-50"
+                    className="v3-btn py-3 text-[12.5px] disabled:opacity-50"
                   >
                     انتشار فوری
                   </button>
@@ -306,10 +306,10 @@ export function ReviewScreen() {
 
       {/* رد با دلیل */}
       <Dialog open={rejecting !== null} onOpenChange={(v) => !v && setRejecting(null)}>
-        <DialogContent className="rounded-[28px] border-line bg-popover p-5">
+        <DialogContent className="rounded-[24px] border-[var(--v3-line)] bg-[var(--v3-card)] p-5">
           <DialogHeader className="text-right">
-            <DialogTitle className="text-ink">رد خبر با دلیل</DialogTitle>
-            <DialogDescription className="text-ink-muted">
+            <DialogTitle className="text-[var(--v3-ink)]">رد خبر با دلیل</DialogTitle>
+            <DialogDescription className="text-[var(--v3-ink-2)]">
               دلیل رد برای خبرنگار نمایش داده می‌شود؛ می‌تواند ویرایش و مجدداً ارسال کند.
             </DialogDescription>
           </DialogHeader>
@@ -320,24 +320,24 @@ export function ReviewScreen() {
                 onClick={() => setReason(r.key)}
                 className={cn(
                   "flex w-full items-start gap-3 rounded-2xl border px-4 py-3 text-right transition-colors",
-                  reason === r.key ? "border-danger/50 bg-danger/8" : "border-line bg-surface hover:bg-surface-2",
+                  reason === r.key ? "border-red-500/40 bg-red-50 dark:bg-red-500/12" : "border-[var(--v3-line)] bg-[var(--v3-card-2)]/60 hover:bg-[var(--v3-card-2)]",
                 )}
               >
-                <span className={cn("mt-0.5 flex h-5 w-5 items-center justify-center rounded-full border", reason === r.key ? "border-danger bg-danger text-white" : "border-line")}>
+                <span className={cn("mt-0.5 flex h-5 w-5 items-center justify-center rounded-full border", reason === r.key ? "border-red-500 bg-red-500 text-white" : "border-[var(--v3-line)]")}>
                   {reason === r.key && <Check className="h-3 w-3" />}
                 </span>
                 <span>
-                  <span className="block text-[13px] font-bold text-ink">{r.label}</span>
-                  <span className="block text-[11px] text-ink-muted">{r.hint}</span>
+                  <span className="block text-[13px] font-bold text-[var(--v3-ink)]">{r.label}</span>
+                  <span className="block text-[11px] text-[var(--v3-ink-2)]">{r.hint}</span>
                 </span>
               </button>
             ))}
-            <Textarea value={note} onChange={(e) => setNote(e.target.value)} rows={3} placeholder="توضیح تکمیلی برای خبرنگار (اختیاری)" className="rounded-2xl border-line bg-surface text-ink leading-6 placeholder:text-ink-muted/50" />
+            <Textarea value={note} onChange={(e) => setNote(e.target.value)} rows={3} placeholder="توضیح تکمیلی برای خبرنگار (اختیاری)" className="v3-input rounded-2xl leading-6 placeholder:text-[var(--v3-ink-2)]/50" />
           </div>
           <button
             onClick={() => rejecting !== null && act(rejecting, "reject", reason, note)}
             disabled={busy !== null}
-            className="mt-4 w-full rounded-full bg-danger py-3.5 text-[14px] font-bold text-white disabled:opacity-50"
+            className="mt-4 w-full rounded-[14px] bg-red-50 py-3.5 text-[14px] font-black text-red-600 transition-colors hover:bg-red-100 disabled:opacity-50 dark:bg-red-500/12 dark:text-red-400 dark:hover:bg-red-500/20"
           >
             {busy !== null ? "..." : "ثبت رد خبر"}
           </button>
