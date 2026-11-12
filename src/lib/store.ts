@@ -30,6 +30,8 @@ export type UserInfo = {
   lastActivityAt: string | null; createdAt: string
   /** حساب محافظت‌شدهٔ ادمین کل سامانه — از سمت سرور محاسبه می‌شود */
   isSuperAdmin?: boolean
+  /** مجوز ارسال خبر به کانال ایتا (کارشناس، فقط با اجازهٔ ادمین کل) */
+  canSendEitaa?: boolean
 }
 
 export type AdminUserDetail = {

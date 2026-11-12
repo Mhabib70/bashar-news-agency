@@ -6,14 +6,15 @@ import { CATEGORY_LABELS, DISTRICT_LABELS, ROLE_LABELS } from "@/lib/domain"
 import { toJalali, JALALI_MONTHS } from "@/lib/jalali"
 import { activeUser } from "@/lib/server/session"
 
-// ارسال خبر به کانال ایتا — با حفظ الگوی متن + عکس خبر
-// پیش‌نیاز (متغیرهای محیطی سرویس bashar در docker-compose):
+// ارسال خبر به کانال ایتا — با قالب مجله‌ای تمیز + عکس خبر
+// دسترسی: ادمین کل همیشه؛ کارشناس خبر فقط با اجازهٔ صریح ادمین کل (canSendEitaa)
+// متغیرهای محیطی:
 //   BASHAR_EITAA_TOKEN    توکن ربات ایتا (از eitaayar.ir)
 //   BASHAR_EITAA_CHANNEL  شناسه کانال مقصد (مثل @channel_name)
 // رفتار:
-//   - خبر بدون عکس → پیام متنی با الگوی کامل
-//   - خبر با عکس → عکس + متن کامل به‌عنوان کپشن (نکته: API ایتا فایل را با فیلد «file» می‌پذیرد)
+//   - خبر با عکس → عکس + متن کامل به‌عنوان کپشن (فیلد فایل در API ایتا «file» است)
 //     اگر متن از سقف کپشن بلندتر باشد → عکس با تیتر، سپس متن کامل در پیام بعدی
+//   - خبر بدون عکس → پیام متنی با همان قالب
 //   - خطای شبکه → یک تلاش مجدد خودکار
 const CAPTION_MAX = 900
 
@@ -25,6 +26,58 @@ const MIME_BY_EXT: Record<string, string> = {
   ".gif": "image/gif",
 }
 
+// ── پاراگراف‌بندی متن خبر: خطوط موجود حفظ می‌شوند و پاراگراف‌های
+//    یک‌تکهٔ بلند به جمله‌های خوانا (حدود ۲ جمله) شکسته می‌شوند.
+function formatParagraphs(raw: string): string {
+  const clean = (t: string) => t.replace(/[ \t]+/g, " ").trim()
+  const out: string[] = []
+  for (const chunk of raw.split(/\n+/)) {
+    const text = clean(chunk)
+    if (!text) continue
+    if (text.length <= 240) {
+      out.push(text)
+      continue
+    }
+    const sentences = text.split(/(?<=[.!?؟…])\s+/).filter(Boolean)
+    let buf = ""
+    for (const s of sentences) {
+      if (buf && (buf + " " + s).length > 240) {
+        out.push(buf.trim())
+        buf = s
+      } else {
+        buf = buf ? buf + " " + s : s
+      }
+    }
+    if (buf.trim()) out.push(buf.trim())
+  }
+  return out.join("\n\n")
+}
+
+// ── قالب مجله‌ای پیام ──
+const LINE = "━━━━━━━━━━━━━━━━━"
+
+function buildMessage(
+  news: { title: string; content: string; category: string; district: string; code: string; createdAt: Date },
+  reporter: string,
+  withBody: boolean,
+): string {
+  const j = toJalali(news.createdAt.getFullYear(), news.createdAt.getMonth() + 1, news.createdAt.getDate())
+  const dateStr = `${j.jd} ${JALALI_MONTHS[j.jm - 1]} ${j.jy}`
+  const category = CATEGORY_LABELS[news.category] ?? "خبر"
+  const district = DISTRICT_LABELS[news.district] ?? news.district
+
+  const head = [`خبرگزاری بسیج شهر رشت`, LINE, `📰 ${category}`, ``, `«${news.title.trim()}»`]
+  const body = withBody ? [``, formatParagraphs(news.content)] : []
+  const foot = [
+    ``,
+    LINE,
+    `✍️ خبرنگار: ${reporter}${district ? ` · ${district}` : ""}`,
+    `🗓 ${dateStr} | کد خبر: ${news.code}`,
+    `#خبرگزاری_بسیج_رشت`,
+  ]
+  return [...head, ...body, ...foot].join("\n")
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
@@ -34,8 +87,14 @@ export async function POST(req: NextRequest) {
     }
 
     const sender = await activeUser(req)
-    if (!sender || !["admin", "specialist"].includes(sender.role)) {
-      return NextResponse.json({ error: "فقط ادمین کل و کارشناس خبر می‌توانند به ایتا ارسال کنند" }, { status: 403 })
+    const allowed =
+      sender?.role === "admin" ||
+      (sender?.role === "specialist" && sender.status === "active" && sender.canSendEitaa)
+    if (!sender || !allowed) {
+      return NextResponse.json(
+        { error: "اجازه ندارید. ارسال به ایتا فقط برای ادمین کل و کارشناسی که ادمین به او اجازه داده فعال است." },
+        { status: 403 },
+      )
     }
 
     const token = process.env.BASHAR_EITAA_TOKEN ?? ""
@@ -49,17 +108,16 @@ export async function POST(req: NextRequest) {
 
     const news = await db.newsItem.findUnique({ where: { id: Number(newsId) }, include: { reporter: true } })
     if (!news) return NextResponse.json({ error: "خبر یافت نشد" }, { status: 404 })
+    if (news.status !== "approved") {
+      return NextResponse.json(
+        { error: "این خبر هنوز چرخه بررسی را کامل نکرده است. اول «تایید نهایی و انتشار» را بزنید؛ ارسال به ایتا آخرین مرحله است." },
+        { status: 400 },
+      )
+    }
 
-    // ── الگوی متن خبر برای ایتا ──
-    const j = toJalali(news.createdAt.getFullYear(), news.createdAt.getMonth() + 1, news.createdAt.getDate())
-    const dateStr = `${j.jd} ${JALALI_MONTHS[j.jm - 1]} ${j.jy}`
-    const category = CATEGORY_LABELS[news.category] ?? "خبر"
-    const district = DISTRICT_LABELS[news.district] ?? news.district
     const reporter = news.reporter?.fullName ?? "خبرنگار"
-    const header = `📰 ${category} | خبرگزاری بسیج رشت`
-    const footer = `👤 خبرنگار: ${reporter}${district ? ` · ${district}` : ""}\n🕐 ${dateStr} · کد ${news.code}\n\n#خبرگزاری_بسیج_رشت`
-    const text = [header, ``, `${news.title}`, ``, `${news.content.trim()}`, ``, footer].join("\n")
-    const shortCaption = [header, ``, `${news.title}`, ``, footer].join("\n")
+    const text = buildMessage(news, reporter, true)
+    const shortCaption = buildMessage(news, reporter, false)
 
     // ── ارسال‌کننده‌ها با یک تلاش مجدد ──
     const withRetry = async (fn: () => Promise<Response | null>): Promise<Response | null> => {
@@ -75,7 +133,7 @@ export async function POST(req: NextRequest) {
       fetch(`https://eitaayar.ir/api/${token}/sendMessage`, {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({ chat_id: channel, text, title: news.title }),
+        body: new URLSearchParams({ chat_id: channel, text }),
         signal: AbortSignal.timeout(30000),
       }).catch(() => null)
 
@@ -101,10 +159,6 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const resultIsOk = (r: Response | null) => {
-      if (!r || !r.ok) return false
-      return true // پاسخ 2xx از eitaayar؛ خطای منطقی در body با ok:false می‌آید که پایین‌تر چک می‌شود
-    }
     const bodyOf = async (r: Response | null) => (r ? await r.json().catch(() => ({})) : {}) as { ok?: boolean; description?: string; error?: string }
 
     // ── جریان ارسال ──
@@ -118,7 +172,7 @@ export async function POST(req: NextRequest) {
           await recordEvent(news.id, sender.id, sender.fullName, sender.role)
           return NextResponse.json({ ok: true, message: "خبر با عکس و متن کامل به ایتا ارسال شد ✅" })
         }
-        // متن بلند: عکس با تیتر رفت؛ متن کامل را در پیام بعدی بفرست
+        // متن بلند: عکس با تیتر رفت؛ متن کامل در پیام بعدی
         const textRes = await withRetry(sendTextOnce)
         const td = await bodyOf(textRes)
         if (textRes && textRes.ok && td.ok !== false) {

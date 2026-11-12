@@ -21,6 +21,7 @@ model User {
   education       String    @default("")
   points          Int       @default(0)
   forumPoints     Int       @default(0) // امتیاز تالار گفتگو — پاداش پیام/تاپیک/واکنش‌گیری
+  canSendEitaa    Boolean   @default(false) // مجوز ارسال خبر به کانال ایتا (فقط با اجازهٔ ادمین کل)
   levelKey        String    @default("rookie") // rookie | follower | active | pro | expert
   currentStreak   Int       @default(0)
   bestStreak      Int       @default(0)

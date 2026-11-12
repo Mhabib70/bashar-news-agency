@@ -31,6 +31,8 @@ export type AppUser = {
   avatar: string
   /** حساب محافظت‌شدهٔ ادمین کل سامانه (شماره‌اش در کلاینت لو نمی‌رود) */
   isSuperAdmin: boolean
+  /** مجوز ارسال خبر به کانال ایتا (کارشناس فقط با اجازهٔ ادمین کل) */
+  canSendEitaa: boolean
   createdAt: string
 }
 
@@ -263,6 +265,7 @@ export async function getAppState(userId: string): Promise<AppState | null> {
     nextLevelTitle: nx?.title ?? null, nextLevelMin: nx?.min ?? null,
     currentStreak: u.currentStreak, bestStreak: u.bestStreak, avatar: u.avatar,
     isSuperAdmin: isSuperAdminPhone(u.phone),
+    canSendEitaa: u.role === "admin" ? true : !!u.canSendEitaa,
     createdAt: u.createdAt.toISOString(),
   }
 

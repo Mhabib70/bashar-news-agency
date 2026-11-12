@@ -38,7 +38,7 @@ export async function GET(req: NextRequest) {
       user: {
         id: u.id, fullName: u.fullName, username: u.username, role: u.role, status: u.status,
         rejectReason: u.rejectReason, district: u.district, base: u.base, phone: u.phone,
-        age: u.age, education: u.education, points: u.points, levelKey: u.levelKey,
+        age: u.age, education: u.education, canSendEitaa: u.canSendEitaa, points: u.points, levelKey: u.levelKey,
         currentStreak: u.currentStreak, bestStreak: u.bestStreak, avatar: u.avatar,
         isSuperAdmin: isSuperAdminPhone(u.phone),
         lastActivityAt: u.lastActivityAt?.toISOString() ?? null,
@@ -62,7 +62,7 @@ export async function GET(req: NextRequest) {
   const users = await db.user.findMany({
     select: {
       id: true, fullName: true, username: true, role: true, status: true, rejectReason: true,
-      district: true, base: true, phone: true, age: true, education: true,
+      district: true, base: true, phone: true, age: true, education: true, canSendEitaa: true,
       points: true, levelKey: true, currentStreak: true, bestStreak: true, avatar: true,
       lastActivityAt: true, createdAt: true,
     },
@@ -136,6 +136,29 @@ export async function POST(req: NextRequest) {
         message: roleChanged
           ? `نقش ${target.fullName} به «${ROLE_LABELS[newRole]}» تغییر کرد.`
           : `حوزه ${target.fullName} به‌روزرسانی شد.`,
+      })
+    }
+
+    // مجوز ارسال خبر به کانال ایتا — فقط با ارادهٔ ادمین کل به کارشناس داده/گرفته می‌شود
+    if (action === "set_eitaa_perm") {
+      const allowed = body.allowed === true
+      if (target.role !== "specialist") {
+        return NextResponse.json({ error: "این مجوز فقط برای نقش «کارشناس خبر» معنا دارد" }, { status: 400 })
+      }
+      await db.user.update({ where: { id: target.id }, data: { canSendEitaa: allowed } })
+      await notifyUser(
+        target.id,
+        "user_status",
+        allowed ? "📨 مجوز ارسال به ایتا فعال شد" : "📨 مجوز ارسال به ایتا برداشته شد",
+        allowed
+          ? `${admin.fullName} به شما اجازه داد خبرها را به کانال ایتا ارسال کنید.`
+          : `ادمین کل مجوز ارسال خبر به کانال ایتا را از شما گرفت.`,
+        `user:${target.id}`,
+        { force: true },
+      )
+      return NextResponse.json({
+        ok: true,
+        message: allowed ? `مجوز ارسال به ایتا برای ${target.fullName} فعال شد.` : `مجوز ارسال به ایتا از ${target.fullName} گرفته شد.`,
       })
     }
 
