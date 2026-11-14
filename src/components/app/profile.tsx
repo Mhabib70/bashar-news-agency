@@ -2,10 +2,11 @@
 
 import { useRef, useState } from "react"
 import { useRouter } from "next/navigation"
-import { LogOut, SwitchCamera, Zap, Trophy, Flame, BellRing, ShieldCheck, Users2, Timer, Award, ChevronDown, BadgeCheck, Share2, FileDown, Camera, Trash2, Loader2, Landmark, KeyRound } from "lucide-react"
+import { LogOut, SwitchCamera, Zap, Trophy, Flame, BellRing, ShieldCheck, Users2, Timer, Award, ChevronDown, BadgeCheck, Share2, FileDown, Camera, Trash2, Loader2, Landmark, KeyRound, Sparkles, Eye, Heart, Star, Clock3, CalendarCheck2, Newspaper } from "lucide-react"
 import { useApp } from "@/lib/store"
 import { Ring, SectionHeader, Avatar } from "@/components/app/bits"
 import { fa, faNum, jalali } from "@/lib/format"
+import { jalaliToday } from "@/lib/jalali"
 import { ROLE_LABELS, DISTRICT_LABELS, EDUCATION_LABELS, LEVELS, levelIndex } from "@/lib/domain"
 import { fileToAvatarDataUrl } from "@/lib/image"
 import { ThemeToggle } from "@/components/app/theme-toggle"
@@ -28,6 +29,10 @@ export function ProfileScreen({ onOpenAdmin }: { onOpenAdmin?: () => void }) {
   const [pinCurrent, setPinCurrent] = useState("")
   const [pinNew, setPinNew] = useState("")
   const [pinBusy, setPinBusy] = useState(false)
+  // سالنامهٔ سال جلالی — جمع‌بندی فعالیت خبرنگار
+  const [recapOpen, setRecapOpen] = useState(false)
+  const [recap, setRecap] = useState<RecapData | null>(null)
+  const [recapBusy, setRecapBusy] = useState(false)
   if (!state) return null
   const { user, stats } = state
 
@@ -61,6 +66,7 @@ export function ProfileScreen({ onOpenAdmin }: { onOpenAdmin?: () => void }) {
   const progressToNext = nx ? Math.min(100, Math.round(((user.points - lv.min) / (nx.min - lv.min)) * 100)) : 100
 
   const unlockedBadges = state.badges.filter((b) => b.unlocked).length
+  const recapYear = jalaliToday().jy
 
   const shareCard = async () => {
     const text = `🎖 کارت خبرنگاری دیجیتال\n${user.fullName}\n${ROLE_LABELS[user.role]} · ${DISTRICT_LABELS[user.district] ?? ""}\n${user.base}\nسطح: ${user.levelEmoji} ${user.levelTitle} · ${faNum(user.points)} امتیاز\nعضو از ${jalali(user.createdAt, true)}\n📰 خبرگزاری بسیج شهر رشت`
@@ -83,6 +89,21 @@ export function ProfileScreen({ onOpenAdmin }: { onOpenAdmin?: () => void }) {
   }
 
   const digits = (s: string) => s.replace(/[۰-۹]/g, (d) => String("۰۱۲۳۴۵۶۷۸۹".indexOf(d))).replace(/\D/g, "")
+
+  const openRecap = async () => {
+    setRecapOpen(true)
+    if (recap) return
+    setRecapBusy(true)
+    try {
+      const r = await fetch("/api/recap")
+      if (r.ok) setRecap(await r.json())
+      else setRecap(null)
+    } catch {
+      setRecap(null)
+    } finally {
+      setRecapBusy(false)
+    }
+  }
 
   const submitPin = async (action: "set" | "remove") => {
     if (action === "set" && !/^\d{4,6}$/.test(digits(pinNew))) {
@@ -227,6 +248,23 @@ export function ProfileScreen({ onOpenAdmin }: { onOpenAdmin?: () => void }) {
           <MiniKpi icon={<Trophy className="h-4 w-4" />} value={`${fa(user.bestStreak)} روز`} label="بهترین استریک" />
         </div>
       </div>
+
+      {/* سالنامه */}
+      <button onClick={openRecap} className="v3-tile-blue relative w-full overflow-hidden rounded-[22px] p-5 text-right shadow-[0_18px_40px_-18px_rgba(37,99,235,0.7)] transition-transform hover:scale-[1.01] active:scale-[0.99]">
+        <div className="pointer-events-none absolute -left-10 -bottom-12 h-36 w-36 rounded-full bg-white/12 blur-2xl" />
+        <div className="relative flex items-center gap-4">
+          <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[18px] bg-white/18 shadow-[inset_0_1px_0_rgba(255,255,255,0.25)]">
+            <Sparkles className="h-7 w-7" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="text-[16px] font-black">سالنامهٔ {faNum(recapYear)}</p>
+            <p className="mt-1 text-[11.5px] leading-5 text-white/85">
+              جمع‌بندی سال کاری‌ات: خبرها، بازدیدها، ماهِ پرکار و امتیازها — همه در یک کارت
+            </p>
+          </div>
+          <ChevronDown className="h-5 w-5 shrink-0 -rotate-90 text-white/80" />
+        </div>
+      </button>
 
       {/* کارنامه */}
       <div>
@@ -392,6 +430,130 @@ export function ProfileScreen({ onOpenAdmin }: { onOpenAdmin?: () => void }) {
         </DialogContent>
       </Dialog>
 
+      {/* شیت سالنامه */}
+      <Dialog open={recapOpen} onOpenChange={(v) => !v && setRecapOpen(false)}>
+        <DialogContent className="max-h-[86dvh] overflow-y-auto nice-scroll rounded-[24px] border-[var(--v3-line)] bg-[var(--v3-card)] p-5">
+          <DialogHeader className="text-right">
+            <DialogTitle className="flex items-center gap-2 text-[var(--v3-ink)]">
+              <Sparkles className="h-5 w-5 text-[var(--v3-azure)]" />
+              سالنامهٔ {recap ? faNum(recap.jy) : ""} — {user.fullName}
+            </DialogTitle>
+            <DialogDescription className="text-[var(--v3-ink-2)]">
+              جمع‌بندی یک سال خبرنگاری شما در خبرگزاری بسیج شهر رشت
+            </DialogDescription>
+          </DialogHeader>
+
+          {recapBusy && (
+            <div className="flex flex-col items-center gap-3 py-12 text-center">
+              <Loader2 className="h-8 w-8 animate-spin text-[var(--v3-azure)]" />
+              <p className="text-[12.5px] text-[var(--v3-ink-2)]">در حال محاسبهٔ سالنامه…</p>
+            </div>
+          )}
+
+          {!recapBusy && !recap && (
+            <p className="py-10 text-center text-[12.5px] text-[var(--v3-ink-2)]">سالنامه در دسترس نیست — دوباره تلاش کنید.</p>
+          )}
+
+          {!recapBusy && recap && (
+            <div className="mt-2 space-y-4">
+              {/* کارت قهرمانی سال */}
+              <div className="v3-tile-blue rounded-[20px] p-4 text-center shadow-[0_18px_40px_-18px_rgba(37,99,235,0.7)]">
+                <p className="text-[11.5px] font-bold text-white/85">در سال {faNum(recap.jy)} شما</p>
+                <p className="v3-num mt-1 text-[34px] font-black leading-none">{fa(recap.totals.approved)}</p>
+                <p className="mt-1 text-[12.5px] font-bold text-white/90">خبر تاییدشده منتشر کردید</p>
+                {recap.bestMonth && recap.bestMonth.count > 0 && (
+                  <p className="mt-2 text-[11px] text-white/80">
+                    ماهِ طلایی شما: <b className="text-white">{recap.bestMonth.name}</b> با {fa(recap.bestMonth.count)} خبر
+                  </p>
+                )}
+              </div>
+
+              {/* شاخص‌های اصلی */}
+              <div className="grid grid-cols-2 gap-2.5">
+                <RecapKpi icon={<Eye className="h-4.5 w-4.5" />} value={fa(recap.totals.views)} label="بازدید خبرهای شما" tone="azure" />
+                <RecapKpi icon={<Heart className="h-4.5 w-4.5" />} value={fa(recap.totals.reactions)} label="واکنش کانال ایتا" tone="rose" />
+                <RecapKpi icon={<Star className="h-4.5 w-4.5" />} value={fa(recap.totals.points)} label="امتیاز کسب‌شدهٔ سال" tone="amber" />
+                <RecapKpi icon={<Clock3 className="h-4.5 w-4.5" />} value={`${fa(Math.round(recap.totals.minutes / 60))} ساعت`} label="زمان صرف‌شده برای خبر" tone="emerald" />
+              </div>
+
+              {/* نمودار ۱۲ ماه */}
+              {recap.totals.all > 0 && (
+                <div className="v3-card-flat p-4">
+                  <p className="flex items-center gap-2 text-[12.5px] font-bold text-[var(--v3-ink)]">
+                    <Newspaper className="h-4 w-4 text-[var(--v3-azure)]" />
+                    خبرهای شما در طول سال
+                  </p>
+                  <div className="mt-3 flex h-24 items-end justify-between gap-1">
+                    {recap.perMonth.map((c, i) => {
+                      const max = Math.max(...recap.perMonth, 1)
+                      const best = recap.bestMonth?.index === i && c > 0
+                      return (
+                        <div key={i} className="flex min-w-0 flex-1 flex-col items-center gap-1">
+                          <span className="v3-num text-[8.5px] font-bold text-[var(--v3-ink-2)]">{c > 0 ? fa(c) : ""}</span>
+                          <div
+                            className={cn("w-full rounded-t-md transition-all", best ? "bg-[var(--v3-amber)]" : "bg-[var(--v3-azure)]/75")}
+                            style={{ height: `${Math.max(4, Math.round((c / max) * 68))}px` }}
+                          />
+                          <span className={cn("text-[8px]", best ? "font-black text-[var(--v3-amber)]" : "text-[var(--v3-ink-2)]")}>
+                            {recap.monthNames[i]?.slice(0, 3)}
+                          </span>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* جزئیات سال */}
+              <div className="v3-card-flat space-y-3 p-4">
+                <div className="flex items-center justify-between">
+                  <span className="flex items-center gap-2 text-[12px] font-semibold text-[var(--v3-ink-2)]">
+                    <CalendarCheck2 className="h-4 w-4 text-[var(--v3-azure)]" />
+                    روزهای فعال
+                  </span>
+                  <span className="v3-num text-[12.5px] font-black text-[var(--v3-ink)]">{fa(recap.totals.activeDays)} روز</span>
+                </div>
+                {recap.firstNews && (
+                  <div className="border-t border-[var(--v3-line)]/70 pt-3">
+                    <span className="flex items-center gap-2 text-[12px] font-semibold text-[var(--v3-ink-2)]">
+                      <Newspaper className="h-4 w-4 text-[var(--v3-azure)]" />
+                      نخستین خبر سال
+                    </span>
+                    <p className="mt-1 line-clamp-2 text-[12px] font-bold text-[var(--v3-ink)]">{recap.firstNews.title}</p>
+                    <p className="mt-0.5 text-[10px] text-[var(--v3-ink-2)]">{jalali(recap.firstNews.at)}</p>
+                  </div>
+                )}
+                {recap.topNews && (
+                  <div className="border-t border-[var(--v3-line)]/70 pt-3">
+                    <span className="flex items-center gap-2 text-[12px] font-semibold text-[var(--v3-ink-2)]">
+                      <Star className="h-4 w-4 text-[var(--v3-amber)]" />
+                      پربازدیدترین خبر سال
+                    </span>
+                    <p className="mt-1 line-clamp-2 text-[12px] font-bold text-[var(--v3-ink)]">{recap.topNews.title}</p>
+                    <p className="mt-0.5 flex items-center gap-3 text-[10px] text-[var(--v3-ink-2)]">
+                      <span dir="ltr">{recap.topNews.code}</span>
+                      <span className="flex items-center gap-1"><Eye className="h-3 w-3" />{fa(recap.topNews.views)}</span>
+                      <span className="flex items-center gap-1"><Heart className="h-3 w-3" />{fa(recap.topNews.reactions)}</span>
+                    </p>
+                  </div>
+                )}
+                {recap.totals.rejected > 0 && (
+                  <div className="flex items-center justify-between border-t border-[var(--v3-line)]/70 pt-3">
+                    <span className="text-[12px] font-semibold text-[var(--v3-ink-2)]">بازگشتی برای اصلاح</span>
+                    <span className="v3-num text-[12.5px] font-black text-[var(--v3-ink)]">{fa(recap.totals.rejected)}</span>
+                  </div>
+                )}
+                {recap.totals.all === 0 && (
+                  <p className="pt-2 text-center text-[12px] text-[var(--v3-ink-2)]">
+                    برای سال {faNum(recap.jy)} خبری ثبت نشده — سال جدید را با خبر شروع کن!
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
       {/* اکشن‌ها */}
       <div className="flex flex-wrap gap-2.5 pb-2">
         {user.role === "admin" && (
@@ -438,6 +600,34 @@ function MiniKpi({ icon, value, label }: { icon: React.ReactNode; value: string;
 
 function toFaTime(t: string): string {
   return t.replace(/[0-9]/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[Number(d)])
+}
+
+// شاخص سالنامه — با رنگ متنوع
+function RecapKpi({ icon, value, label, tone }: { icon: React.ReactNode; value: string; label: string; tone: "azure" | "rose" | "amber" | "emerald" }) {
+  const tones: Record<string, string> = {
+    azure: "bg-[var(--v3-azure-soft)] text-[var(--v3-azure)]",
+    rose: "bg-rose-100 text-rose-600 dark:bg-rose-500/15 dark:text-rose-400",
+    amber: "bg-[var(--v3-amber-soft)] text-[var(--v3-amber)]",
+    emerald: "bg-emerald-100 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-400",
+  }
+  return (
+    <div className="v3-card-flat p-3.5">
+      <span className={cn("flex h-9 w-9 items-center justify-center rounded-[12px]", tones[tone])}>{icon}</span>
+      <p className="v3-num mt-2 text-[18px] font-black leading-none text-[var(--v3-ink)]">{value}</p>
+      <p className="mt-1 text-[10px] font-medium leading-4 text-[var(--v3-ink-2)]">{label}</p>
+    </div>
+  )
+}
+
+// شکل دادهٔ سالنامه — هم‌سان با /api/recap
+type RecapData = {
+  jy: number
+  totals: { all: number; approved: number; rejected: number; pending: number; views: number; reactions: number; minutes: number; activeDays: number; points: number }
+  perMonth: number[]
+  monthNames: string[]
+  bestMonth: { index: number; name: string; count: number } | null
+  firstNews: { title: string; at: string } | null
+  topNews: { code: string; title: string; views: number; reactions: number } | null
 }
 
 export { BellRing }
