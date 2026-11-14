@@ -1,0 +1,20 @@
+#!/usr/bin/env python3
+import json, paramiko
+cfg = json.load(open('/home/z/my-project/upload/deploy.json'))
+cli = paramiko.SSHClient()
+cli.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+cli.connect(cfg['ip'], username=cfg['username'], password=cfg['password'], timeout=25, allow_agent=False, look_for_keys=False)
+def run(cmd, timeout=60):
+    _, out, err = cli.exec_command(cmd, timeout=timeout)
+    rc = out.channel.recv_exit_status()
+    print(f"$ {cmd}\n[rc={rc}] {out.read().decode('utf-8','replace').strip()[-600:]}")
+    e = err.read().decode('utf-8','replace').strip()
+    if e: print("[stderr]", e[-200:])
+run("docker ps --filter name=bashar --format '{{.Status}}'")
+run("curl -s -o /dev/null -w 'bootstrap:%{http_code}' http://127.0.0.1:3424/api/bootstrap --max-time 5")
+run("find /www/wwwroot/vodda/bashar/src -type f | wc -l")
+run("ls /www/wwwroot/vodda/bashar/src/lib/server/ 2>/dev/null")
+run("df -h / | tail -1")
+run("docker images vodda-bashar --format '{{.Repository}}:{{.Tag}}' | head -5")
+cli.close()
+print("CHECK DONE")
