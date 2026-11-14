@@ -23,6 +23,9 @@
 - **پیش‌نویس** خبر + مدیریت و حذف
 - **تنظیمات اعلان** + ساعت سکوت
 - **آمار زنده**: کارت پیشرفت امروز سازمان در صفحه ورود، نمودار هفتگی امتیاز، رتبه‌بندی، کارنامه
+- **نشست امن با کوکی HttpOnly**: هویت کاربر از کوکی امضاشده خوانده می‌شود، نه از درخواست کلاینت — یعنی جعل نقش ادمین با دستکاری `userId` ممکن نیست
+- **انتخاب تاریخ تهیه خبر**: تقویم جلالی با انتخاب روز و ساعت در فرم ارسال خبر
+- **نگهداری خودکار**: پایان خودکار چالش‌های مهلت‌گذشته، یادآوری مهلت، انقضای درخواست‌های بی‌پاسخ، سقوط سطح پس از ۷ روز غیبت و یادآوری به ادمین درباره درخواست‌های معطل
 - **اپ اندروید**: WebView اختصاصی با اسپلش و آیکون لوگو + پنجره تغییر آدرس سرور در قطعی اتصال
 
 ## معماری و تکنولوژی
@@ -33,6 +36,7 @@
 | بک‌اند | API Routes (۹ اندپوینت) · منطق امتیازدهی پورت‌شده از `scoring.py` ربات اصلی |
 | دیتابیس | SQLite + Prisma ORM (۱۱ مدل) |
 | اپ اندروید | WebView بومی (Java) — بدون وابستگی اضافه |
+| احراز هویت | کوکی نشست HttpOnly با امضای HMAC-SHA256 (کلید: `SESSION_SECRET`) |
 | فونت و RTL | Vazirmatn · چیدمان کاملاً راست‌به‌چپ فارسی |
 
 ## راه‌اندازی سریع
@@ -41,12 +45,20 @@
 # ۱) نصب وابستگی‌ها
 bun install        # یا: npm install
 
-# ۲) ساخت دیتابیس خالی (فقط اسکیما)
+# ۲) کپی متغیرهای محیطی و ساخت کلید نشست
+cp .env.example .env
+# در .env مقدار SESSION_SECRET را بگذارید:  openssl rand -hex 32
+
+# ۳) ساخت دیتابیس خالی (فقط اسکیما)
 bunx prisma db push
 
-# ۳) اجرای توسعه
+# ۴) اجرای توسعه
 bun run dev        # http://localhost:3000
 ```
+
+> **نکته:** اگر `SESSION_SECRET` تنظیم نشود، یک کلید تصادفی موقت در حافظه ساخته
+> می‌شود؛ در این حالت با هر ری‌استارت سرور، همهٔ نشست‌ها باطل و کاربران دوباره
+> وارد می‌شوند. برای استقرار دائمی حتماً `SESSION_SECRET` را تنظیم کنید.
 
 سپس در اپ: **ثبت‌نام خبرنگار جدید** — اولین حساب، ادمین کل سازمان است.
 
@@ -86,10 +98,13 @@ DATABASE_URL="libsql://bashar-news-xxxx.turso.io?authToken=YOUR_TOKEN" bunx pris
 ### گام ۳ — دیپلوی روی Vercel (رایگان)
 
 1. به [vercel.com/new](https://vercel.com/new) بروید و ریپو `bashar-news-agency` را Import کنید
-2. در بخش **Environment Variables** سه مقدار را اضافه کنید:
+2. در بخش **Environment Variables** این مقادیر را اضافه کنید:
    - `DATABASE_URL` = `file:./db/custom.db` (برای ساخت کلاینت — استفاده نمی‌شود)
    - `TURSO_DATABASE_URL` = آدرس گام ۱
    - `TURSO_AUTH_TOKEN` = توکن گام ۱
+   - `SESSION_SECRET` = یک کلید تصادفی (`openssl rand -hex 32`) — **الزامی**، وگرنه
+     نشست‌ها با هر ری‌استارت باطل می‌شوند
+   - `SUPER_ADMIN_PHONE` = شمارهٔ ادمین کل سامانه (اختیاری — فقط سمت سرور خوانده می‌شود)
 3. **Deploy** را بزنید — بعد از یک دقیقه آدرس دائمی (مثل `https://bashar-news.vercel.app`) تحویل می‌گیرید
 
 ### گام ۴ — اتصال اپ اندروید
@@ -132,14 +147,26 @@ apksigner sign --ks keystore.jks --out BasharNews-v1.0.0.apk aligned.apk
 - اپ وب به دیتابیس SQLite نیاز دارد؛ برای استقرار دائمی، `DATABASE_URL` را تنظیم و `prisma db push` را اجرا کنید
 - آدرس سرور داخل APK از `strings.xml` قابل تغییر است و نیازی به بازسازی APK ندارد (قابل ویرایش از خود اپ)
 
+## تست‌های خودکار
+
+```bash
+# تست‌های API (نیازمند سرور در حال اجرا روی پورت ۳۱۰۰ و دیتابیس تازه)
+BASE=http://localhost:3100 node scripts/e2e-smoke.mjs        # ۴۳ بررسی — از ثبت‌نام تا چرخهٔ تایید
+BASE=http://localhost:3100 node scripts/ui-smoke.mjs          # ۱۳ بررسی رابط کاربری (Playwright)
+BASE=http://localhost:3100 node scripts/ui-submit-picker.mjs  # ۱۰ بررسی تقویم جلالی
+DATABASE_URL="file:./db/custom.db" node scripts/scheduler-test.mjs  # ۱۴ بررسی زمان‌بند نگهداری
+node --experimental-strip-types scripts/verify-jalali.ts        # ۲۰ بررسی تقویم جلالی
+```
+
 ## ساختار پروژه
 
 ```
-├── src/app/api/          # ۱۰ اندپوینت REST (state, news, review, resubmit, register, …)
+├── src/app/api/          # اندپوینت‌های REST (state, news, review, resubmit, register, …)
 ├── src/components/app/   # صفحات و جریان‌های UI (Welcome, Home, Activity, Review, …)
 ├── src/lib/              # store (Zustand), domain (کاتالوگ‌ها و امتیازدهی), server/state
-├── prisma/               # اسکیمای ۱۱ مدل
-├── scripts/              # seed.ts (داده دمو), e2e-*.sh (تست‌های انتها به انتها)
+├── src/lib/server/       # نشست (session.ts)، اعلان‌ها، نگهداری دوره‌ای، ادمین کل
+├── prisma/               # اسکیمای ۱۴ مدل
+├── scripts/              # seed.ts (داده دمو) + تست‌های خودکار (e2e-smoke, ui-smoke, scheduler-test, verify-jalali)
 ├── android/              # سورس اپ اندروید (WebView wrapper)
 ├── apk/                  # APK امضاشده آماده نصب
 └── docs/                 # اسکرین‌شات‌ها و آیکون

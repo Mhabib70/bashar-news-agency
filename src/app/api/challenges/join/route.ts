@@ -1,12 +1,16 @@
 import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
+import { activeUser } from "@/lib/server/session"
 
 // عضویت در چالش فعال (سناریوی ۴)
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { userId, challengeId } = body ?? {}
-    if (!userId || !challengeId) return NextResponse.json({ error: "پارامترهای ناقص" }, { status: 400 })
+    const { challengeId } = body ?? {}
+    if (!challengeId) return NextResponse.json({ error: "پارامترهای ناقص" }, { status: 400 })
+    const user = await activeUser(req)
+    if (!user) return NextResponse.json({ error: "نشست معتبر نیست — دوباره وارد شوید" }, { status: 401 })
+    const userId = user.id
     const ch = await db.challenge.findUnique({ where: { id: Number(challengeId) }, include: { participations: true } })
     if (!ch) return NextResponse.json({ error: "چالش یافت نشد" }, { status: 404 })
     if (ch.status !== "active") return NextResponse.json({ error: "این چالش پایان یافته است" }, { status: 409 })

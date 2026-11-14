@@ -27,18 +27,15 @@ export default function Page() {
 
   const openAdmin = () => router.push("/admin")
 
-  // راه‌اندازی: بازیابی نشست قبلی
+  // راه‌اندازی: بازیابی نشست قبلی از کوکی (HttpOnly)
+  // اگر نشست معتبر بود، state گرفته و کاربر مستقیم وارد اپ می‌شود؛
+  // در غیر این صورت صفحه ورود نمایش داده می‌شود.
   useEffect(() => {
-    const uid = localStorage.getItem("newsapp_uid")
-    if (uid) {
-      login(uid).catch(() => {
-        // سشن قدیمی/نامعتبر — پاک‌سازی و باز کردن صفحه ورود (جلوگیری از اسکلت بی‌پایان)
-        localStorage.removeItem("newsapp_uid")
-        useApp.setState({ booted: true })
-      })
-    } else {
+    login().catch(() => {
+      // نشست نامعتبر/منقضی — پاک‌سازی و باز کردن صفحه ورود (جلوگیری از اسکلت بی‌پایان)
+      localStorage.removeItem("newsapp_uid")
       useApp.setState({ booted: true })
-    }
+    })
   }, [])
 
   // پیش‌نمایش آنلاین چرخه: پولینگ هوشمند — فقط وقتی صفحه مرئی است + رفرش فوری هنگام بازگشت

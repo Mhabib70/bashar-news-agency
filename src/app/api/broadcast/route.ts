@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { notifyActiveUsers } from "@/lib/server/notify"
+import { activeUser } from "@/lib/server/session"
 
 // پیام همگانی ادمین به همه اعضای فعال — با احترام به فلگ broadcast و ساعت سکوت (سناریوی ۵ ربات)
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { userId, title, text } = body ?? {}
-    const admin = await db.user.findUnique({ where: { id: userId } })
+    const { title, text } = body ?? {}
+    const admin = await activeUser(req)
     if (!admin || admin.role !== "admin") {
       return NextResponse.json({ error: "فقط ادمین کل می‌تواند پیام همگانی بفرستد" }, { status: 403 })
     }

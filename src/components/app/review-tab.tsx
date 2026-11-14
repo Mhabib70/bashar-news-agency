@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Check, X, ClipboardCheck, Inbox, AlertTriangle, Eye, ChevronLeft, Rocket, ArrowUpCircle, Pencil, Send } from "lucide-react"
+import { Check, X, ClipboardCheck, Inbox, AlertTriangle, Eye, ChevronLeft, Rocket, ArrowUpCircle, Pencil } from "lucide-react"
 import { useApp } from "@/lib/store"
 import { fa, relTime, durFmt } from "@/lib/format"
 import { CATEGORY_LABELS, REJECT_REASONS, reviewStageLabel, DISTRICT_LABELS, ROLE_STAGE, REVIEW_STAGES } from "@/lib/domain"
@@ -21,8 +21,7 @@ export function ReviewScreen() {
   const [busy, setBusy] = useState<number | null>(null)
   const [detail, setDetail] = useState<number | null>(null)
   const [editing, setEditing] = useState<number | null>(null)
-  const [eitaaBusy, setEitaaBusy] = useState<number | null>(null)
-  const { reviewNews, sendToEitaa, refresh } = useApp()
+  const { reviewNews, refresh } = useApp()
 
   if (!state) return null
   const queue = state.reviewQueue
@@ -53,18 +52,6 @@ export function ReviewScreen() {
 
   const detailNews = queue.find((n) => n.id === detail)
   const canEditNews = isAdmin || role === "specialist"
-
-  const doEitaa = async (newsId: number) => {
-    setEitaaBusy(newsId)
-    const res = await sendToEitaa(newsId)
-    setEitaaBusy(null)
-    if (res.ok) {
-      toast({ title: "ارسال شد", description: res.message })
-      await refresh()
-    } else {
-      toast({ title: "خطا", description: res.message, variant: "destructive" })
-    }
-  }
 
   return (
     <div className="stage-enter flex flex-col gap-4 px-5 pb-4 pt-6">
@@ -263,23 +250,13 @@ export function ReviewScreen() {
                 <StageTimeline news={detailNews} />
               </div>
               {canEditNews && (
-                <div className="mt-3 grid grid-cols-2 gap-2">
-                  <button
-                    onClick={() => setEditing(detailNews.id)}
-                    className="v3-btn-ghost flex items-center justify-center gap-1.5 py-3 text-[12px]"
-                  >
-                    <Pencil className="h-4 w-4" />
-                    ویرایش متن خبر
-                  </button>
-                  <button
-                    onClick={() => doEitaa(detailNews.id)}
-                    disabled={eitaaBusy !== null}
-                    className="v3-btn v3-btn-amber flex items-center justify-center gap-1.5 py-3 text-[12px] disabled:opacity-50"
-                  >
-                    <Send className="h-4 w-4" />
-                    {eitaaBusy === detailNews.id ? "در حال ارسال..." : "ارسال به ایتا"}
-                  </button>
-                </div>
+                <button
+                  onClick={() => setEditing(detailNews.id)}
+                  className="v3-btn-ghost mt-3 flex w-full items-center justify-center gap-1.5 py-3 text-[12px]"
+                >
+                  <Pencil className="h-4 w-4" />
+                  ویرایش متن خبر
+                </button>
               )}
               {isAdmin && detailNews.status === "pending" && detailNews.reviewStage !== "admin" && (
                 <div className="mt-3 grid grid-cols-2 gap-2">

@@ -20,7 +20,7 @@ const FILTERS = [
 ] as const
 
 export function NewsScreen({ onQuickSubmit, draftsView }: { onQuickSubmit: () => void; draftsView?: boolean }) {
-  const { state, fetchAllNews, deleteNews, refresh } = useApp()
+  const { state, fetchAllNews, deleteNews, sendToEitaa, refresh } = useApp()
   const { toast } = useToast()
   const [filter, setFilter] = useState<(typeof FILTERS)[number]["key"]>("all")
   const [detail, setDetail] = useState<number | null>(null)
@@ -30,6 +30,7 @@ export function NewsScreen({ onQuickSubmit, draftsView }: { onQuickSubmit: () =>
   const [loadingAll, setLoadingAll] = useState(false)
   const [editing, setEditing] = useState<number | null>(null)
   const [deleting, setDeleting] = useState<number | null>(null)
+  const [eitaaBusy, setEitaaBusy] = useState(false)
   const searched = q.trim().length >= 2
 
   const loadAll = async () => {
@@ -38,9 +39,18 @@ export function NewsScreen({ onQuickSubmit, draftsView }: { onQuickSubmit: () =>
     setAllNews(rows)
     setLoadingAll(false)
   }
+  // بارگذاری فهرست «همه اخبار» هنگام ورود به این حالت.
+  // واکشی داخل continuation انجام می‌شود تا setState همگام در بدنهٔ effect رخ ندهد
+  // (قانون react-hooks/set-state-in-effect) و رندر آبشاری ایجاد نشود.
   useEffect(() => {
-    if (scope === "all") loadAll()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (scope !== "all") return
+    let cancelled = false
+    void fetchAllNews().then((rows) => {
+      if (!cancelled) setAllNews(rows)
+    })
+    return () => {
+      cancelled = true
+    }
   }, [scope])
 
   const base = scope === "all" ? allNews : (state?.news ?? [])
@@ -61,6 +71,21 @@ export function NewsScreen({ onQuickSubmit, draftsView }: { onQuickSubmit: () =>
     (["admin", "specialist"].includes(me.role)) || (n.reporterId === me.id && n.status === "pending")
   const canDeleteNews = (n: NewsDTO) =>
     me.role === "admin" || (n.reporterId === me.id && (n.status === "pending" || n.status === "rejected"))
+
+  const doEitaa = async (id: number) => {
+    if (eitaaBusy) return
+    setEitaaBusy(true)
+    const r = await sendToEitaa(id)
+    setEitaaBusy(false)
+    if (r.ok) {
+      toast({ title: "ارسال شد", description: r.message })
+      setDetail(null)
+      if (scope === "all") loadAll()
+      refresh()
+    } else {
+      toast({ title: "خطا", description: r.message, variant: "destructive" })
+    }
+  }
 
   const doDelete = async (id: number) => {
     const r = await deleteNews(id)
@@ -277,6 +302,17 @@ export function NewsScreen({ onQuickSubmit, draftsView }: { onQuickSubmit: () =>
                     </button>
                   )}
                 </div>
+              )}
+
+              {detailNews.status === "approved" && (me.role === "admin" || me.canSendEitaa) && (
+                <button
+                  onClick={() => doEitaa(detailNews.id)}
+                  disabled={eitaaBusy}
+                  className="mt-3 flex w-full items-center justify-center gap-2 rounded-full bg-neon py-3.5 text-[14px] font-bold text-neon-foreground btn-glow disabled:opacity-50"
+                >
+                  <Send className="h-4.5 w-4.5" />
+                  {eitaaBusy ? "در حال ارسال به ایتا..." : "📨 ارسال به کانال ایتا"}
+                </button>
               )}
 
               {detailNews.status === "rejected" && detailNews.reporterId === me.id && (

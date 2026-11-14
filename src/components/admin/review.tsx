@@ -1,7 +1,7 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import { Check, X, ClipboardList, Inbox, ChevronDown, RefreshCw, Hourglass, Filter, Pencil, Send } from "lucide-react"
+import { Check, X, ClipboardList, Inbox, ChevronDown, RefreshCw, Hourglass, Filter, Pencil } from "lucide-react"
 import { useApp } from "@/lib/store"
 import { fa, relTime, durFmt } from "@/lib/format"
 import { CATEGORY_LABELS, REJECT_REASONS, reviewStageLabel, DISTRICT_LABELS, REVIEW_STAGES } from "@/lib/domain"
@@ -13,7 +13,7 @@ import { Textarea } from "@/components/ui/textarea"
 
 // صف بررسی اختصاصی ادمین: همه مراحل، فیلتر مرحله/حوزه، متن کامل + رسانه
 export function AdminReviewSection() {
-  const { state, reviewNews, sendToEitaa, refresh } = useApp()
+  const { state, reviewNews, refresh } = useApp()
   const { toast } = useToast()
   const [stage, setStage] = useState("all")
   const [district, setDistrict] = useState("all")
@@ -23,7 +23,6 @@ export function AdminReviewSection() {
   const [note, setNote] = useState("")
   const [busy, setBusy] = useState<number | null>(null)
   const [editing, setEditing] = useState<number | null>(null)
-  const [eitaaBusy, setEitaaBusy] = useState<number | null>(null)
 
   const queue = state?.reviewQueue ?? []
 
@@ -51,17 +50,6 @@ export function AdminReviewSection() {
     }
   }
 
-  const doEitaa = async (newsId: number) => {
-    setEitaaBusy(newsId)
-    const res = await sendToEitaa(newsId)
-    setEitaaBusy(null)
-    if (res.ok) {
-      toast({ title: "ارسال شد", description: res.message })
-      refresh()
-    } else {
-      toast({ title: "خطا", description: res.message, variant: "destructive" })
-    }
-  }
 
   if (!state) return null
 
@@ -157,21 +145,13 @@ export function AdminReviewSection() {
                 </button>
 
                 {open && (
-                  <div className="mt-3 grid grid-cols-2 gap-2 rounded-2xl border border-line bg-surface-2/50 p-2">
+                  <div className="mt-3 rounded-2xl border border-line bg-surface-2/50 p-2">
                     <button
                       onClick={() => setEditing(n.id)}
-                      className="flex items-center justify-center gap-1.5 rounded-full border border-line bg-surface py-2.5 text-[12px] font-bold text-ink transition-colors hover:border-neon/40 hover:text-neon"
+                      className="flex w-full items-center justify-center gap-1.5 rounded-full border border-line bg-surface py-2.5 text-[12px] font-bold text-ink transition-colors hover:border-neon/40 hover:text-neon"
                     >
                       <Pencil className="h-4 w-4" />
                       ویرایش متن خبر
-                    </button>
-                    <button
-                      onClick={() => doEitaa(n.id)}
-                      disabled={eitaaBusy !== null}
-                      className="flex items-center justify-center gap-1.5 rounded-full border border-neon/45 bg-neon/10 py-2.5 text-[12px] font-bold text-neon transition-colors hover:bg-neon/20 disabled:opacity-50"
-                    >
-                      <Send className="h-4 w-4" />
-                      {eitaaBusy === n.id ? "در حال ارسال..." : "ارسال به ایتا"}
                     </button>
                   </div>
                 )}

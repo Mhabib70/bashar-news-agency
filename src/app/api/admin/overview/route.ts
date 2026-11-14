@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { tehranDayStart } from "@/lib/server/tz"
+import { activeUser } from "@/lib/server/session"
 
 // آمار جامع پنل مدیریت — فقط ادمین کل
 export async function GET(req: NextRequest) {
-  const adminId = req.nextUrl.searchParams.get("userId")
-  const admin = await db.user.findUnique({ where: { id: adminId ?? "" } })
+  const admin = await activeUser(req)
   if (!admin || admin.role !== "admin") {
     return NextResponse.json({ error: "دسترسی مجاز نیست" }, { status: 403 })
   }

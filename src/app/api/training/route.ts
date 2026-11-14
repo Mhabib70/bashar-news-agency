@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { notifyActiveUsers } from "@/lib/server/notify"
+import { activeUser } from "@/lib/server/session"
 
 // بخش آموزش (آکادمی) v2 — دسته‌بندی، سطح، مدت مطالعه، بازدید و پیشرفت «خوانده شد»
 // GET          → فهرست آموزش‌ها + پیشرفت کاربر (همه اعضای فعال)
@@ -13,10 +14,9 @@ const CATEGORIES = ["writing", "photo", "reporting", "media", "tech"]
 const LEVELS = ["beginner", "intermediate", "advanced"]
 
 export async function GET(req: NextRequest) {
-  const userId = req.nextUrl.searchParams.get("userId")
-  if (!userId) return NextResponse.json({ error: "userId لازم است" }, { status: 400 })
-  const user = await db.user.findUnique({ where: { id: userId } })
-  if (!user || user.status !== "active") return NextResponse.json({ error: "دسترسی مجاز نیست" }, { status: 403 })
+  const user = await activeUser(req)
+  if (!user) return NextResponse.json({ error: "نشست معتبر نیست — دوباره وارد شوید" }, { status: 401 })
+  const userId = user.id
 
   const rows = await db.training.findMany({
     orderBy: { createdAt: "desc" },
@@ -42,8 +42,8 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { userId, action } = body ?? {}
-    const user = await db.user.findUnique({ where: { id: String(userId ?? "") } })
+    const { action } = body ?? {}
+    const user = await activeUser(req)
     if (!user || user.status !== "active") {
       return NextResponse.json({ error: "دسترسی مجاز نیست" }, { status: 403 })
     }

@@ -50,7 +50,7 @@ export function Welcome() {
       })
       const d = await res.json().catch(() => ({}))
       if (d.ok && d.userId) {
-        await login(d.userId)
+        await login()
         toast({ title: `خوش آمدی ${d.fullName}!`, description: "ورود با موفقیت انجام شد." })
         setOpen(false)
         setPhone("")
@@ -158,8 +158,8 @@ export function Welcome() {
         open={regOpen}
         onOpenChange={setRegOpen}
         initialPhone={faToEn(phone).replace(/\D/g, "")}
-        onDone={(id, msg) => {
-          login(id).then(() => {
+        onDone={(_id, msg) => {
+          login().then(() => {
             toast({ title: msg })
           })
         }}
@@ -184,10 +184,14 @@ function RegisterDialog({
   const { toast } = useToast()
   const [step, setStep] = useState(0)
   const [f, setF] = useState({ fullName: "", phone: "", age: "", education: "bachelor", district: "b1", base: "" })
-  // شماره‌ای که کاربر در صفحه ورود وارد کرده، همین‌جا پیش‌پر می‌شود
-  useEffect(() => {
-    if (open && initialPhone) setF((prev) => ({ ...prev, phone: initialPhone }))
-  }, [open, initialPhone])
+  // شماره‌ای که کاربر در صفحه ورود وارد کرده، همین‌جا پیش‌پر می‌شود.
+  // تنظیم state هنگام تغییر prop (الگوی رسمی React) — نه داخل useEffect.
+  const phoneKey = open && initialPhone ? initialPhone : ""
+  const [prevPhoneKey, setPrevPhoneKey] = useState("")
+  if (phoneKey !== prevPhoneKey) {
+    setPrevPhoneKey(phoneKey)
+    if (initialPhone) setF((prev) => ({ ...prev, phone: initialPhone }))
+  }
   const steps = ["نام و شماره", "سن و تحصیلات", "حوزه و پایگاه"]
   const lastStep = steps.length - 1
   const canNext =

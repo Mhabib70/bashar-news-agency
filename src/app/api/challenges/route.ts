@@ -2,13 +2,14 @@ import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { nextChallengeCode } from "@/lib/server/challenges-code"
 import { notifyActiveUsers } from "@/lib/server/notify"
+import { activeUser } from "@/lib/server/session"
 
 // ایجاد چالش جدید — فقط ادمین کل (معادل سناریوی ۴ ربات: عنوان/توضیح/مهلت جلالی/جایزه)
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { userId, title, description, reward, deadlineAt } = body ?? {}
-    const admin = await db.user.findUnique({ where: { id: userId } })
+    const { title, description, reward, deadlineAt } = body ?? {}
+    const admin = await activeUser(req)
     if (!admin || admin.role !== "admin") {
       return NextResponse.json({ error: "فقط ادمین کل می‌تواند چالش بسازد" }, { status: 403 })
     }

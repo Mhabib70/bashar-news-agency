@@ -4,6 +4,8 @@ import { create } from "zustand"
 import type { AppState, NewsDTO } from "@/lib/server/state"
 import { applyOrgUnits } from "@/lib/domain"
 
+export type { NewsDTO } from "@/lib/server/state"
+
 export type Tab = "home" | "news" | "activity" | "profile" | "review"
 
 type SubmitPayload = {
@@ -13,6 +15,8 @@ type SubmitPayload = {
   mediaType: string
   mediaUrl?: string
   durationMin: number
+  /** تاریخ و ساعت تهیه خبر (ISO) */
+  preparedAt?: string | null
   challengeId?: number | null
   draftId?: number | null
 }
@@ -24,6 +28,10 @@ export type UserInfo = {
   district: string; base: string; phone: string; age: string; education: string
   points: number; levelKey: string; currentStreak: number; bestStreak: number; avatar: string
   lastActivityAt: string | null; createdAt: string
+  /** حساب محافظت‌شدهٔ ادمین کل سامانه — از سمت سرور محاسبه می‌شود */
+  isSuperAdmin?: boolean
+  /** مجوز ارسال خبر به کانال ایتا (کارشناس، فقط با اجازهٔ ادمین کل) */
+  canSendEitaa?: boolean
 }
 
 export type AdminUserDetail = {
@@ -128,8 +136,8 @@ type Store = {
   tab: Tab
   booted: boolean
   setTab: (t: Tab) => void
-  login: (userId: string) => Promise<void>
-  logout: () => void
+  login: () => Promise<void>
+  logout: () => Promise<void>
   refresh: () => Promise<void>
   submitNews: (p: SubmitPayload) => Promise<Result>
   reviewNews: (newsId: number, action: "approve" | "reject", reason?: string, note?: string, mode?: "advance" | "final") => Promise<Result>
@@ -176,6 +184,8 @@ type Store = {
 async function api<T>(url: string, init?: RequestInit): Promise<T> {
   const res = await fetch(url, {
     ...init,
+    // کوکی نشست (HttpOnly) به‌صورت خودکار همراه درخواست فرستاده می‌شود
+    credentials: "same-origin",
     headers: { "Content-Type": "application/json", ...(init?.headers ?? {}) },
   })
   const data = await res.json().catch(() => ({}))
@@ -192,15 +202,16 @@ export const useApp = create<Store>((set, get) => ({
 
   setTab: (t) => set({ tab: t }),
 
-  login: async (userId) => {
+  login: async () => {
     set({ loading: true })
     try {
-      const state = await api<AppState>(`/api/state?userId=${encodeURIComponent(userId)}`)
+      // هویت از نشست (کوکی) خوانده می‌شود — کلاینت نقشی در تعیین آن ندارد
+      const state = await api<AppState>(`/api/state`)
       if (state.districts?.length) applyOrgUnits(state.districts)
-      localStorage.setItem("newsapp_uid", userId)
-      set({ userId, state, tab: "home", booted: true })
+      localStorage.setItem("newsapp_uid", state.user.id)
+      set({ userId: state.user.id, state, tab: "home", booted: true })
     } catch (e) {
-      // سشن نامعتبر/منقضی — پاک‌سازی و بازگشت به صفحه ورود (نه گیر کردن روی اسکلت)
+      // نشست نامعتبر/منقضی — پاک‌سازی و بازگشت به صفحه ورود (نه گیر کردن روی اسکلت)
       localStorage.removeItem("newsapp_uid")
       set({ userId: null, state: null, tab: "home", booted: true })
       throw e
@@ -209,7 +220,9 @@ export const useApp = create<Store>((set, get) => ({
     }
   },
 
-  logout: () => {
+  logout: async () => {
+    // حذف کوکی نشست از سمت سرور
+    await api("/api/logout", { method: "POST" }).catch(() => {})
     localStorage.removeItem("newsapp_uid")
     set({ userId: null, state: null, tab: "home", booted: true })
   },
@@ -218,7 +231,7 @@ export const useApp = create<Store>((set, get) => ({
     const uid = get().userId
     if (!uid) return
     try {
-      const state = await api<AppState>(`/api/state?userId=${encodeURIComponent(uid)}`)
+      const state = await api<AppState>(`/api/state`)
       if (state.districts?.length) applyOrgUnits(state.districts)
       set({ state })
     } catch {
@@ -232,7 +245,7 @@ export const useApp = create<Store>((set, get) => ({
     try {
       const r = await api<Result & { message: string }>("/api/news", {
         method: "POST",
-        body: JSON.stringify({ userId: uid, ...p }),
+        body: JSON.stringify({ ...p }),
       })
       await get().refresh()
       return { ok: true, message: r.message, pointsEarned: r.pointsEarned, badgesAwarded: r.badgesAwarded }
@@ -247,7 +260,7 @@ export const useApp = create<Store>((set, get) => ({
     try {
       const r = await api<Result & { message: string }>('/api/news/review', {
         method: "POST",
-        body: JSON.stringify({ userId: uid, newsId, action, reason, note, mode }),
+        body: JSON.stringify({ newsId, action, reason, note, mode }),
       })
       await get().refresh()
       return { ok: true, message: r.message }
@@ -262,7 +275,7 @@ export const useApp = create<Store>((set, get) => ({
     try {
       const r = await api<Result & { message: string }>("/api/news/resubmit", {
         method: "POST",
-        body: JSON.stringify({ userId: uid, newsId, title, content, category }),
+        body: JSON.stringify({ newsId, title, content, category }),
       })
       await get().refresh()
       return { ok: true, message: r.message }
@@ -277,7 +290,7 @@ export const useApp = create<Store>((set, get) => ({
     try {
       const r = await api<Result & { message: string }>("/api/challenges/join", {
         method: "POST",
-        body: JSON.stringify({ userId: uid, challengeId }),
+        body: JSON.stringify({ challengeId }),
       })
       await get().refresh()
       return { ok: true, message: r.message }
@@ -292,7 +305,7 @@ export const useApp = create<Store>((set, get) => ({
     try {
       const r = await api<Result & { message: string }>("/api/challenges", {
         method: "POST",
-        body: JSON.stringify({ userId: uid, ...p }),
+        body: JSON.stringify({ ...p }),
       })
       await get().refresh()
       return { ok: true, message: r.message }
@@ -307,7 +320,7 @@ export const useApp = create<Store>((set, get) => ({
     try {
       const r = await api<Result & { message: string }>("/api/challenges/finish", {
         method: "POST",
-        body: JSON.stringify({ userId: uid, challengeId }),
+        body: JSON.stringify({ challengeId }),
       })
       await get().refresh()
       return { ok: true, message: r.message }
@@ -322,7 +335,7 @@ export const useApp = create<Store>((set, get) => ({
     try {
       const r = await api<Result & { message: string }>("/api/broadcast", {
         method: "POST",
-        body: JSON.stringify({ userId: uid, title, text }),
+        body: JSON.stringify({ title, text }),
       })
       return { ok: true, message: r.message }
     } catch (e) {
@@ -334,7 +347,7 @@ export const useApp = create<Store>((set, get) => ({
     const uid = get().userId
     if (!uid) return []
     try {
-      const r = await api<{ users: UserInfo[] }>(`/api/users?userId=${encodeURIComponent(uid)}`)
+      const r = await api<{ users: UserInfo[] }>(`/api/users`)
       return r.users
     } catch {
       return []
@@ -347,7 +360,7 @@ export const useApp = create<Store>((set, get) => ({
     try {
       const r = await api<Result & { message: string }>("/api/users", {
         method: "POST",
-        body: JSON.stringify({ userId: uid, targetId, action, reason }),
+        body: JSON.stringify({ targetId, action, reason }),
       })
       return { ok: true, message: r.message }
     } catch (e) {
@@ -361,7 +374,7 @@ export const useApp = create<Store>((set, get) => ({
     try {
       const r = await api<Result & { message: string }>("/api/users", {
         method: "POST",
-        body: JSON.stringify({ userId: uid, targetId, action: "set_role", newRole, newDistrict }),
+        body: JSON.stringify({ targetId, action: "set_role", newRole, newDistrict }),
       })
       return { ok: true, message: r.message }
     } catch (e) {
@@ -375,7 +388,7 @@ export const useApp = create<Store>((set, get) => ({
     try {
       const r = await api<Result & { message: string }>("/api/news/edit", {
         method: "POST",
-        body: JSON.stringify({ userId: uid, newsId, title: p.title, content: p.content }),
+        body: JSON.stringify({ newsId, title: p.title, content: p.content }),
       })
       return { ok: true, message: r.message }
     } catch (e) {
@@ -389,7 +402,7 @@ export const useApp = create<Store>((set, get) => ({
     try {
       const r = await api<Result & { message: string }>("/api/news/eitaa", {
         method: "POST",
-        body: JSON.stringify({ userId: uid, newsId }),
+        body: JSON.stringify({ newsId }),
       })
       return { ok: true, message: r.message }
     } catch (e) {
@@ -403,7 +416,7 @@ export const useApp = create<Store>((set, get) => ({
     try {
       await api("/api/notifications/read", {
         method: "POST",
-        body: JSON.stringify({ userId: uid }),
+        body: JSON.stringify({}),
       })
       await get().refresh()
     } catch {
@@ -415,7 +428,7 @@ export const useApp = create<Store>((set, get) => ({
     const uid = get().userId
     if (!uid) return []
     try {
-      const r = await api<{ news: NewsDTO[] }>(`/api/news/all?userId=${encodeURIComponent(uid)}`)
+      const r = await api<{ news: NewsDTO[] }>(`/api/news/all`)
       return r.news ?? []
     } catch {
       return []
@@ -428,7 +441,7 @@ export const useApp = create<Store>((set, get) => ({
     try {
       const r = await api<Result & { message: string }>("/api/news/delete", {
         method: "POST",
-        body: JSON.stringify({ userId: uid, newsId }),
+        body: JSON.stringify({ newsId }),
       })
       return { ok: true, message: r.message }
     } catch (e) {
@@ -440,7 +453,7 @@ export const useApp = create<Store>((set, get) => ({
     const uid = get().userId
     if (!uid) return null
     try {
-      const r = await api<TrainingFeed>(`/api/training?userId=${encodeURIComponent(uid)}`)
+      const r = await api<TrainingFeed>(`/api/training`)
       return { trainings: r.trainings ?? [], stats: r.stats ?? { total: 0, completed: 0, minutes: 0 } }
     } catch {
       return null
@@ -453,7 +466,7 @@ export const useApp = create<Store>((set, get) => ({
     try {
       const r = await api<Result & { message: string }>("/api/training", {
         method: "POST",
-        body: JSON.stringify({ userId: uid, action: "create", ...p }),
+        body: JSON.stringify({ action: "create", ...p }),
       })
       return { ok: true, message: r.message }
     } catch (e) {
@@ -467,7 +480,7 @@ export const useApp = create<Store>((set, get) => ({
     try {
       const r = await api<Result & { message: string }>("/api/training", {
         method: "POST",
-        body: JSON.stringify({ userId: uid, action: "delete", id }),
+        body: JSON.stringify({ action: "delete", id }),
       })
       return { ok: true, message: r.message }
     } catch (e) {
@@ -479,7 +492,7 @@ export const useApp = create<Store>((set, get) => ({
     const uid = get().userId
     if (!uid) return
     try {
-      await api("/api/training", { method: "POST", body: JSON.stringify({ userId: uid, action: "view", id }) })
+      await api("/api/training", { method: "POST", body: JSON.stringify({ action: "view", id }) })
     } catch { /* بازدید غیرحیاتی است */ }
   },
 
@@ -489,7 +502,7 @@ export const useApp = create<Store>((set, get) => ({
     try {
       const r = await api<Result & { message: string; completed?: boolean }>("/api/training", {
         method: "POST",
-        body: JSON.stringify({ userId: uid, action: "complete", id }),
+        body: JSON.stringify({ action: "complete", id }),
       })
       return { ok: true, completed: r.completed, message: r.message }
     } catch (e) {
@@ -501,7 +514,7 @@ export const useApp = create<Store>((set, get) => ({
     const uid = get().userId
     if (!uid) return null
     try {
-      return await api<ForumTopicsResult>(`/api/forum?userId=${encodeURIComponent(uid)}`)
+      return await api<ForumTopicsResult>(`/api/forum`)
     } catch {
       return null
     }
@@ -511,7 +524,7 @@ export const useApp = create<Store>((set, get) => ({
     const uid = get().userId
     if (!uid) return null
     try {
-      return await api<ForumThreadResult>(`/api/forum?userId=${encodeURIComponent(uid)}&topicId=${topicId}`)
+      return await api<ForumThreadResult>(`/api/forum?topicId=${topicId}`)
     } catch {
       return null
     }
@@ -523,7 +536,7 @@ export const useApp = create<Store>((set, get) => ({
     try {
       const r = await api<Result & { id?: number; message: string }>("/api/forum", {
         method: "POST",
-        body: JSON.stringify({ userId: uid, action: "topic", title, type }),
+        body: JSON.stringify({ action: "topic", title, type }),
       })
       return { ok: true, id: r.id, message: r.message }
     } catch (e) {
@@ -537,7 +550,7 @@ export const useApp = create<Store>((set, get) => ({
     try {
       await api("/api/forum", {
         method: "POST",
-        body: JSON.stringify({ userId: uid, action: "message", topicId: p.topicId, body: p.body, fileUrl: p.fileUrl, replyToId: p.replyToId ?? null }),
+        body: JSON.stringify({ action: "message", topicId: p.topicId, body: p.body, fileUrl: p.fileUrl, replyToId: p.replyToId ?? null }),
       })
       return { ok: true, message: "پیام ارسال شد" }
     } catch (e) {
@@ -551,7 +564,7 @@ export const useApp = create<Store>((set, get) => ({
     try {
       const r = await api<Result & { active?: boolean; message: string }>("/api/forum", {
         method: "POST",
-        body: JSON.stringify({ userId: uid, action: "react", messageId, emoji }),
+        body: JSON.stringify({ action: "react", messageId, emoji }),
       })
       return { ok: true, active: r.active, message: r.message }
     } catch (e) {
@@ -565,7 +578,7 @@ export const useApp = create<Store>((set, get) => ({
     try {
       const r = await api<Result & { message: string }>("/api/forum", {
         method: "POST",
-        body: JSON.stringify({ userId: uid, action: "poll_create", topicId: p.topicId, question: p.question, options: p.options }),
+        body: JSON.stringify({ action: "poll_create", topicId: p.topicId, question: p.question, options: p.options }),
       })
       return { ok: true, message: r.message }
     } catch (e) {
@@ -579,7 +592,7 @@ export const useApp = create<Store>((set, get) => ({
     try {
       const r = await api<Result & { message: string }>("/api/forum", {
         method: "POST",
-        body: JSON.stringify({ userId: uid, action: "poll_vote", pollId, optionIndex }),
+        body: JSON.stringify({ action: "poll_vote", pollId, optionIndex }),
       })
       return { ok: true, message: r.message }
     } catch (e) {
@@ -593,7 +606,7 @@ export const useApp = create<Store>((set, get) => ({
     try {
       const r = await api<Result & { message: string }>("/api/forum", {
         method: "POST",
-        body: JSON.stringify({ userId: uid, action: "poll_delete", pollId }),
+        body: JSON.stringify({ action: "poll_delete", pollId }),
       })
       return { ok: true, message: r.message }
     } catch (e) {
@@ -607,7 +620,7 @@ export const useApp = create<Store>((set, get) => ({
     try {
       const r = await api<Result & { message: string }>("/api/forum", {
         method: "POST",
-        body: JSON.stringify({ userId: uid, action: "delete_topic", topicId }),
+        body: JSON.stringify({ action: "delete_topic", topicId }),
       })
       return { ok: true, message: r.message }
     } catch (e) {
@@ -621,7 +634,7 @@ export const useApp = create<Store>((set, get) => ({
     try {
       const r = await api<Result & { message: string }>("/api/forum", {
         method: "POST",
-        body: JSON.stringify({ userId: uid, action: "delete_message", messageId }),
+        body: JSON.stringify({ action: "delete_message", messageId }),
       })
       return { ok: true, message: r.message }
     } catch (e) {
@@ -635,7 +648,7 @@ export const useApp = create<Store>((set, get) => ({
     try {
       const r = await api<Result & { message: string }>("/api/forum", {
         method: "POST",
-        body: JSON.stringify({ userId: uid, action: "pin", topicId }),
+        body: JSON.stringify({ action: "pin", topicId }),
       })
       return { ok: true, message: r.message }
     } catch (e) {
@@ -649,7 +662,7 @@ export const useApp = create<Store>((set, get) => ({
     try {
       const r = await api<Result & { message: string }>("/api/forum", {
         method: "POST",
-        body: JSON.stringify({ userId: uid, action: "weekly_question", question }),
+        body: JSON.stringify({ action: "weekly_question", question }),
       })
       return { ok: true, message: r.message }
     } catch (e) {
@@ -662,9 +675,8 @@ export const useApp = create<Store>((set, get) => ({
     if (!uid) return { ok: false }
     try {
       const fd = new FormData()
-      fd.append("userId", uid)
       fd.append("file", file)
-      const res = await fetch("/api/upload", { method: "POST", body: fd })
+      const res = await fetch("/api/upload", { method: "POST", body: fd, credentials: "same-origin" })
       const data = await res.json().catch(() => ({}))
       if (!res.ok) throw new Error(data.error ?? "بارگذاری ناموفق بود")
       return { ok: true, url: data.url, mediaType: data.mediaType, message: data.message }
@@ -679,7 +691,7 @@ export const useApp = create<Store>((set, get) => ({
     try {
       const r = await api<Result & { message: string }>("/api/user/avatar", {
         method: "POST",
-        body: JSON.stringify({ userId: uid, avatar: dataUrl }),
+        body: JSON.stringify({ avatar: dataUrl }),
       })
       await get().refresh()
       return { ok: true, message: r.message }
@@ -692,7 +704,7 @@ export const useApp = create<Store>((set, get) => ({
     const uid = get().userId
     if (!uid) return null
     try {
-      const r = await api<AdminUserDetail>(`/api/users?userId=${encodeURIComponent(uid)}&targetId=${encodeURIComponent(targetId)}`)
+      const r = await api<AdminUserDetail>(`/api/users?targetId=${encodeURIComponent(targetId)}`)
       return r
     } catch {
       return null
@@ -703,7 +715,7 @@ export const useApp = create<Store>((set, get) => ({
     const uid = get().userId
     if (!uid) return null
     try {
-      return await api<AdminOverview>(`/api/admin/overview?userId=${encodeURIComponent(uid)}`)
+      return await api<AdminOverview>(`/api/admin/overview`)
     } catch {
       return null
     }
@@ -715,7 +727,7 @@ export const useApp = create<Store>((set, get) => ({
     try {
       const r = await api<Result & { message: string }>("/api/drafts", {
         method: "POST",
-        body: JSON.stringify({ userId: uid, ...p }),
+        body: JSON.stringify({ ...p }),
       })
       await get().refresh()
       return { ok: true, message: r.message }
@@ -728,7 +740,7 @@ export const useApp = create<Store>((set, get) => ({
     const uid = get().userId
     if (!uid) return { ok: false }
     try {
-      const r = await api<Result & { message: string }>(`/api/drafts?id=${id}&userId=${encodeURIComponent(uid)}`, { method: "DELETE" })
+      const r = await api<Result & { message: string }>(`/api/drafts?id=${id}`, { method: "DELETE" })
       await get().refresh()
       return { ok: true, message: r.message }
     } catch (e) {
@@ -742,7 +754,7 @@ export const useApp = create<Store>((set, get) => ({
     try {
       const r = await api<Result & { message: string }>("/api/settings", {
         method: "PUT",
-        body: JSON.stringify({ userId: uid, ...p }),
+        body: JSON.stringify({ ...p }),
       })
       await get().refresh()
       return { ok: true, message: r.message }

@@ -1,13 +1,16 @@
 import { db } from "@/lib/db"
 import { addPoints, evaluateBadges } from "./state"
 import { notifyUser } from "./notify"
-import { LEVELS, levelIndex } from "@/lib/domain"
+import {
+  LEVELS, levelIndex,
+  POINTS, PENDING_EXPIRE_HOURS, PENDING_NUDGE_HOURS, REMINDER_WINDOW_HOURS, DEMOTE_INACTIVITY_DAYS,
+} from "@/lib/domain"
+import { notifyStaff } from "./upkeep-notify"
 
-// معادل config ربات
-export const CHALLENGE_PRIZES = [30, 20, 10] // مقام اول تا سوم
-export const DEMOTION_AFTER_DAYS = 7 // سقوط سطح پس از ۷ روز غیبت (سناریوی ۷)
-export const REMINDER_WINDOW_H = 3 // یادآور ۳ ساعت مانده به مهلت
-export const PENDING_EXPIRE_HOURS = 72 // انقضای درخواست‌های بی‌پاسخ (سناریوی ۱)
+// مقام اول تا سوم — تنظیم مشترک در domain.ts
+export const CHALLENGE_PRIZES = POINTS.CHALLENGE_PRIZES
+export const DEMOTION_AFTER_DAYS = DEMOTE_INACTIVITY_DAYS // سقوط سطح پس از ۷ روز غیبت (سناریوی ۷)
+export const REMINDER_WINDOW_H = REMINDER_WINDOW_HOURS // یادآور ۳ ساعت مانده به مهلت
 export const INACTIVITY_DEMOTION_GAP_DAYS = 7 // فاصله حداقل بین دو سقوط
 
 /**
@@ -112,6 +115,28 @@ export async function applyInactivityPolicy(userId: string): Promise<boolean> {
     { force: true },
   )
   return true
+}
+
+/**
+ * یادآوری روزانه به ادمین‌ها دربارهٔ درخواست‌های معطل (بیش از ۲۴ ساعت).
+ * یک‌بار در هر روز (با ref یکتا) — معادل nudge_pending ربات.
+ */
+export async function pendingNudgeHousekeeping(): Promise<void> {
+  const pending = await db.user.findMany({ where: { status: "pending" }, select: { createdAt: true } })
+  if (!pending.length) return
+  const oldest = Math.min(...pending.map((u) => u.createdAt.getTime()))
+  const hours = (Date.now() - oldest) / 3_600_000
+  if (hours < PENDING_NUDGE_HOURS) return
+  const ref = `pending_nudge:${new Date().toISOString().slice(0, 10)}`
+  const exists = await db.notification.findFirst({ where: { ref }, select: { id: true } })
+  if (exists) return
+  const days = Math.floor(hours / 24)
+  await notifyStaff({
+    kind: "pending_user",
+    title: "درخواست‌های عضویت در انتظار بررسی",
+    body: `${pending.length} درخواست عضویت معطل مانده (قدیمی‌ترین: ${days} روز). لطفاً از بخش «کاربران» بررسی کن.`,
+    ref,
+  })
 }
 
 /**

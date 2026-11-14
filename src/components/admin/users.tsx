@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react"
 import { Search, Check, X, Clock, RefreshCw, Phone, GraduationCap, CalendarDays, Activity, Flame, Trophy, Newspaper, ChevronLeft, ImageOff, Loader2, FileText, Award } from "lucide-react"
 import { useApp, type AdminUserDetail } from "@/lib/store"
 import { fa, faNum, relTime, jalali } from "@/lib/format"
-import { ROLE_LABELS, DISTRICT_LABELS, BASE_LISTS, USER_REJECT_TITLES, LEVELS, EDUCATION_LABELS, BADGES, isSuperAdminPhone } from "@/lib/domain"
+import { ROLE_LABELS, DISTRICT_LABELS, BASE_LISTS, USER_REJECT_TITLES, LEVELS, EDUCATION_LABELS, BADGES } from "@/lib/domain"
 import { NeonAvatar } from "@/components/app/bits"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
@@ -294,7 +294,7 @@ export function UserPhoto({ user, size = 48, tilted = false }: { user: { fullNam
 
 // ---------- پرونده کامل کاربر ----------
 function UserDetailDialog({ userId, onClose, onChanged }: { userId: string | null; onClose: () => void; onChanged: () => void }) {
-  const { fetchUserDetail, moderateUser, setUserRole, refresh } = useApp()
+  const { userId: adminUid, fetchUserDetail, moderateUser, setUserRole, refresh } = useApp()
   const { toast } = useToast()
   const [detail, setDetail] = useState<AdminUserDetail | null>(null)
   const [loadedId, setLoadedId] = useState<string | null>(null)
@@ -345,6 +345,30 @@ function UserDetailDialog({ userId, onClose, onChanged }: { userId: string | nul
     } else {
       toast({ title: "خطا", description: res.message, variant: "destructive" })
     }
+  }
+
+  // مجوز ارسال خبر به کانال ایتا — فقط برای کارشناس، با ارادهٔ ادمین کل
+  const toggleEitaaPerm = async (allowed: boolean) => {
+    if (!detail || busy) return
+    setBusy(true)
+    try {
+      const res = await fetch("/api/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: adminUid, action: "set_eitaa_perm", targetId: detail.user.id, allowed }),
+      })
+      const d = await res.json().catch(() => ({}))
+      if (res.ok && d.ok) {
+        toast({ title: "انجام شد", description: d.message })
+        const dd = await fetchUserDetail(detail.user.id)
+        if (dd) setDetail(dd)
+      } else {
+        toast({ title: "خطا", description: d.error ?? "عملیات ناموفق بود", variant: "destructive" })
+      }
+    } catch {
+      toast({ title: "خطا", description: "خطای شبکه", variant: "destructive" })
+    }
+    setBusy(false)
   }
 
   const u = detail?.user
@@ -407,13 +431,13 @@ function UserDetailDialog({ userId, onClose, onChanged }: { userId: string | nul
             )}
 
             {/* نقش سازمانی — منصوب‌کردن چرخه سه‌مرحله‌ای + ارتقا به ادمین کل */}
-            {u.status === "active" && isSuperAdminPhone(u.phone) && (
+            {u.status === "active" && u.isSuperAdmin && (
               <div className="flex items-center justify-between rounded-[24px] border border-warn/35 bg-warn/6 p-4">
                 <p className="text-[12px] font-black text-warn">👑 حساب ادمین کل سامانه</p>
                 <p className="text-[10.5px] text-ink-muted">این حساب محافظت‌شده است؛ نقش و وضعیت آن قابل تغییر نیست.</p>
               </div>
             )}
-            {u.status === "active" && !isSuperAdminPhone(u.phone) && (
+            {u.status === "active" && !u.isSuperAdmin && (
               <div className="rounded-[24px] border border-line bg-surface p-4">
                 <div className="mb-1 flex items-center justify-between">
                   <p className="text-[13px] font-black text-ink">نقش در چرخه بررسی</p>
@@ -463,6 +487,27 @@ function UserDetailDialog({ userId, onClose, onChanged }: { userId: string | nul
                     </button>
                   ))}
                 </div>
+
+                {u.role === "specialist" && (
+                  <div className="mt-3 flex items-center justify-between rounded-2xl border border-line bg-surface-2/60 px-4 py-3">
+                    <div className="min-w-0">
+                      <p className="text-[12px] font-black text-ink">📨 ارسال خبر به کانال ایتا</p>
+                      <p className="mt-0.5 text-[10.5px] leading-4 text-ink-muted">
+                        با فعال بودن این مجوز، این کارشناس می‌تواند خبرها را مستقیم به کانال ایتا ارسال کند.
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => toggleEitaaPerm(!u.canSendEitaa)}
+                      disabled={busy}
+                      className={cn(
+                        "ml-3 flex h-8 shrink-0 items-center rounded-full px-4 text-[11px] font-black transition-colors disabled:opacity-50",
+                        u.canSendEitaa ? "bg-neon text-neon-foreground" : "border border-line bg-surface text-ink-muted",
+                      )}
+                    >
+                      {busy ? "..." : u.canSendEitaa ? "فعال ✓" : "غیرفعال"}
+                    </button>
+                  </div>
+                )}
               </div>
             )}
 

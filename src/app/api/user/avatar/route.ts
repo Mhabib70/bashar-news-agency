@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
+import { activeUser } from "@/lib/server/session"
 
 const MAX_AVATAR_LEN = 400_000 // حدود ۳۰۰KB باینری بعد از base64
 const AVATAR_RE = /^data:image\/(png|jpe?g|webp);base64,[A-Za-z0-9+/=]+$/
@@ -8,9 +9,10 @@ const AVATAR_RE = /^data:image\/(png|jpe?g|webp);base64,[A-Za-z0-9+/=]+$/
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { userId, avatar } = body ?? {}
-    if (!userId) return NextResponse.json({ error: "کاربر مشخص نیست" }, { status: 400 })
-    const user = await db.user.findUnique({ where: { id: userId } })
+    const { avatar } = body ?? {}
+    const user = await activeUser(req)
+    if (!user) return NextResponse.json({ error: "نشست معتبر نیست — دوباره وارد شوید" }, { status: 401 })
+    const userId = user.id
     if (!user || user.status !== "active") {
       return NextResponse.json({ error: "دسترسی مجاز نیست" }, { status: 403 })
     }

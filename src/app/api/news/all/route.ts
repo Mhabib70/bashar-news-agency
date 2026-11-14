@@ -1,15 +1,12 @@
 import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
+import { activeUser } from "@/lib/server/session"
 
 // همه اخبار سازمان در هر وضعیت — برای اشراف همه بر چرخه انتشار
 // (اخبار من در state اصلی می‌آید؛ این مسیر نمای کل سازمان را می‌دهد)
 export async function GET(req: NextRequest) {
-  const userId = req.nextUrl.searchParams.get("userId")
-  if (!userId) return NextResponse.json({ error: "userId لازم است" }, { status: 400 })
-  const user = await db.user.findUnique({ where: { id: userId } })
-  if (!user || user.status !== "active") {
-    return NextResponse.json({ error: "دسترسی مجاز نیست" }, { status: 403 })
-  }
+  const user = await activeUser(req)
+  if (!user) return NextResponse.json({ error: "نشست معتبر نیست — دوباره وارد شوید" }, { status: 401 })
 
   const rows = await db.newsItem.findMany({
     include: {
@@ -41,6 +38,7 @@ export async function GET(req: NextRequest) {
       reviewedBy: n.reviewedBy,
       challengeId: n.challengeId,
       durationMin: n.durationMin,
+      preparedAt: n.preparedAt ? n.preparedAt.toISOString() : null,
       createdAt: n.createdAt.toISOString(),
       events: n.events.map((e) => ({
         id: e.id, stage: e.stage, action: e.action, actorName: e.actorName,

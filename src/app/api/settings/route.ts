@@ -1,12 +1,15 @@
 import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
+import { activeUser } from "@/lib/server/session"
 
 // تنظیمات اعلان + ساعت سکوت (سناریوی ۹)
 export async function PUT(req: NextRequest) {
   try {
     const body = await req.json()
-    const { userId, approvals, challenges, broadcast, rejections, quietStart, quietEnd } = body ?? {}
-    if (!userId) return NextResponse.json({ error: "userId لازم است" }, { status: 400 })
+    const { approvals, challenges, broadcast, rejections, quietStart, quietEnd } = body ?? {}
+    const user = await activeUser(req)
+    if (!user) return NextResponse.json({ error: "نشست معتبر نیست — دوباره وارد شوید" }, { status: 401 })
+    const userId = user.id
     const existing = await db.notifSetting.findUnique({ where: { userId } })
     const data = {
       ...(typeof approvals === "boolean" ? { approvals } : {}),

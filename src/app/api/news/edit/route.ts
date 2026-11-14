@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { notifyUser } from "@/lib/server/notify"
 import { ROLE_LABELS } from "@/lib/domain"
+import { activeUser } from "@/lib/server/session"
 
 // ویرایش متن خبر (اختیار سردبیری)
 // - ادمین کل و کارشناس خبر: هر خبری در هر وضعیتی
@@ -10,8 +11,8 @@ import { ROLE_LABELS } from "@/lib/domain"
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { userId, newsId, title, content } = body ?? {}
-    if (!userId || !newsId || !title || !content) {
+    const { newsId, title, content } = body ?? {}
+    if (!newsId || !title || !content) {
       return NextResponse.json({ error: "پارامترهای ناقص" }, { status: 400 })
     }
     if (String(title).trim().length < 8) {
@@ -21,9 +22,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "متن خبر باید حداقل ۳۰ کاراکتر باشد" }, { status: 400 })
     }
 
-    const editor = await db.user.findUnique({ where: { id: userId } })
-    if (!editor || editor.status !== "active") {
-      return NextResponse.json({ error: "دسترسی مجاز نیست" }, { status: 403 })
+    const editor = await activeUser(req)
+    if (!editor) {
+      return NextResponse.json({ error: "نشست معتبر نیست — دوباره وارد شوید" }, { status: 401 })
     }
 
     const news = await db.newsItem.findUnique({ where: { id: Number(newsId)}, include: { reporter: true } })

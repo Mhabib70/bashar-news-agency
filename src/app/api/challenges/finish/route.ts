@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { finishChallenge } from "@/lib/server/challenges"
+import { activeUser } from "@/lib/server/session"
 
 // پایان چالش و اعلام نتایج — فقط ادمین کل (معادل ch.fin ربات)
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { userId, challengeId } = body ?? {}
-    const admin = await db.user.findUnique({ where: { id: userId } })
+    const { challengeId } = body ?? {}
+    const admin = await activeUser(req)
     if (!admin || admin.role !== "admin") {
       return NextResponse.json({ error: "فقط ادمین کل می‌تواند نتایج را اعلام کند" }, { status: 403 })
     }

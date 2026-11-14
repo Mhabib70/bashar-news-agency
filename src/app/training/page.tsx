@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, type CSSProperties } from "react"
+import { useEffect, useState, type CSSProperties, type JSX } from "react"
 import { useRouter } from "next/navigation"
 import {
   ArrowRight, GraduationCap, Loader2, ShieldCheck, Plus, Trash2, FileDown, Video, FileText, X, UploadCloud,
@@ -90,7 +90,8 @@ export default function TrainingPage() {
 
   useEffect(() => {
     const uid = localStorage.getItem("newsapp_uid")
-    if (uid) login(uid).catch(() => router.replace("/"))
+    // نشست از کوکی خوانده می‌شود؛ فقط تلاش برای بازیابی
+    if (uid) login().catch(() => router.replace("/"))
     else router.replace("/")
   }, [login, router])
 
@@ -99,7 +100,6 @@ export default function TrainingPage() {
   }
   useEffect(() => {
     if (userId) load()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId])
 
   if (!booted || !state) {

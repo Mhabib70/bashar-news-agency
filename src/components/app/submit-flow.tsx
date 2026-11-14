@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Slider } from "@/components/ui/slider"
+import { JalaliPicker } from "@/components/app/jalali-picker"
 import { useToast } from "@/hooks/use-toast"
 
 const STEPS = ["دسته‌بندی", "محتوای خبر", "رسانه", "بازبینی نهایی"]
@@ -35,6 +36,8 @@ export function SubmitFlow({
   const [mediaUrl, setMediaUrl] = useState("")
   const [uploading, setUploading] = useState(false)
   const [duration, setDuration] = useState(30)
+  // تاریخ و ساعت تهیه خبر — انتخاب خبرنگار با تقویم جلالی
+  const [preparedAt, setPreparedAt] = useState<Date | null>(null)
   const [challengeId, setChallengeId] = useState<number | null>(preset?.challengeId ?? null)
   const [busy, setBusy] = useState(false)
   const [done, setDone] = useState<{ points: number; message: string; badges: string[] } | null>(null)
@@ -55,6 +58,7 @@ export function SubmitFlow({
       setMediaType("none")
       setMediaUrl("")
       setDuration(30)
+      setPreparedAt(null)
       setChallengeId(null)
     }, 250)
   }
@@ -100,6 +104,7 @@ export function SubmitFlow({
       mediaType,
       mediaUrl,
       durationMin: duration,
+      preparedAt: preparedAt ? preparedAt.toISOString() : null,
       challengeId,
       draftId: preset?.draftId ?? null,
     })
@@ -234,6 +239,9 @@ export function SubmitFlow({
                   <div className="v3-card-flat p-4">
                     <label className="mb-3 block text-[12px] font-semibold text-[var(--v3-ink-2)]">زمان تهیه خبر: {fa(duration)} دقیقه</label>
                     <Slider value={[duration]} onValueChange={(v) => setDuration(v[0])} min={5} max={120} step={5} className="[&_[data-slot=slider-range]]:bg-[var(--v3-azure)] [&_[data-slot=slider-track]]:bg-[var(--v3-line)] [&_[data-slot=slider-thumb]]:border-[var(--v3-azure)]" />
+                  </div>
+                  <div className="v3-card-flat p-4">
+                    <JalaliPicker label="تاریخ و ساعت تهیه خبر" value={preparedAt} onChange={setPreparedAt} />
                   </div>
                   <button onClick={saveDraftNow} className="flex items-center gap-2 text-[12px] font-bold text-[var(--v3-azure)] transition-opacity hover:opacity-80">
                     <Save className="h-4 w-4" />

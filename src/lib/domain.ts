@@ -152,20 +152,13 @@ export const ROLE_LABELS: Record<string, string> = {
 }
 
 // ── ادمین کل سامانه ──
-// صاحب این شماره همیشه و به‌صورت خودکار «ادمین کل» فعال است:
-// ثبت‌نام با این شماره مستقیم ادمین می‌شود و هر بار وارد اپ شود نقشش ترمیم می‌گردد.
-export const SUPER_ADMIN_PHONE = "09300500977"
-const SUPER_ADMIN_NORM = SUPER_ADMIN_PHONE.replace(/\D/g, "").slice(-10)
-
-// نرمال‌سازی شماره برای مقایسه: ارقام فارسی→انگلیسی، حذف غیررقم‌ها، ۱۰ رقم آخر
+// منطق «شمارهٔ محافظت‌شده» عمداً از این ماژول حذف شد تا شماره در باندل
+// کلاینت لو نرود؛ به src/lib/server/superadmin.ts منتقل شد (فقط سمت سرور).
+// نرمال‌سازی شماره (ارقام فارسی→انگلیسی، حذف غیررقم‌ها، ۱۰ رقم آخر)
 export function normalizePhone(raw: unknown): string {
   const fa = String(raw ?? "").replace(/[۰-۹]/g, (d) => String("۰۱۲۳۴۵۶۷۸۹".indexOf(d)))
   const digits = fa.replace(/\D/g, "")
   return digits.length > 10 ? digits.slice(-10) : digits
-}
-
-export function isSuperAdminPhone(raw: unknown): boolean {
-  return normalizePhone(raw) === SUPER_ADMIN_NORM
 }
 
 // اعمال حوزه‌ها/پایگاه‌های سازمان (از دیتابیس) روی نقشه‌های این ماژول.
@@ -208,7 +201,19 @@ export const POINTS = {
   PROLIFIC: 50,
   PROFESSIONAL: 40,
   CHALLENGE_WIN: 60,
+  // جایزهٔ مقام‌های اول تا سوم چالش (مطابق متن راهنمای فرم چالش: «مثلاً ۳۰ امتیاز»)
+  CHALLENGE_PRIZES: [30, 20, 10],
 }
+
+// ── مهلت‌ها و آستانه‌های نگهداری دوره‌ای (تنظیمات ربات) ──
+// انقضای درخواست‌های عضویت بی‌پاسخ
+export const PENDING_EXPIRE_HOURS = 72
+// یادآوری به ادمین دربارهٔ درخواست‌های معطل
+export const PENDING_NUDGE_HOURS = 24
+// یادآوری مهلت چالش (چند ساعت مانده به پایان)
+export const REMINDER_WINDOW_HOURS = 3
+// سقوط سطح پس از چند روز بی‌فعالیت
+export const DEMOTE_INACTIVITY_DAYS = 7
 
 export function toFa(n: number | string): string {
   return String(n).replace(/[0-9]/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[Number(d)])

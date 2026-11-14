@@ -1,14 +1,15 @@
 import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { notifyUser } from "@/lib/server/notify"
-import { USER_REJECT_TITLES, ROLE_LABELS, DISTRICT_LABELS, isSuperAdminPhone } from "@/lib/domain"
+import { USER_REJECT_TITLES, ROLE_LABELS, DISTRICT_LABELS } from "@/lib/domain"
+import { isSuperAdminPhone } from "@/lib/server/superadmin"
+import { activeUser } from "@/lib/server/session"
 
 // مدیریت کاربران — فقط ادمین کل
 // GET  بدون targetId: لیست همه اعضا | GET با targetId: پرونده کامل کاربر
 // POST: تایید/رد درخواست عضویت (معادل سناریوی ۱ ربات)
 export async function GET(req: NextRequest) {
-  const adminId = req.nextUrl.searchParams.get("userId")
-  const admin = await db.user.findUnique({ where: { id: adminId ?? "" } })
+  const admin = await activeUser(req)
   if (!admin || admin.role !== "admin") {
     return NextResponse.json({ error: "دسترسی مجاز نیست" }, { status: 403 })
   }
@@ -37,8 +38,9 @@ export async function GET(req: NextRequest) {
       user: {
         id: u.id, fullName: u.fullName, username: u.username, role: u.role, status: u.status,
         rejectReason: u.rejectReason, district: u.district, base: u.base, phone: u.phone,
-        age: u.age, education: u.education, points: u.points, levelKey: u.levelKey,
+        age: u.age, education: u.education, canSendEitaa: u.canSendEitaa, points: u.points, levelKey: u.levelKey,
         currentStreak: u.currentStreak, bestStreak: u.bestStreak, avatar: u.avatar,
+        isSuperAdmin: isSuperAdminPhone(u.phone),
         lastActivityAt: u.lastActivityAt?.toISOString() ?? null,
         createdAt: u.createdAt.toISOString(),
       },
@@ -60,13 +62,13 @@ export async function GET(req: NextRequest) {
   const users = await db.user.findMany({
     select: {
       id: true, fullName: true, username: true, role: true, status: true, rejectReason: true,
-      district: true, base: true, phone: true, age: true, education: true,
+      district: true, base: true, phone: true, age: true, education: true, canSendEitaa: true,
       points: true, levelKey: true, currentStreak: true, bestStreak: true, avatar: true,
       lastActivityAt: true, createdAt: true,
     },
     orderBy: [{ status: "asc" }, { createdAt: "desc" }], // pending اول
   })
-  return NextResponse.json({ users })
+  return NextResponse.json({ users: users.map((u) => ({ ...u, isSuperAdmin: isSuperAdminPhone(u.phone) })) })
 }
 
 export async function POST(req: NextRequest) {
@@ -134,6 +136,29 @@ export async function POST(req: NextRequest) {
         message: roleChanged
           ? `نقش ${target.fullName} به «${ROLE_LABELS[newRole]}» تغییر کرد.`
           : `حوزه ${target.fullName} به‌روزرسانی شد.`,
+      })
+    }
+
+    // مجوز ارسال خبر به کانال ایتا — فقط با ارادهٔ ادمین کل به کارشناس داده/گرفته می‌شود
+    if (action === "set_eitaa_perm") {
+      const allowed = body.allowed === true
+      if (target.role !== "specialist") {
+        return NextResponse.json({ error: "این مجوز فقط برای نقش «کارشناس خبر» معنا دارد" }, { status: 400 })
+      }
+      await db.user.update({ where: { id: target.id }, data: { canSendEitaa: allowed } })
+      await notifyUser(
+        target.id,
+        "user_status",
+        allowed ? "📨 مجوز ارسال به ایتا فعال شد" : "📨 مجوز ارسال به ایتا برداشته شد",
+        allowed
+          ? `${admin.fullName} به شما اجازه داد خبرها را به کانال ایتا ارسال کنید.`
+          : `ادمین کل مجوز ارسال خبر به کانال ایتا را از شما گرفت.`,
+        `user:${target.id}`,
+        { force: true },
+      )
+      return NextResponse.json({
+        ok: true,
+        message: allowed ? `مجوز ارسال به ایتا برای ${target.fullName} فعال شد.` : `مجوز ارسال به ایتا از ${target.fullName} گرفته شد.`,
       })
     }
 
