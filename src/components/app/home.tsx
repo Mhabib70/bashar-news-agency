@@ -3,11 +3,12 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { Megaphone, ArrowLeft, Flame, Newspaper, Timer, ShieldCheck, ClipboardCheck, MessagesSquare, GraduationCap } from "lucide-react"
+import { Megaphone, ArrowLeft, Flame, Newspaper, Timer, ShieldCheck, ClipboardCheck, MessagesSquare, GraduationCap, Trophy, Eye, Heart } from "lucide-react"
 import { useApp } from "@/lib/store"
 import { SectionHeader, CountUp, Avatar } from "@/components/app/bits"
 import { StoryRow, ComposerCard, FeedPost, type FeedNews } from "@/components/app/social"
 import { faNum, fa, durFmt, untilFmt } from "@/lib/format"
+import { CATEGORY_LABELS } from "@/lib/domain"
 import { cn } from "@/lib/utils"
 
 export function HomeScreen({
@@ -18,6 +19,7 @@ export function HomeScreen({
   onGotoActivity,
   onGotoReview,
   onOpenAdmin,
+  onOpenNewsDetail,
 }: {
   onOpenNotifications: () => void
   onQuickSubmit: () => void
@@ -26,6 +28,7 @@ export function HomeScreen({
   onGotoActivity: () => void
   onGotoReview: () => void
   onOpenAdmin: () => void
+  onOpenNewsDetail?: (id: number) => void
 }) {
   const router = useRouter()
   const { state, userId } = useApp()
@@ -146,6 +149,38 @@ export function HomeScreen({
           <span className="mt-3 inline-flex items-center gap-2 rounded-full bg-black/25 px-4 py-2.5 text-[12px] font-bold text-white transition-transform hover:scale-[1.03]">
             {activeChallenge.joined ? "ارسال خبر برای چالش" : "شرکت در چالش"}
             <ArrowLeft className="h-4 w-4" />
+          </span>
+        </button>
+      )}
+
+      {/* خبر هفته — پربازدیدترین خبر منتشرشدهٔ هفته (بستن حلقه اثرگذاری) */}
+      {state.weekFeatured && (
+        <button
+          onClick={() => onOpenNewsDetail?.(state.weekFeatured!.id)}
+          className="v3-tile-amber relative overflow-hidden rounded-[22px] p-4 text-right shadow-[0_18px_40px_-18px_rgba(245,158,11,0.65)] transition-transform active:scale-[0.98]"
+        >
+          <div className="flex items-start justify-between">
+            <span className="flex items-center gap-1.5 text-[11px] font-bold opacity-95">
+              <Trophy className="h-4 w-4" />
+              خبر هفته خبرگزاری
+            </span>
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/22">
+              <Trophy className="h-5 w-5" />
+            </span>
+          </div>
+          <h3 className="mt-1.5 line-clamp-2 text-[15px] font-black leading-7">{state.weekFeatured.title}</h3>
+          <p className="mt-1 text-[11px] font-bold opacity-95">
+            ✍️ {state.weekFeatured.reporterName} · {CATEGORY_LABELS[state.weekFeatured.category] ?? "خبر"}
+          </p>
+          <span className="mt-2.5 flex flex-wrap items-center gap-2">
+            <span className="inline-flex items-center gap-1 rounded-full bg-black/22 px-3 py-1.5 text-[11px] font-bold text-white">
+              <Eye className="h-3.5 w-3.5" /> {faNum(state.weekFeatured.views)} بازدید
+            </span>
+            {state.weekFeatured.eitaaReactions > 0 && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-black/22 px-3 py-1.5 text-[11px] font-bold text-white">
+                <Heart className="h-3.5 w-3.5" /> {faNum(state.weekFeatured.eitaaReactions)} واکنش
+              </span>
+            )}
           </span>
         </button>
       )}

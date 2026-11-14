@@ -152,7 +152,11 @@ type Store = {
   editNews: (newsId: number, p: { title: string; content: string }) => Promise<Result>
   sendToEitaa: (newsId: number) => Promise<Result>
   markNotificationsRead: () => Promise<void>
-  fetchAllNews: () => Promise<NewsDTO[]>
+  fetchAllNews: (params?: { q?: string; category?: string; status?: string; period?: string }) => Promise<NewsDTO[]>
+  viewNews: (newsId: number) => Promise<void>
+  setEitaaStats: (newsId: number, reactions: number) => Promise<Result>
+  praiseNews: (newsId: number) => Promise<Result>
+  managePin: (p: { action: "set" | "remove"; newPin?: string; currentPin?: string }) => Promise<Result>
   deleteNews: (newsId: number) => Promise<Result>
   fetchTrainings: () => Promise<TrainingFeed | null>
   createTraining: (p: { title: string; body: string; kind: string; fileUrl?: string; category: string; level: string; minutes: number }) => Promise<Result>
@@ -175,7 +179,7 @@ type Store = {
   uploadAvatar: (dataUrl: string) => Promise<Result>
   fetchUserDetail: (targetId: string) => Promise<AdminUserDetail | null>
   fetchAdminOverview: () => Promise<AdminOverview | null>
-  saveDraft: (p: { category: string; title: string; content: string; draftId?: number | null }) => Promise<Result>
+  saveDraft: (p: { category: string; title: string; content: string; mediaType?: string; mediaUrl?: string; durationMin?: number; preparedAt?: string | null; draftId?: number | null }) => Promise<Result & { id?: number }>
   deleteDraft: (id: number) => Promise<Result>
   saveSettings: (p: Partial<AppState["notifSettings"]>) => Promise<Result>
   register: (p: { fullName: string; phone: string; age: string; education: string; district: string; base: string }) => Promise<{ ok: boolean; userId?: string; status?: string; message?: string }>
@@ -424,14 +428,74 @@ export const useApp = create<Store>((set, get) => ({
     }
   },
 
-  fetchAllNews: async () => {
+  fetchAllNews: async (params) => {
     const uid = get().userId
     if (!uid) return []
     try {
-      const r = await api<{ news: NewsDTO[] }>(`/api/news/all`)
+      const qs = new URLSearchParams()
+      if (params?.q && params.q.trim().length >= 2) qs.set("q", params.q.trim())
+      if (params?.category && params.category !== "all") qs.set("category", params.category)
+      if (params?.status && params.status !== "all") qs.set("status", params.status)
+      if (params?.period && params.period !== "all") qs.set("period", params.period)
+      const r = await api<{ news: NewsDTO[] }>(`/api/news/all${qs.size ? `?${qs}` : ""}`)
       return r.news ?? []
     } catch {
       return []
+    }
+  },
+
+  viewNews: async (newsId) => {
+    const uid = get().userId
+    if (!uid) return
+    try {
+      await api("/api/news/view", { method: "POST", body: JSON.stringify({ newsId }) })
+    } catch {
+      /* بازدید غیرحیاتی است */
+    }
+  },
+
+  setEitaaStats: async (newsId, reactions) => {
+    const uid = get().userId
+    if (!uid) return { ok: false }
+    try {
+      const r = await api<Result & { message: string }>("/api/news/eitaa-stats", {
+        method: "POST",
+        body: JSON.stringify({ newsId, reactions }),
+      })
+      await get().refresh()
+      return { ok: true, message: r.message }
+    } catch (e) {
+      return { ok: false, message: (e as Error).message }
+    }
+  },
+
+  praiseNews: async (newsId) => {
+    const uid = get().userId
+    if (!uid) return { ok: false }
+    try {
+      const r = await api<Result & { message: string }>("/api/news/praise", {
+        method: "POST",
+        body: JSON.stringify({ newsId }),
+      })
+      await get().refresh()
+      return { ok: true, message: r.message }
+    } catch (e) {
+      return { ok: false, message: (e as Error).message }
+    }
+  },
+
+  managePin: async (p) => {
+    const uid = get().userId
+    if (!uid) return { ok: false }
+    try {
+      const r = await api<Result & { message: string }>("/api/user/pin", {
+        method: "POST",
+        body: JSON.stringify({ ...p }),
+      })
+      await get().refresh()
+      return { ok: true, message: r.message }
+    } catch (e) {
+      return { ok: false, message: (e as Error).message }
     }
   },
 
@@ -725,12 +789,12 @@ export const useApp = create<Store>((set, get) => ({
     const uid = get().userId
     if (!uid) return { ok: false }
     try {
-      const r = await api<Result & { message: string }>("/api/drafts", {
+      const r = await api<Result & { id?: number; message: string }>("/api/drafts", {
         method: "POST",
         body: JSON.stringify({ ...p }),
       })
       await get().refresh()
-      return { ok: true, message: r.message }
+      return { ok: true, id: r.id, message: r.message }
     } catch (e) {
       return { ok: false, message: (e as Error).message }
     }

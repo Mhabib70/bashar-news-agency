@@ -22,6 +22,7 @@ model User {
   points          Int       @default(0)
   forumPoints     Int       @default(0) // امتیاز تالار گفتگو — پاداش پیام/تاپیک/واکنش‌گیری
   canSendEitaa    Boolean   @default(false) // مجوز ارسال خبر به کانال ایتا (فقط با اجازهٔ ادمین کل)
+  pinHash         String    @default("") // رمز دوم اختیاری (۴ تا ۶ رقم) — اگر تنظیم شود ورود دومرحله‌ای می‌شود
   levelKey        String    @default("rookie") // rookie | follower | active | pro | expert
   currentStreak   Int       @default(0)
   bestStreak      Int       @default(0)
@@ -63,6 +64,8 @@ model NewsItem {
   mediaUrl     String @default("") // آدرس فایل رسانه آپلودشده
   durationMin  Int    @default(0) // زمان صرف‌شده برای تهیه خبر (دقیقه)
   preparedAt   DateTime? // تاریخ و ساعت تهیه خبر (انتخاب خبرنگار)
+  views        Int    @default(0) // بازدید خبر در اپ
+  eitaaReactions Int  @default(0) // واکنش‌های ثبت‌شده از کانال ایتا (ورود دستی ادمین)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -134,13 +137,17 @@ model PointsLog {
 }
 
 model Draft {
-  id       Int      @id @default(autoincrement())
-  userId   String
-  user     User     @relation(fields: [userId], references: [id])
-  category String   @default("none")
-  title    String   @default("")
-  content  String   @default("")
-  savedAt  DateTime @default(now())
+  id          Int       @id @default(autoincrement())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+  category    String    @default("none")
+  title       String    @default("")
+  content     String    @default("")
+  mediaType   String    @default("none") // none | photo | video
+  mediaUrl    String    @default("")
+  durationMin Int       @default(0)
+  preparedAt  DateTime?
+  savedAt     DateTime  @default(now())
 }
 
 model NotifSetting {

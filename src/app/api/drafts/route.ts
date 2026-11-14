@@ -2,25 +2,42 @@ import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { activeUser } from "@/lib/server/session"
 
-// پیش‌نویس خبر (سناریوی ۸)
+// پیش‌نویس خبر (سناریوی ۸) — کامل با رسانه، زمان صرف‌شده و زمان تهیه
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { category, title, content, draftId } = body ?? {}
+    const { category, title, content, mediaType, mediaUrl, durationMin, preparedAt, draftId } = body ?? {}
     const user = await activeUser(req)
     if (!user) return NextResponse.json({ error: "نشست معتبر نیست — دوباره وارد شوید" }, { status: 401 })
     const userId = user.id
+    const patch = {
+      category: category || "none",
+      title: typeof title === "string" ? title.slice(0, 200) : undefined,
+      content: typeof content === "string" ? content : undefined,
+      mediaType: ["photo", "video", "none"].includes(mediaType) ? mediaType : undefined,
+      mediaUrl: typeof mediaUrl === "string" && mediaUrl.startsWith("/uploads/") ? mediaUrl : undefined,
+      durationMin: Number.isFinite(Number(durationMin)) ? Math.max(0, Math.min(600, Number(durationMin))) : undefined,
+      preparedAt: preparedAt ? new Date(String(preparedAt)) : undefined,
+      savedAt: new Date(),
+    }
     if (draftId) {
       const existing = await db.draft.findUnique({ where: { id: Number(draftId) } })
       if (!existing || existing.userId !== userId) return NextResponse.json({ error: "پیش‌نویس یافت نشد" }, { status: 404 })
-      await db.draft.update({
-        where: { id: existing.id },
-        data: { category: category || existing.category, title: title ?? existing.title, content: content ?? existing.content, savedAt: new Date() },
-      })
-      return NextResponse.json({ ok: true, message: "پیش‌نویس به‌روزرسانی شد." })
+      const clean = Object.fromEntries(Object.entries(patch).filter(([, v]) => v !== undefined))
+      await db.draft.update({ where: { id: existing.id }, data: clean })
+      return NextResponse.json({ ok: true, id: existing.id, message: "پیش‌نویس به‌روزرسانی شد." })
     }
     const d = await db.draft.create({
-      data: { userId, category: category || "none", title: (title ?? "").slice(0, 200), content: content ?? "" },
+      data: {
+        userId,
+        category: patch.category,
+        title: patch.title ?? "",
+        content: patch.content ?? "",
+        mediaType: patch.mediaType ?? "none",
+        mediaUrl: patch.mediaUrl ?? "",
+        durationMin: patch.durationMin ?? 0,
+        ...(patch.preparedAt ? { preparedAt: patch.preparedAt } : {}),
+      },
     })
     return NextResponse.json({ ok: true, id: d.id, message: "پیش‌نویس ذخیره شد." })
   } catch (e) {

@@ -2,15 +2,17 @@
 
 import Image from "next/image"
 import { useEffect, useMemo, useState } from "react"
-import { Plus, PencilLine, X, FileText, Search, Trash2, RefreshCw, Globe2, UserRound, Send } from "lucide-react"
+import { Plus, PencilLine, X, FileText, Search, Trash2, RefreshCw, Globe2, UserRound, Send, CalendarDays, List, Eye, Heart, Trophy, Loader2 } from "lucide-react"
 import { useApp, type NewsDTO } from "@/lib/store"
 import { SectionHeader, StatusChip, StageDots, StageTimeline, StageChip } from "@/components/app/bits"
 import { NewsEditDialog } from "@/components/app/news-edit"
-import { fa, durFmt, relTime, jalali } from "@/lib/format"
-import { CATEGORY_LABELS, REJECT_REASONS, DISTRICT_LABELS } from "@/lib/domain"
+import { ContentCalendar } from "@/components/app/content-calendar"
+import { fa, faNum, durFmt, relTime, jalali } from "@/lib/format"
+import { CATEGORY_LABELS, REJECT_REASONS, DISTRICT_LABELS, NEWS_CATEGORIES } from "@/lib/domain"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
 
 const FILTERS = [
   { key: "all", label: "همه" },
@@ -19,8 +21,30 @@ const FILTERS = [
   { key: "rejected", label: "رد شده" },
 ] as const
 
-export function NewsScreen({ onQuickSubmit, draftsView }: { onQuickSubmit: () => void; draftsView?: boolean }) {
-  const { state, fetchAllNews, deleteNews, sendToEitaa, refresh } = useApp()
+export type SubmitPreset = {
+  category?: string
+  title?: string
+  content?: string
+  draftId?: number | null
+  challengeId?: number | null
+  mediaType?: string
+  mediaUrl?: string
+  durationMin?: number
+  preparedAt?: string | null
+}
+
+export function NewsScreen({
+  onQuickSubmit,
+  draftsView,
+  initialNewsId,
+  onConsumeNewsId,
+}: {
+  onQuickSubmit: (preset?: SubmitPreset) => void
+  draftsView?: boolean
+  initialNewsId?: number | null
+  onConsumeNewsId?: () => void
+}) {
+  const { state, fetchAllNews, deleteNews, sendToEitaa, refresh, viewNews, setEitaaStats, praiseNews, deleteDraft } = useApp()
   const { toast } = useToast()
   const [filter, setFilter] = useState<(typeof FILTERS)[number]["key"]>("all")
   const [detail, setDetail] = useState<number | null>(null)
@@ -31,38 +55,80 @@ export function NewsScreen({ onQuickSubmit, draftsView }: { onQuickSubmit: () =>
   const [editing, setEditing] = useState<number | null>(null)
   const [deleting, setDeleting] = useState<number | null>(null)
   const [eitaaBusy, setEitaaBusy] = useState(false)
+  // فیلترهای آرشیو (سروری — فقط دامنه «همه اخبار»)
+  const [cat, setCat] = useState("all")
+  const [period, setPeriod] = useState("all")
+  const [serverQ, setServerQ] = useState("")
+  // نمای تقویم محتوا
+  const [viewMode, setViewMode] = useState<"list" | "calendar">("list")
+  // ورود مستقیم به یک خبر (از اعلان یا بنر خبر هفته)
+  const [consumedNewsId, setConsumedNewsId] = useState<number | null>(null)
+  // ورود دستی واکنش‌های ایتا
+  const [reactionsDraft, setReactionsDraft] = useState("")
+  const [statsBusy, setStatsBusy] = useState(false)
   const searched = q.trim().length >= 2
+
+  const openDetail = (id: number) => {
+    setDetail(id)
+    setReactionsDraft("")
+    void viewNews(id) // شمارش بازدید
+  }
 
   const loadAll = async () => {
     setLoadingAll(true)
-    const rows = await fetchAllNews()
+    const rows = await fetchAllNews({ q: serverQ, category: cat, period })
     setAllNews(rows)
     setLoadingAll(false)
   }
-  // بارگذاری فهرست «همه اخبار» هنگام ورود به این حالت.
-  // واکشی داخل continuation انجام می‌شود تا setState همگام در بدنهٔ effect رخ ندهد
-  // (قانون react-hooks/set-state-in-effect) و رندر آبشاری ایجاد نشود.
+  // بارگذاری فهرست «همه اخبار» با فیلترهای سروری (جستجو با تاخیر کوتاه)
+  useEffect(() => {
+    if (scope !== "all") return
+    const t = setTimeout(() => setServerQ(q), 350)
+    return () => clearTimeout(t)
+  }, [q, scope])
   useEffect(() => {
     if (scope !== "all") return
     let cancelled = false
-    void fetchAllNews().then((rows) => {
+    void fetchAllNews({ q: serverQ, category: cat, period }).then((rows) => {
       if (!cancelled) setAllNews(rows)
     })
     return () => {
       cancelled = true
     }
-  }, [scope])
+  }, [scope, serverQ, cat, period])
+
+  // باز کردن مستقیم خبر (از اعلان‌ها یا بنر خبر هفته)
+  useEffect(() => {
+    if (!initialNewsId || consumedNewsId === initialNewsId) return
+    let cancelled = false
+    void (async () => {
+      const own = state?.news.find((n) => n.id === initialNewsId)
+      const rows = own ? [] : await fetchAllNews()
+      if (cancelled) return
+      if (!own && rows.length) setAllNews(rows)
+      setScope("all")
+      setDetail(initialNewsId)
+      setReactionsDraft("")
+      void viewNews(initialNewsId)
+      setConsumedNewsId(initialNewsId)
+      onConsumeNewsId?.()
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [initialNewsId])
 
   const base = scope === "all" ? allNews : (state?.news ?? [])
   const list = useMemo(() => {
     let rows = base
     if (filter !== "all") rows = rows.filter((n) => n.status === filter)
-    if (searched) {
+    // در دامنه «همه اخبار» جستجو سمت سرور انجام می‌شود؛ فقط «اخبار من» جستجوی محلی دارد
+    if (scope === "mine" && searched) {
       const s = q.trim().toLowerCase()
       rows = rows.filter((n) => n.title.toLowerCase().includes(s) || n.content.toLowerCase().includes(s) || n.code.toLowerCase().includes(s))
     }
     return rows
-  }, [base, filter, q, searched])
+  }, [base, filter, q, searched, scope])
 
   if (!state) return null
   const me = state.user
@@ -100,17 +166,66 @@ export function NewsScreen({ onQuickSubmit, draftsView }: { onQuickSubmit: () =>
     }
   }
 
+  const doDeleteDraft = async (id: number) => {
+    const r = await deleteDraft(id)
+    if (r.ok) toast({ title: "حذف شد", description: r.message })
+    else toast({ title: "خطا", description: r.message, variant: "destructive" })
+  }
+
+  const saveReactions = async (id: number) => {
+    const n = Number(reactionsDraft.replace(/[۰-۹]/g, (d) => String("۰۱۲۳۴۵۶۷۸۹".indexOf(d))))
+    if (Number.isNaN(n) || n < 0) {
+      toast({ title: "عدد نامعتبر", description: "تعداد واکنش‌ها را وارد کنید", variant: "destructive" })
+      return
+    }
+    setStatsBusy(true)
+    const r = await setEitaaStats(id, n)
+    setStatsBusy(false)
+    if (r.ok) {
+      // به‌روزرسانی فهرست جاری تا عدد ثبت‌شده فوراً در دیالوگ دیده شود
+      if (scope === "all") await loadAll()
+      else await refresh()
+      toast({ title: "ثبت شد", description: r.message })
+    } else toast({ title: "خطا", description: r.message, variant: "destructive" })
+  }
+
+  const doPraise = async (id: number) => {
+    setEitaaBusy(true)
+    const r = await praiseNews(id)
+    setEitaaBusy(false)
+    if (r.ok) {
+      if (scope === "all") await loadAll()
+      else await refresh()
+      toast({ title: "تقدیر ارسال شد", description: r.message })
+    } else toast({ title: "خطا", description: r.message, variant: "destructive" })
+  }
+
   return (
     <div className="stage-enter flex flex-col gap-4 px-5 pb-4 pt-6">
       <div className="flex items-center justify-between">
         <h1 className="text-[22px] font-black text-[var(--v3-ink)]">اخبار خبرگزاری</h1>
-        <button
-          onClick={onQuickSubmit}
-          className="v3-btn flex items-center gap-1.5 px-4 py-2.5 text-[13px] transition-transform hover:scale-[1.03] active:scale-95"
-        >
-          <Plus className="h-4 w-4" />
-          ارسال خبر
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setViewMode(viewMode === "list" ? "calendar" : "list")}
+            className={cn(
+              "flex h-10 w-10 items-center justify-center rounded-full border transition-colors",
+              viewMode === "calendar"
+                ? "border-transparent bg-gradient-to-l from-[var(--v3-azure-2)] to-[var(--v3-azure-deep)] text-white"
+                : "border-[var(--v3-line)] bg-[var(--v3-card)] text-[var(--v3-ink-2)] hover:text-[var(--v3-azure)]",
+            )}
+            aria-label={viewMode === "list" ? "نمای تقویم محتوا" : "نمای فهرست"}
+            title={viewMode === "list" ? "تقویم محتوا" : "فهرست اخبار"}
+          >
+            {viewMode === "list" ? <CalendarDays className="h-4.5 w-4.5" /> : <List className="h-4.5 w-4.5" />}
+          </button>
+          <button
+            onClick={() => onQuickSubmit()}
+            className="v3-btn flex items-center gap-1.5 px-4 py-2.5 text-[13px] transition-transform hover:scale-[1.03] active:scale-95"
+          >
+            <Plus className="h-4 w-4" />
+            ارسال خبر
+          </button>
+        </div>
       </div>
 
       {/* انتخاب دامنه: همه اخبار سازمان / اخبار من */}
@@ -135,7 +250,7 @@ export function NewsScreen({ onQuickSubmit, draftsView }: { onQuickSubmit: () =>
             </button>
           ))}
         </div>
-        {scope === "all" && (
+        {scope === "all" && viewMode === "list" && (
           <button
             onClick={loadAll}
             disabled={loadingAll}
@@ -147,7 +262,8 @@ export function NewsScreen({ onQuickSubmit, draftsView }: { onQuickSubmit: () =>
         )}
       </div>
 
-      {/* جستجوی اخبار */}
+      {/* جستجوی اخبار (در نمای تقویم مخفی) */}
+      {viewMode === "list" && (
       <div className="relative">
         <Search className="absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--v3-ink-2)]/60" />
         <input
@@ -162,8 +278,45 @@ export function NewsScreen({ onQuickSubmit, draftsView }: { onQuickSubmit: () =>
           </button>
         )}
       </div>
+      )}
 
-      {/* فیلترها */}
+      {/* فیلترهای آرشیو: دسته و بازه زمانی (فقط دامنه «همه اخبار» و نمای فهرست) */}
+      {viewMode === "list" && scope === "all" && (
+        <div className="no-scrollbar flex gap-2 overflow-x-auto pb-0.5">
+          {[{ key: "all", label: "همه دسته‌ها" }, ...NEWS_CATEGORIES.map((c) => ({ key: c.code, label: c.label }))].map((c) => (
+            <button
+              key={c.key}
+              onClick={() => setCat(c.key)}
+              className={cn(
+                "shrink-0 rounded-full border px-3.5 py-1.5 text-[11.5px] font-bold transition-colors",
+                cat === c.key
+                  ? "border-transparent bg-[var(--v3-ink)] text-[var(--v3-card)]"
+                  : "border-[var(--v3-line)] bg-[var(--v3-card-2)] text-[var(--v3-ink-2)] hover:text-[var(--v3-ink)]",
+              )}
+            >
+              {c.label}
+            </button>
+          ))}
+          <span className="mx-0.5 w-px shrink-0 bg-[var(--v3-line)]" />
+          {[{ key: "all", label: "هر زمان" }, { key: "week", label: "۷ روز" }, { key: "month", label: "۳۰ روز" }].map((p) => (
+            <button
+              key={p.key}
+              onClick={() => setPeriod(p.key)}
+              className={cn(
+                "shrink-0 rounded-full border px-3.5 py-1.5 text-[11.5px] font-bold transition-colors",
+                period === p.key
+                  ? "border-[var(--v3-azure)] bg-[var(--v3-azure-soft)] text-[var(--v3-azure-deep)] dark:text-[#93c5fd]"
+                  : "border-[var(--v3-line)] bg-[var(--v3-card-2)] text-[var(--v3-ink-2)] hover:text-[var(--v3-ink)]",
+              )}
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* فیلترهای وضعیت */}
+      {viewMode === "list" && (
       <div className="no-scrollbar flex gap-2 overflow-x-auto pb-0.5">
         {FILTERS.map((f) => {
           const count = f.key === "all" ? base.length : base.filter((n) => n.status === f.key).length
@@ -183,29 +336,57 @@ export function NewsScreen({ onQuickSubmit, draftsView }: { onQuickSubmit: () =>
           )
         })}
       </div>
+      )}
 
-      {/* پیش‌نویس‌ها */}
-      {draftsView && scope === "mine" && state.drafts.length > 0 && (
+      {/* پیش‌نویس‌ها — با ادامه ویرایش و حذف */}
+      {draftsView && scope === "mine" && viewMode === "list" && state.drafts.length > 0 && (
         <div>
           <SectionHeader title="پیش‌نویس‌ها" />
           <div className="space-y-2">
             {state.drafts.map((d) => (
-              <button key={d.id} onClick={onQuickSubmit} className="flex w-full items-center gap-3 rounded-3xl border border-dashed border-[var(--v3-line)] bg-[var(--v3-card-2)]/60 p-3.5 text-right transition-colors hover:border-[var(--v3-azure)]/40">
-                <span className="flex h-10 w-10 items-center justify-center rounded-full border border-[var(--v3-line)] bg-[var(--v3-card)] text-[var(--v3-ink-2)]">
-                  <FileText className="h-5 w-5" />
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate text-[13.5px] font-bold text-[var(--v3-ink)]">{d.title || "بدون عنوان"}</span>
-                  <span className="block text-[11px] text-[var(--v3-ink-2)]">{CATEGORY_LABELS[d.category]} · ذخیره {relTime(d.savedAt)}</span>
-                </span>
-                <PencilLine className="h-4 w-4 shrink-0 text-[var(--v3-ink-2)]" />
-              </button>
+              <div key={d.id} className="flex w-full items-center gap-1 rounded-3xl border border-dashed border-[var(--v3-line)] bg-[var(--v3-card-2)]/60 p-2.5 transition-colors hover:border-[var(--v3-azure)]/40">
+                <button
+                  onClick={() =>
+                    onQuickSubmit({
+                      draftId: d.id,
+                      category: d.category,
+                      title: d.title,
+                      content: d.content,
+                      mediaType: d.mediaType,
+                      mediaUrl: d.mediaUrl,
+                      durationMin: d.durationMin,
+                      preparedAt: d.preparedAt,
+                    })
+                  }
+                  className="flex min-w-0 flex-1 items-center gap-3 rounded-full p-1 text-right"
+                >
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[var(--v3-line)] bg-[var(--v3-card)] text-[var(--v3-ink-2)]">
+                    <FileText className="h-5 w-5" />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-[13.5px] font-bold text-[var(--v3-ink)]">{d.title || "بدون عنوان"}</span>
+                    <span className="block text-[11px] text-[var(--v3-ink-2)]">{CATEGORY_LABELS[d.category]} · ذخیره {relTime(d.savedAt)}{d.mediaUrl ? " · با رسانه" : ""}</span>
+                  </span>
+                  <PencilLine className="h-4 w-4 shrink-0 text-[var(--v3-ink-2)]" />
+                </button>
+                <button
+                  onClick={() => doDeleteDraft(d.id)}
+                  className="mr-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[var(--v3-ink-2)]/70 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-500/12 dark:hover:text-red-400"
+                  aria-label="حذف پیش‌نویس"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
             ))}
           </div>
         </div>
       )}
 
+      {/* نمای تقویم محتوا */}
+      {viewMode === "calendar" && <ContentCalendar mine={scope === "mine"} onOpenNews={openDetail} />}
+
       {/* لیست اخبار */}
+      {viewMode === "list" && (
       <div className="space-y-2.5">
         {list.length === 0 && (
           <div className="v3-card flex flex-col items-center gap-2 border-dashed py-12 text-center">
@@ -217,20 +398,32 @@ export function NewsScreen({ onQuickSubmit, draftsView }: { onQuickSubmit: () =>
           </div>
         )}
         {list.map((n) => (
-          <button key={n.id} onClick={() => setDetail(n.id)} className="v3-card w-full p-4 text-right transition-transform hover:scale-[1.01]">
+          <button key={n.id} onClick={() => openDetail(n.id)} className="v3-card w-full p-4 text-right transition-transform hover:scale-[1.01]">
             <div className="flex items-start gap-3">
               <span className="relative h-16 w-16 shrink-0 overflow-hidden rounded-[14px]">
                 <Image src={`/img/cat-${n.category === "none" ? "local" : n.category}.png`} alt="" fill sizes="64px" className="object-cover" />
               </span>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="rounded-full bg-[var(--v3-card-2)] px-2.5 py-0.5 text-[10px] font-bold text-[var(--v3-ink-2)]">{CATEGORY_LABELS[n.category]}</span>
+                  <span className="flex min-w-0 items-center gap-1.5">
+                    <span className="shrink-0 rounded-full bg-[var(--v3-card-2)] px-2.5 py-0.5 text-[10px] font-bold text-[var(--v3-ink-2)]">{CATEGORY_LABELS[n.category]}</span>
+                    {(n as { isWeekFeatured?: boolean }).isWeekFeatured && (
+                      <span className="flex shrink-0 items-center gap-1 rounded-full bg-[var(--v3-amber-soft)] px-2 py-0.5 text-[9.5px] font-black text-amber-600 dark:text-amber-400">
+                        <Trophy className="h-2.5 w-2.5" />
+                        خبر هفته
+                      </span>
+                    )}
+                  </span>
                   <StatusChip status={n.status} small />
                 </div>
                 <p className="mt-1.5 line-clamp-2 text-[13.5px] font-bold leading-6 text-[var(--v3-ink)]">{n.title}</p>
-                <p className="mt-1 text-[10.5px] text-[var(--v3-ink-2)]">
-                  {n.reporterId === me.id ? "شما" : n.reporterName} · {n.code} · {jalali(n.createdAt)}
-                  {n.mediaUrl && n.mediaType === "photo" ? " · 📷" : n.mediaUrl && n.mediaType === "video" ? " · 🎬" : ""}
+                <p className="mt-1 flex flex-wrap items-center gap-x-2 text-[10.5px] text-[var(--v3-ink-2)]">
+                  <span>{n.reporterId === me.id ? "شما" : n.reporterName} · {n.code} · {jalali(n.createdAt)}</span>
+                  <span className="flex items-center gap-2.5">
+                    {n.views > 0 && <span className="flex items-center gap-1"><Eye className="h-3 w-3" />{faNum(n.views)}</span>}
+                    {n.eitaaReactions > 0 && <span className="flex items-center gap-1"><Heart className="h-3 w-3" />{faNum(n.eitaaReactions)}</span>}
+                    {n.mediaUrl && n.mediaType === "photo" ? " · 📷" : n.mediaUrl && n.mediaType === "video" ? " · 🎬" : ""}
+                  </span>
                 </p>
               </div>
             </div>
@@ -241,6 +434,7 @@ export function NewsScreen({ onQuickSubmit, draftsView }: { onQuickSubmit: () =>
           </button>
         ))}
       </div>
+      )}
 
       {/* جزئیات خبر */}
       <Dialog open={detail !== null} onOpenChange={(v) => !v && setDetail(null)}>
@@ -305,14 +499,47 @@ export function NewsScreen({ onQuickSubmit, draftsView }: { onQuickSubmit: () =>
               )}
 
               {detailNews.status === "approved" && (me.role === "admin" || me.canSendEitaa) && (
-                <button
-                  onClick={() => doEitaa(detailNews.id)}
-                  disabled={eitaaBusy}
-                  className="mt-3 flex w-full items-center justify-center gap-2 rounded-full bg-neon py-3.5 text-[14px] font-bold text-neon-foreground btn-glow disabled:opacity-50"
-                >
-                  <Send className="h-4.5 w-4.5" />
-                  {eitaaBusy ? "در حال ارسال به ایتا..." : "📨 ارسال به کانال ایتا"}
-                </button>
+                <>
+                  <button
+                    onClick={() => doEitaa(detailNews.id)}
+                    disabled={eitaaBusy}
+                    className="mt-3 flex w-full items-center justify-center gap-2 rounded-full bg-neon py-3.5 text-[14px] font-bold text-neon-foreground btn-glow disabled:opacity-50"
+                  >
+                    <Send className="h-4.5 w-4.5" />
+                    {eitaaBusy ? "در حال ارسال به ایتا..." : "📨 ارسال به کانال ایتا"}
+                  </button>
+                  {/* آمار ایتا + تقدیر خبرنگار — بستن حلقه اثرگذاری */}
+                  <div className="mt-3 rounded-[16px] border border-[var(--v3-line)] bg-[var(--v3-card-2)]/60 p-3">
+                    <p className="flex items-center gap-1.5 text-[11.5px] font-black text-[var(--v3-ink)]">
+                      <Heart className="h-3.5 w-3.5 text-red-500" />
+                      واکنش‌های کانال ایتا
+                      <span className="mr-auto text-[11px] font-bold text-[var(--v3-ink-2)]">ثبت‌شده: {faNum(detailNews.eitaaReactions)}</span>
+                    </p>
+                    <div className="mt-2 flex items-center gap-2">
+                      <Input
+                        value={reactionsDraft}
+                        onChange={(e) => setReactionsDraft(e.target.value.replace(/[^۰-۹\d]/g, ""))}
+                        inputMode="numeric"
+                        dir="ltr"
+                        placeholder="تعداد واکنش از کانال"
+                        className="v3-input flex-1 rounded-xl text-center text-[13px]"
+                      />
+                      <button onClick={() => saveReactions(detailNews.id)} disabled={statsBusy} className="v3-btn shrink-0 px-4 py-2.5 text-[12px] disabled:opacity-50">
+                        {statsBusy ? "..." : "ثبت"}
+                      </button>
+                    </div>
+                    {me.role === "admin" && (
+                      <button
+                        onClick={() => doPraise(detailNews.id)}
+                        disabled={eitaaBusy}
+                        className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-full border border-[var(--v3-amber)]/40 bg-[var(--v3-amber-soft)] py-2.5 text-[12px] font-bold text-amber-600 transition-colors hover:bg-[var(--v3-amber)]/25 dark:text-amber-400 disabled:opacity-50"
+                      >
+                        <Trophy className="h-3.5 w-3.5" />
+                        تقدیر خبرنگار در کانال ایتا
+                      </button>
+                    )}
+                  </div>
+                </>
               )}
 
               {detailNews.status === "rejected" && detailNews.reporterId === me.id && (

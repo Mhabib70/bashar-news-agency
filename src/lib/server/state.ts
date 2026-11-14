@@ -33,6 +33,8 @@ export type AppUser = {
   isSuperAdmin: boolean
   /** مجوز ارسال خبر به کانال ایتا (کارشناس فقط با اجازهٔ ادمین کل) */
   canSendEitaa: boolean
+  /** آیا رمز دوم (PIN) برای این حساب فعال است */
+  pinSet: boolean
   createdAt: string
 }
 
@@ -65,6 +67,8 @@ export type NewsDTO = {
   reviewedBy: string
   challengeId: number | null
   durationMin: number
+  views: number
+  eitaaReactions: number
   createdAt: string
   events: NewsEventDTO[]
 }
@@ -87,6 +91,19 @@ export type ChallengeDTO = {
   roster: { fullName: string; count: number; isMe: boolean }[]
 }
 
+export type WeekFeatured = {
+  id: number
+  code: string
+  title: string
+  category: string
+  mediaType: string
+  mediaUrl: string
+  reporterName: string
+  reporterAvatar: string
+  views: number
+  eitaaReactions: number
+}
+
 export type LeaderRow = { id: string; fullName: string; avatar: string; points: number; levelKey: string; district: string; rank: number; isMe: boolean }
 
 export type AppState = {
@@ -101,9 +118,10 @@ export type AppState = {
   reviewQueue: NewsDTO[]
   challenges: ChallengeDTO[]
   leaderboard: LeaderRow[]
+  weekFeatured: WeekFeatured | null
   badges: { key: string; emoji: string; title: string; desc: string; unlocked: boolean; awardedAt: string | null }[]
-  drafts: { id: number; category: string; title: string; content: string; savedAt: string }[]
-  notifications: { id: string; kind: string; title: string; body: string; at: string; unread: boolean }[]
+  drafts: { id: number; category: string; title: string; content: string; mediaType: string; mediaUrl: string; durationMin: number; preparedAt: string | null; savedAt: string }[]
+  notifications: { id: string; kind: string; title: string; body: string; ref: string; at: string; unread: boolean }[]
   unreadCount: number
   districts: { key: string; label: string; bases: string[] }[]
   notifSettings: { approvals: boolean; challenges: boolean; broadcast: boolean; rejections: boolean; quietStart: string; quietEnd: string }
@@ -137,7 +155,7 @@ function toNewsDTO(
   n: {
     id: number; code: string; reporterId: string; district: string; category: string; title: string; content: string
     mediaType: string; mediaUrl: string; status: string; reviewStage: string; rejectReason: string; rejectNote: string; reviewedBy: string
-    challengeId: number | null; durationMin: number; createdAt: Date
+    challengeId: number | null; durationMin: number; views: number; eitaaReactions: number; createdAt: Date
     reporter: { fullName: string; district: string; avatar: string }
   },
   events: NewsEventDTO[] = [],
@@ -146,7 +164,8 @@ function toNewsDTO(
     id: n.id, code: n.code, reporterId: n.reporterId, reporterName: n.reporter.fullName, reporterAvatar: n.reporter.avatar, reporterDistrict: n.reporter.district,
     district: n.district, category: n.category, title: n.title, content: n.content, mediaType: n.mediaType, mediaUrl: n.mediaUrl,
     status: n.status, reviewStage: n.reviewStage, rejectReason: n.rejectReason, rejectNote: n.rejectNote,
-    reviewedBy: n.reviewedBy, challengeId: n.challengeId, durationMin: n.durationMin, createdAt: n.createdAt.toISOString(),
+    reviewedBy: n.reviewedBy, challengeId: n.challengeId, durationMin: n.durationMin,
+    views: n.views, eitaaReactions: n.eitaaReactions, createdAt: n.createdAt.toISOString(),
     events,
   }
 }
@@ -165,6 +184,26 @@ async function eventsForNews(newsIds: number[]): Promise<Map<number, NewsEventDT
 }
 
 const newsInclude = { reporter: { select: { fullName: true, district: true, avatar: true } } } satisfies Prisma.NewsItemInclude
+
+// خبر هفته — پربازدیدترین خبر منتشرشدهٔ ۷ روز اخیر (برای بنر خانه و فید)
+export async function getWeekFeatured(): Promise<WeekFeatured | null> {
+  const from = new Date(Date.now() - 7 * 24 * 3600 * 1000)
+  const row = await db.newsItem.findFirst({
+    where: {
+      status: "approved",
+      OR: [{ reviewedAt: { gte: from } }, { AND: [{ reviewedAt: null }, { createdAt: { gte: from } }] }],
+    },
+    include: { reporter: { select: { fullName: true, avatar: true } } },
+    orderBy: [{ views: "desc" }, { eitaaReactions: "desc" }],
+  })
+  if (!row) return null
+  return {
+    id: row.id, code: row.code, title: row.title, category: row.category,
+    mediaType: row.mediaType, mediaUrl: row.mediaUrl,
+    reporterName: row.reporter.fullName, reporterAvatar: row.reporter.avatar,
+    views: row.views, eitaaReactions: row.eitaaReactions,
+  }
+}
 
 export async function getAppState(userId: string): Promise<AppState | null> {
   // نگهداری دوره‌ای lazy (معادل scheduler ربات): انقضای ثبت‌نام‌ها، پایان چالش‌ها، سقوط غیبت
@@ -266,6 +305,7 @@ export async function getAppState(userId: string): Promise<AppState | null> {
     currentStreak: u.currentStreak, bestStreak: u.bestStreak, avatar: u.avatar,
     isSuperAdmin: isSuperAdminPhone(u.phone),
     canSendEitaa: u.role === "admin" ? true : !!u.canSendEitaa,
+    pinSet: !!u.pinHash,
     createdAt: u.createdAt.toISOString(),
   }
 
@@ -289,8 +329,8 @@ export async function getAppState(userId: string): Promise<AppState | null> {
     }
   })
 
-  // اعلان‌های واقعی (جدول Notification — با احترام به تنظیمات و ساعت سکوت هنگام ایجاد)
-  const [notifRows, unreadCount, orgUnits] = await Promise.all([
+  // اعلان‌های واقعی (جدول Notification — با احترام به تنظیمات و ساعت سکوت هنگام ایجاد) + خبر هفته
+  const [notifRows, unreadCount, orgUnits, featured] = await Promise.all([
     db.notification.findMany({
       where: { userId, deliveredAt: { lte: new Date() } },
       orderBy: { deliveredAt: "desc" },
@@ -298,9 +338,10 @@ export async function getAppState(userId: string): Promise<AppState | null> {
     }),
     db.notification.count({ where: { userId, readAt: null, deliveredAt: { lte: new Date() } } }),
     getOrgUnits(),
+    getWeekFeatured().catch(() => null),
   ])
   const notifications: AppState["notifications"] = notifRows.map((n) => ({
-    id: `notif-${n.id}`, kind: n.kind, title: n.title, body: n.body, at: n.deliveredAt.toISOString(),
+    id: `notif-${n.id}`, kind: n.kind, title: n.title, body: n.body, ref: n.ref, at: n.deliveredAt.toISOString(),
     unread: n.readAt === null,
   }))
 
@@ -316,11 +357,12 @@ export async function getAppState(userId: string): Promise<AppState | null> {
     reviewQueue: queue.map((n) => toNewsDTO(n, queueEvents.get(n.id) ?? [])),
     challenges: challengeDTOs,
     leaderboard,
+    weekFeatured: featured,
     badges: Object.entries(BADGES).map(([key, b]) => ({
       key, emoji: b.emoji, title: b.title, desc: b.desc, unlocked: badgeKeys.has(key),
       awardedAt: allBadges.find((x) => x.badgeKey === key)?.awardedAt.toISOString() ?? null,
     })),
-    drafts: drafts.map((d) => ({ id: d.id, category: d.category, title: d.title, content: d.content, savedAt: d.savedAt.toISOString() })),
+    drafts: drafts.map((d) => ({ id: d.id, category: d.category, title: d.title, content: d.content, mediaType: d.mediaType, mediaUrl: d.mediaUrl, durationMin: d.durationMin, preparedAt: d.preparedAt ? d.preparedAt.toISOString() : null, savedAt: d.savedAt.toISOString() })),
     notifications: notifications.slice(0, 20),
     unreadCount,
     districts: orgUnits,

@@ -23,7 +23,17 @@ export function SubmitFlow({
 }: {
   open: boolean
   onClose: () => void
-  preset?: { category?: string; title?: string; content?: string; draftId?: number | null; challengeId?: number | null } | null
+  preset?: {
+    category?: string
+    title?: string
+    content?: string
+    draftId?: number | null
+    challengeId?: number | null
+    mediaType?: string
+    mediaUrl?: string
+    durationMin?: number
+    preparedAt?: string | null
+  } | null
 }) {
   const { state, submitNews, saveDraft, deleteDraft, uploadMedia } = useApp()
   const { toast } = useToast()
@@ -41,6 +51,28 @@ export function SubmitFlow({
   const [challengeId, setChallengeId] = useState<number | null>(preset?.challengeId ?? null)
   const [busy, setBusy] = useState(false)
   const [done, setDone] = useState<{ points: number; message: string; badges: string[] } | null>(null)
+  // شناسه پیش‌نویس فعال — از preset (ادامه پیش‌نویس) یا از اولین ذخیره
+  const [draftId, setDraftId] = useState<number | null>(null)
+
+  // بارگذاری محتوای پیش‌نویس هنگام باز شدن با preset.draftId (الگوی تنظیم state هنگام رندر)
+  const presetKey = open && preset?.draftId ? preset.draftId : 0
+  const [prevPresetKey, setPrevPresetKey] = useState(0)
+  if (presetKey !== prevPresetKey) {
+    setPrevPresetKey(presetKey)
+    if (presetKey && preset) {
+      setCategory(preset.category ?? "local")
+      setTitle(preset.title ?? "")
+      setContent(preset.content ?? "")
+      setMediaType(preset.mediaType ?? "none")
+      setMediaUrl(preset.mediaUrl ?? "")
+      setDuration(preset.durationMin && preset.durationMin > 0 ? preset.durationMin : 30)
+      setPreparedAt(preset.preparedAt ? new Date(preset.preparedAt) : null)
+      setChallengeId(preset.challengeId ?? null)
+      setDraftId(preset.draftId ?? null)
+      setStep(0)
+      setDone(null)
+    }
+  }
 
   const activeChallenges = useMemo(() => (state?.challenges ?? []).filter((c) => c.status === "active"), [state])
   const canNext = step === 0 ? !!category : step === 1 ? title.trim().length >= 8 && content.trim().length >= 30 : true
@@ -50,6 +82,7 @@ export function SubmitFlow({
     setTimeout(() => {
       setStep(0)
       setDone(null)
+      setDraftId(null)
       if (!preset) {
         setCategory("local")
         setTitle("")
@@ -106,21 +139,39 @@ export function SubmitFlow({
       durationMin: duration,
       preparedAt: preparedAt ? preparedAt.toISOString() : null,
       challengeId,
-      draftId: preset?.draftId ?? null,
+      draftId: draftId ?? preset?.draftId ?? null,
     })
     setBusy(false)
     if (r.ok) {
       setDone({ points: r.pointsEarned ?? 10, message: r.message ?? "خبر ثبت شد", badges: r.badgesAwarded ?? [] })
       // حذف پیش‌نویس پس از ارسال موفق (به‌جای خالی‌گذاشتن)
-      if (preset?.draftId) await deleteDraft(preset.draftId)
+      const did = draftId ?? preset?.draftId
+      if (did) {
+        await deleteDraft(did)
+        setDraftId(null)
+      }
     } else {
       toast({ title: "خطا", description: r.message ?? "ارسال ناموفق بود", variant: "destructive" })
     }
   }
 
   const saveDraftNow = async () => {
-    const r = await saveDraft({ category, title: title.trim(), content: content.trim(), draftId: preset?.draftId ?? null })
-    if (r.ok) toast({ title: "ذخیره شد", description: r.message })
+    const r = await saveDraft({
+      category,
+      title: title.trim(),
+      content: content.trim(),
+      mediaType,
+      mediaUrl,
+      durationMin: duration,
+      preparedAt: preparedAt ? preparedAt.toISOString() : null,
+      draftId: draftId ?? preset?.draftId ?? null,
+    })
+    if (r.ok) {
+      if ((r as { id?: number }).id) setDraftId((r as { id?: number }).id!)
+      toast({ title: "ذخیره شد", description: r.message })
+    } else {
+      toast({ title: "خطا", description: r.message ?? "ذخیره ناموفق بود", variant: "destructive" })
+    }
   }
 
   return (

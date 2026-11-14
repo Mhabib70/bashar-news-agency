@@ -13,6 +13,7 @@ import { SubmitFlow } from "@/components/app/submit-flow"
 import { NotificationsSheet, ChallengesSheet } from "@/components/app/sheets"
 import { BottomNav } from "@/components/app/bottom-nav"
 import { TopBar, SideNav, RightRail } from "@/components/app/social"
+import type { SubmitPreset } from "@/components/app/news-tab"
 import { USER_REJECT_TITLES } from "@/lib/domain"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Hourglass, ShieldX, LogOut } from "lucide-react"
@@ -23,7 +24,14 @@ export default function Page() {
   const [submitOpen, setSubmitOpen] = useState(false)
   const [notifOpen, setNotifOpen] = useState(false)
   const [challengesOpen, setChallengesOpen] = useState(false)
-  const [submitPreset, setSubmitPreset] = useState<null | { category?: string; title?: string; content?: string; draftId?: number | null; challengeId?: number | null }>(null)
+  const [submitPreset, setSubmitPreset] = useState<SubmitPreset | null>(null)
+  // باز کردن مستقیم یک خبر (از اعلان‌ها یا بنر خبر هفته) — به تب اخبار + جزئیات
+  const [newsDetailId, setNewsDetailId] = useState<number | null>(null)
+
+  const openNewsDetail = (id: number) => {
+    setNewsDetailId(id)
+    setTab("news")
+  }
 
   const openAdmin = () => router.push("/admin")
 
@@ -52,7 +60,7 @@ export default function Page() {
     }
   }, [userId, refresh])
 
-  const openSubmit = (preset?: typeof submitPreset) => {
+  const openSubmit = (preset?: SubmitPreset) => {
     setSubmitPreset(preset ?? null)
     setSubmitOpen(true)
   }
@@ -127,9 +135,17 @@ export default function Page() {
                   onGotoActivity={() => setTab("activity")}
                   onGotoReview={() => setTab("review")}
                   onOpenAdmin={openAdmin}
+                  onOpenNewsDetail={openNewsDetail}
                 />
               )}
-              {tab === "news" && <NewsScreen onQuickSubmit={() => openSubmit()} draftsView />}
+              {tab === "news" && (
+                <NewsScreen
+                  onQuickSubmit={(p) => openSubmit(p)}
+                  draftsView
+                  initialNewsId={newsDetailId}
+                  onConsumeNewsId={() => setNewsDetailId(null)}
+                />
+              )}
               {tab === "activity" && <ActivityScreen />}
               {tab === "profile" && <ProfileScreen onOpenAdmin={openAdmin} />}
               {tab === "review" && <ReviewScreen />}
@@ -149,7 +165,7 @@ export default function Page() {
 
       {/* شیت‌ها */}
       <SubmitFlow open={submitOpen} onClose={() => setSubmitOpen(false)} preset={submitPreset} />
-      <NotificationsSheet open={notifOpen} onClose={() => setNotifOpen(false)} />
+      <NotificationsSheet open={notifOpen} onClose={() => setNotifOpen(false)} onOpenNews={openNewsDetail} />
       <ChallengesSheet
         open={challengesOpen}
         onClose={() => setChallengesOpen(false)}

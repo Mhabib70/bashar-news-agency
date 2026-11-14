@@ -128,6 +128,7 @@ export const NEWS_EVENT_META: Record<string, { label: string; emoji: string }> =
   resubmitted: { label: "ویرایش و ارسال مجدد", emoji: "🔄" },
   edited: { label: "ویرایش متن توسط ارزیاب", emoji: "✏️" },
   sent_eitaa: { label: "ارسال به ایتا", emoji: "📨" },
+  praised: { label: "تقدیر خبرنگار در کانال ایتا", emoji: "🏅" },
 }
 
 // نقش‌های ارزیاب به‌ترتیب چرخه برای نمایش مراحل

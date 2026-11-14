@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import Image from "next/image"
-import { Menu, Bell, ArrowLeft, X, Check, LogIn } from "lucide-react"
+import { Menu, Bell, ArrowLeft, X, Check, LogIn, KeyRound } from "lucide-react"
 import { useApp } from "@/lib/store"
 import { toFa } from "@/lib/format"
 import { DISTRICT_LABELS, BASE_LISTS, EDUCATION_LEVEL_LABELS, applyOrgUnits } from "@/lib/domain"
@@ -23,6 +23,10 @@ export function Welcome() {
   const [busy, setBusy] = useState(false)
   const [phone, setPhone] = useState("")
   const [err, setErr] = useState("")
+  // مرحله دوم ورود برای حساب‌های دارای رمز دوم (PIN)
+  const [pinStep, setPinStep] = useState(false)
+  const [pinName, setPinName] = useState("")
+  const [pin, setPin] = useState("")
   // حوزه‌ها/پایگاه‌های زنده سازمان — برای فرم ثبت‌نام (قبل از ورود)
   useEffect(() => {
     fetch("/api/districts")
@@ -49,13 +53,50 @@ export function Welcome() {
         body: JSON.stringify({ phone: p }),
       })
       const d = await res.json().catch(() => ({}))
-      if (d.ok && d.userId) {
+      if (d.ok && d.pinRequired) {
+        // حساب رمز دوم دارد — مرحله PIN
+        setPinStep(true)
+        setPinName(d.fullName ?? "")
+        setPin("")
+      } else if (d.ok && d.userId) {
         await login()
         toast({ title: `خوش آمدی ${d.fullName}!`, description: "ورود با موفقیت انجام شد." })
         setOpen(false)
         setPhone("")
       } else {
         setErr(d.error ?? "ورود ناموفق بود — دوباره تلاش کنید")
+      }
+    } catch {
+      setErr("خطای شبکه — اینترنت خود را بررسی کنید")
+    }
+    setBusy(false)
+  }
+
+  const doPinLogin = async () => {
+    const p = faToEn(phone).replace(/\D/g, "")
+    const code = faToEn(pin).replace(/\D/g, "")
+    if (!code) {
+      setErr("رمز دوم (PIN) را وارد کنید")
+      return
+    }
+    setBusy(true)
+    setErr("")
+    try {
+      const res = await fetch("/api/login/pin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone: p, pin: code }),
+      })
+      const d = await res.json().catch(() => ({}))
+      if (d.ok && d.userId) {
+        await login()
+        toast({ title: `خوش آمدی ${d.fullName}!`, description: "ورود با موفقیت انجام شد." })
+        setOpen(false)
+        setPinStep(false)
+        setPhone("")
+        setPin("")
+      } else {
+        setErr(d.error ?? "PIN اشتباه است")
       }
     } catch {
       setErr("خطای شبکه — اینترنت خود را بررسی کنید")
@@ -108,48 +149,94 @@ export function Welcome() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="bottom-3 top-auto translate-y-0 gap-0 rounded-[28px] border-[var(--v3-line)] bg-[var(--v3-card)] p-5 data-[state=open]:slide-in-from-bottom-10 max-h-[82dvh] overflow-y-auto nice-scroll">
           <DialogHeader className="text-right">
-            <DialogTitle className="text-[var(--v3-ink)]">ورود به حساب</DialogTitle>
+            <DialogTitle className="text-[var(--v3-ink)]">{pinStep ? "رمز دوم (PIN)" : "ورود به حساب"}</DialogTitle>
             <DialogDescription className="text-[var(--v3-ink-2)]">
-              شماره موبایل حساب خودتان را وارد کنید. حساب ندارید؟ ثبت‌نام کنید.
+              {pinStep
+                ? `${pinName ? `${pinName} عزیز، ` : ""}این حساب رمز دوم دارد. PIN خود را وارد کنید.`
+                : "شماره موبایل حساب خودتان را وارد کنید. حساب ندارید؟ ثبت‌نام کنید."}
             </DialogDescription>
           </DialogHeader>
           <div className="mt-4 space-y-3">
-            <div>
-              <label className="mb-1.5 block text-[12px] font-semibold text-[var(--v3-ink-2)]">شماره موبایل</label>
-              <Input
-                value={phone}
-                onChange={(e) => {
-                  setPhone(faToEn(e.target.value).replace(/[^\d]/g, "").slice(0, 11))
-                  setErr("")
-                }}
-                onKeyDown={(e) => e.key === "Enter" && doPhoneLogin()}
-                placeholder="۰۹۱۲۳۴۵۶۷۸۹"
-                dir="ltr"
-                inputMode="tel"
-                className="v3-input rounded-2xl text-right text-[15px] tracking-widest placeholder:text-[var(--v3-ink-2)]/50"
-              />
-            </div>
-            {err && (
-              <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-[12px] leading-5 text-red-600 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-400">{err}</p>
+            {pinStep ? (
+              <>
+                <div>
+                  <label className="mb-1.5 block text-[12px] font-semibold text-[var(--v3-ink-2)]">رمز دوم (۴ تا ۶ رقم)</label>
+                  <Input
+                    value={pin}
+                    onChange={(e) => {
+                      setPin(faToEn(e.target.value).replace(/\D/g, "").slice(0, 6))
+                      setErr("")
+                    }}
+                    onKeyDown={(e) => e.key === "Enter" && doPinLogin()}
+                    placeholder="••••"
+                    dir="ltr"
+                    inputMode="numeric"
+                    autoComplete="off"
+                    className="v3-input rounded-2xl text-center text-[20px] tracking-[0.5em] placeholder:text-[var(--v3-ink-2)]/40"
+                  />
+                </div>
+                {err && (
+                  <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-[12px] leading-5 text-red-600 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-400">{err}</p>
+                )}
+                <button
+                  onClick={doPinLogin}
+                  disabled={busy}
+                  className="v3-btn flex w-full items-center justify-center gap-2 py-3.5 text-[14px] disabled:opacity-50"
+                >
+                  <KeyRound className="h-4.5 w-4.5" />
+                  {busy ? "در حال بررسی..." : "تایید و ورود"}
+                </button>
+                <button
+                  onClick={() => {
+                    setPinStep(false)
+                    setPin("")
+                    setErr("")
+                  }}
+                  className="w-full text-center text-[12px] font-bold text-[var(--v3-ink-2)] transition-colors hover:text-[var(--v3-ink)]"
+                >
+                  بازگشت به ورود با شماره
+                </button>
+              </>
+            ) : (
+              <>
+                <div>
+                  <label className="mb-1.5 block text-[12px] font-semibold text-[var(--v3-ink-2)]">شماره موبایل</label>
+                  <Input
+                    value={phone}
+                    onChange={(e) => {
+                      setPhone(faToEn(e.target.value).replace(/[^\d]/g, "").slice(0, 11))
+                      setErr("")
+                    }}
+                    onKeyDown={(e) => e.key === "Enter" && doPhoneLogin()}
+                    placeholder="۰۹۱۲۳۴۵۶۷۸۹"
+                    dir="ltr"
+                    inputMode="tel"
+                    className="v3-input rounded-2xl text-right text-[15px] tracking-widest placeholder:text-[var(--v3-ink-2)]/50"
+                  />
+                </div>
+                {err && (
+                  <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-[12px] leading-5 text-red-600 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-400">{err}</p>
+                )}
+                <button
+                  onClick={doPhoneLogin}
+                  disabled={busy}
+                  className="v3-btn flex w-full items-center justify-center gap-2 py-3.5 text-[14px] disabled:opacity-50"
+                >
+                  <LogIn className="h-4.5 w-4.5" />
+                  {busy ? "در حال ورود..." : "ورود"}
+                </button>
+                <button
+                  onClick={() => {
+                    setOpen(false)
+                    setRegOpen(true)
+                  }}
+                  className="v3-btn-ghost flex w-full items-center justify-center gap-2 py-3.5 text-[14px]"
+                >
+                  <X className="hidden" />
+                  ثبت‌نام خبرنگار جدید
+                </button>
+              </>
             )}
-            <button
-              onClick={doPhoneLogin}
-              disabled={busy}
-              className="v3-btn flex w-full items-center justify-center gap-2 py-3.5 text-[14px] disabled:opacity-50"
-            >
-              <LogIn className="h-4.5 w-4.5" />
-              {busy ? "در حال ورود..." : "ورود"}
-            </button>
-            <button
-              onClick={() => {
-                setOpen(false)
-                setRegOpen(true)
-              }}
-              className="v3-btn-ghost flex w-full items-center justify-center gap-2 py-3.5 text-[14px]"
-            >
-              <X className="hidden" />
-              ثبت‌نام خبرنگار جدید
-            </button>
           </div>
         </DialogContent>
       </Dialog>

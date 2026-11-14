@@ -135,4 +135,6 @@ COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
 COPY --from=builder /app/prisma-cli-deps/node_modules/ ./node_modules/
 
 USER nextjs
-CMD ["node", "./node_modules/prisma/build/index.js", "db", "push", "--accept-data-loss"]
+# بدون --accept-data-loss: اگر روزی تغییری مخرب در اسکیما رخ دهد، مهاجرت
+# «خطا» می‌دهد و متوقف می‌شود — نه اینکه بی‌صدا دادهٔ تولیدی را حذف کند.
+CMD ["node", "./node_modules/prisma/build/index.js", "db", "push"]

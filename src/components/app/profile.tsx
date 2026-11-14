@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react"
 import { useRouter } from "next/navigation"
-import { LogOut, SwitchCamera, Zap, Trophy, Flame, BellRing, ShieldCheck, Users2, Timer, Award, ChevronDown, BadgeCheck, Share2, FileDown, Camera, Trash2, Loader2, Landmark } from "lucide-react"
+import { LogOut, SwitchCamera, Zap, Trophy, Flame, BellRing, ShieldCheck, Users2, Timer, Award, ChevronDown, BadgeCheck, Share2, FileDown, Camera, Trash2, Loader2, Landmark, KeyRound } from "lucide-react"
 import { useApp } from "@/lib/store"
 import { Ring, SectionHeader, Avatar } from "@/components/app/bits"
 import { fa, faNum, jalali } from "@/lib/format"
@@ -12,15 +12,22 @@ import { ThemeToggle } from "@/components/app/theme-toggle"
 import { cn } from "@/lib/utils"
 import { Switch } from "@/components/ui/switch"
 import { useToast } from "@/hooks/use-toast"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
 
 export function ProfileScreen({ onOpenAdmin }: { onOpenAdmin?: () => void }) {
-  const { state, saveSettings, logout, uploadAvatar } = useApp()
+  const { state, saveSettings, logout, uploadAvatar, managePin } = useApp()
   const { toast } = useToast()
   const router = useRouter()
   const [showSettings, setShowSettings] = useState(false)
   const [busy, setBusy] = useState(false)
   const [uploading, setUploading] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
+  // رمز دوم (PIN) — فعال‌سازی/تغییر/حذف
+  const [pinOpen, setPinOpen] = useState(false)
+  const [pinCurrent, setPinCurrent] = useState("")
+  const [pinNew, setPinNew] = useState("")
+  const [pinBusy, setPinBusy] = useState(false)
   if (!state) return null
   const { user, stats } = state
 
@@ -73,6 +80,30 @@ export function ProfileScreen({ onOpenAdmin }: { onOpenAdmin?: () => void }) {
     const r = await saveSettings({ [k]: v })
     setBusy(false)
     if (r.ok) toast({ title: "ذخیره شد", description: r.message })
+  }
+
+  const digits = (s: string) => s.replace(/[۰-۹]/g, (d) => String("۰۱۲۳۴۵۶۷۸۹".indexOf(d))).replace(/\D/g, "")
+
+  const submitPin = async (action: "set" | "remove") => {
+    if (action === "set" && !/^\d{4,6}$/.test(digits(pinNew))) {
+      toast({ title: "PIN نامعتبر", description: "رمز دوم باید ۴ تا ۶ رقم باشد", variant: "destructive" })
+      return
+    }
+    if (action === "remove" && !digits(pinCurrent)) {
+      toast({ title: "PIN فعلی را وارد کنید", variant: "destructive" })
+      return
+    }
+    setPinBusy(true)
+    const r = await managePin({ action, newPin: action === "set" ? digits(pinNew) : undefined, currentPin: digits(pinCurrent) })
+    setPinBusy(false)
+    if (r.ok) {
+      toast({ title: "انجام شد", description: r.message })
+      setPinOpen(false)
+      setPinCurrent("")
+      setPinNew("")
+    } else {
+      toast({ title: "خطا", description: r.message, variant: "destructive" })
+    }
   }
 
   return (
@@ -257,6 +288,29 @@ export function ProfileScreen({ onOpenAdmin }: { onOpenAdmin?: () => void }) {
         </div>
       </div>
 
+      {/* امنیت حساب — رمز دوم */}
+      <div>
+        <SectionHeader title="امنیت حساب" />
+        <div className="v3-card p-4">
+          <div className="flex items-center gap-3">
+            <span className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-full", user.pinSet ? "bg-[var(--v3-azure-soft)] text-[var(--v3-azure)]" : "bg-[var(--v3-amber-soft)] text-[var(--v3-amber)]")}>
+              <KeyRound className="h-4.5 w-4.5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="text-[13px] font-bold text-[var(--v3-ink)]">رمز دوم (PIN) {user.pinSet ? "فعال است" : "غیرفعال"}</p>
+              <p className="mt-0.5 text-[10.5px] leading-4 text-[var(--v3-ink-2)]">
+                {user.pinSet
+                  ? "ورود فقط با شماره موبایل + PIN شما ممکن است."
+                  : "فعلاً هر کس شماره موبایلتان را داشته باشد می‌تواند وارد شود. برای حساب‌های ارزیاب فعالاً توصیه می‌شود."}
+              </p>
+            </div>
+            <button onClick={() => setPinOpen(true)} className="v3-btn shrink-0 px-4 py-2.5 text-[12px]">
+              {user.pinSet ? "مدیریت" : "فعال‌سازی"}
+            </button>
+          </div>
+        </div>
+      </div>
+
       {/* تنظیمات اعلان */}
       <div>
         <button onClick={() => setShowSettings(!showSettings)} className="flex w-full items-center justify-between">
@@ -296,6 +350,47 @@ export function ProfileScreen({ onOpenAdmin }: { onOpenAdmin?: () => void }) {
           </div>
         )}
       </div>
+
+      {/* شیت مدیریت رمز دوم */}
+      <Dialog open={pinOpen} onOpenChange={(v) => !v && setPinOpen(false)}>
+        <DialogContent className="rounded-[24px] border-[var(--v3-line)] bg-[var(--v3-card)] p-5">
+          <DialogHeader className="text-right">
+            <DialogTitle className="flex items-center gap-2 text-[var(--v3-ink)]">
+              <KeyRound className="h-4.5 w-4.5 text-[var(--v3-azure)]" />
+              رمز دوم (PIN)
+            </DialogTitle>
+            <DialogDescription className="text-[var(--v3-ink-2)]">
+              {user.pinSet ? "برای تغییر یا حذف، رمز فعلی را وارد کنید." : "۴ تا ۶ رقم انتخاب کنید؛ از این پس هنگام ورود پرسیده می‌شود."}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mt-3 space-y-3">
+            {user.pinSet && (
+              <div>
+                <label className="mb-1.5 block text-[12px] font-semibold text-[var(--v3-ink-2)]">رمز فعلی</label>
+                <Input value={pinCurrent} onChange={(e) => setPinCurrent(digits(e.target.value).slice(0, 6))} placeholder="••••" dir="ltr" inputMode="numeric" autoComplete="off" className="v3-input rounded-2xl text-center tracking-[0.4em]" />
+              </div>
+            )}
+            <div>
+              <label className="mb-1.5 block text-[12px] font-semibold text-[var(--v3-ink-2)]">{user.pinSet ? "رمز جدید" : "رمز جدید (۴ تا ۶ رقم)"}</label>
+              <Input value={pinNew} onChange={(e) => setPinNew(digits(e.target.value).slice(0, 6))} placeholder="••••" dir="ltr" inputMode="numeric" autoComplete="off" className="v3-input rounded-2xl text-center tracking-[0.4em]" />
+            </div>
+            <button onClick={() => submitPin("set")} disabled={pinBusy} className="v3-btn flex w-full items-center justify-center gap-2 py-3.5 text-[14px] disabled:opacity-50">
+              {pinBusy ? <Loader2 className="h-4.5 w-4.5 animate-spin" /> : <KeyRound className="h-4.5 w-4.5" />}
+              {user.pinSet ? "تغییر رمز دوم" : "فعال‌سازی رمز دوم"}
+            </button>
+            {user.pinSet && (
+              <button
+                onClick={() => submitPin("remove")}
+                disabled={pinBusy}
+                className="flex w-full items-center justify-center gap-2 rounded-full bg-red-50 py-3 text-[13px] font-bold text-red-600 transition-colors hover:bg-red-100 dark:bg-red-500/12 dark:text-red-400 dark:hover:bg-red-500/20 disabled:opacity-50"
+              >
+                <Trash2 className="h-4 w-4" />
+                حذف رمز دوم
+              </button>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* اکشن‌ها */}
       <div className="flex flex-wrap gap-2.5 pb-2">

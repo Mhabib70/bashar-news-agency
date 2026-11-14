@@ -8,7 +8,7 @@ import { useTheme } from "next-themes"
 import {
   Bell, Home, Newspaper, BarChart3, UserRound, ClipboardCheck, ShieldCheck, Search,
   Megaphone, Target, Trophy, Plus, ChevronLeft, Rss, CheckCircle2, PlayCircle, Smile, Landmark,
-  Sun, Moon, CalendarClock,
+  Sun, Moon, CalendarClock, Eye, Heart,
 } from "lucide-react"
 import { type Tab } from "@/lib/store"
 import type { AppState, AppUser, LeaderRow } from "@/lib/server/state"
@@ -457,6 +457,9 @@ export type FeedNews = {
   mediaUrl: string
   durationMin: number
   preparedAt: string | null
+  views?: number
+  eitaaReactions?: number
+  isWeekFeatured?: boolean
   createdAt: string
   reporterName: string
   reporterAvatar: string
@@ -512,6 +515,24 @@ export function FeedPost({ n }: { n: FeedNews }) {
           <span className="flex items-center gap-1 rounded-full bg-[var(--v3-card-2)] px-2.5 py-1">
             <CalendarClock className="h-3 w-3" />
             {preparedFmt(n.preparedAt)}
+          </span>
+        )}
+        {typeof n.views === "number" && n.views > 0 && (
+          <span className="flex items-center gap-1 rounded-full bg-[var(--v3-card-2)] px-2.5 py-1">
+            <Eye className="h-3 w-3" />
+            {faNum(n.views)}
+          </span>
+        )}
+        {typeof n.eitaaReactions === "number" && n.eitaaReactions > 0 && (
+          <span className="flex items-center gap-1 rounded-full bg-red-50 px-2.5 py-1 text-red-500 dark:bg-red-500/12 dark:text-red-400">
+            <Heart className="h-3 w-3" />
+            {faNum(n.eitaaReactions)}
+          </span>
+        )}
+        {n.isWeekFeatured && (
+          <span className="flex items-center gap-1 rounded-full bg-[var(--v3-amber)] px-2.5 py-1 font-black text-[#42290a]">
+            <Trophy className="h-3 w-3" />
+            خبر هفته
           </span>
         )}
         {n.isMine && (

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { activeUser } from "@/lib/server/session"
+import { getWeekFeatured } from "@/lib/server/state"
 
 // فید اجتماعی خبرگزاری — آخرین اخبار منتشرشدهٔ همهٔ همکاران (فقط خواندنی)
 // همهٔ نقش‌ها اجازهٔ دیدن اخبار تأییدشدهٔ نهایی را دارند (خبر رسمی خبرگزاری است)
@@ -10,12 +11,15 @@ export async function GET(req: NextRequest) {
 
   const take = Math.min(Number(req.nextUrl.searchParams.get("take") ?? 12) || 12, 30)
 
-  const rows = await db.newsItem.findMany({
-    where: { status: "approved" },
-    include: { reporter: { select: { fullName: true, district: true, avatar: true, base: true } } },
-    orderBy: { reviewedAt: "desc" },
-    take,
-  })
+  const [rows, featured] = await Promise.all([
+    db.newsItem.findMany({
+      where: { status: "approved" },
+      include: { reporter: { select: { fullName: true, district: true, avatar: true, base: true } } },
+      orderBy: { reviewedAt: "desc" },
+      take,
+    }),
+    getWeekFeatured().catch(() => null),
+  ])
 
   return NextResponse.json({
     news: rows.map((n) => ({
@@ -28,6 +32,9 @@ export async function GET(req: NextRequest) {
       mediaUrl: n.mediaUrl,
       durationMin: n.durationMin,
       preparedAt: n.preparedAt ? n.preparedAt.toISOString() : null,
+      views: n.views,
+      eitaaReactions: n.eitaaReactions,
+      isWeekFeatured: featured?.id === n.id,
       createdAt: n.createdAt,
       reporterName: n.reporter.fullName,
       reporterAvatar: n.reporter.avatar,

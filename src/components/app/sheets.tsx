@@ -9,7 +9,16 @@ import { useToast } from "@/hooks/use-toast"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 
 // ---------- شیت اعلان‌ها ----------
-export function NotificationsSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
+// اعلان‌هایی که به یک خبر اشاره دارند (ref = "news:123") قابل لمس‌اند و مستقیم خبر را باز می‌کنند
+export function NotificationsSheet({
+  open,
+  onClose,
+  onOpenNews,
+}: {
+  open: boolean
+  onClose: () => void
+  onOpenNews?: (newsId: number) => void
+}) {
   const { state, markNotificationsRead } = useApp()
   // با باز شدن شیت، همهٔ اعلان‌های رسیده خوانده‌شده علامت می‌خورند تا بَج زنگوله پاک شود
   useEffect(() => {
@@ -24,6 +33,10 @@ export function NotificationsSheet({ open, onClose }: { open: boolean; onClose: 
     ) : (
       <Flame className="h-4.5 w-4.5 text-[var(--v3-amber)]" />
     )
+  const newsRefOf = (ref: string) => {
+    const m = /^news:(\d+)$/.exec(ref ?? "")
+    return m ? Number(m[1]) : null
+  }
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent className="max-h-[80dvh] overflow-y-auto nice-scroll rounded-[24px] border-[var(--v3-line)] bg-[var(--v3-card)] p-5">
@@ -36,25 +49,34 @@ export function NotificationsSheet({ open, onClose }: { open: boolean; onClose: 
         </DialogHeader>
         <div className="mt-2">
           {state.notifications.length === 0 && <p className="py-8 text-center text-[12.5px] text-[var(--v3-ink-2)]">فعلاً اعلانی ندارید.</p>}
-          {state.notifications.map((n) => (
-            <div
-              key={n.id}
-              className={cn(
-                "flex items-start gap-3 border-b border-[var(--v3-line)] py-3.5 last:border-0",
-                n.unread && "rounded-[14px] bg-[var(--v3-azure-soft)]/40",
-              )}
-            >
-              <span className="relative mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--v3-card-2)]">
-                {icon(n.kind)}
-                {n.unread && <span className="absolute -left-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-[var(--v3-azure)] ring-2 ring-[var(--v3-card)]" />}
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className={cn("text-[13px] text-[var(--v3-ink)]", n.unread ? "font-black" : "font-bold")}>{n.title}</p>
-                <p className="mt-0.5 line-clamp-2 text-[11.5px] leading-5 text-[var(--v3-ink-2)]">{n.body}</p>
-              </div>
-              <span className="shrink-0 text-[9.5px] text-[var(--v3-ink-2)]">{relTime(n.at)}</span>
-            </div>
-          ))}
+          {state.notifications.map((n) => {
+            const newsId = newsRefOf(n.ref)
+            const Row = newsId !== null ? "button" : "div"
+            return (
+              <Row
+                key={n.id}
+                {...(newsId !== null
+                  ? { onClick: () => { onClose(); onOpenNews?.(newsId) }, type: "button" as const }
+                  : {})}
+                className={cn(
+                  "flex w-full items-start gap-3 border-b border-[var(--v3-line)] py-3.5 text-right last:border-0",
+                  n.unread && "rounded-[14px] bg-[var(--v3-azure-soft)]/40",
+                  newsId !== null && "transition-colors hover:bg-[var(--v3-card-2)]/60",
+                )}
+              >
+                <span className="relative mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--v3-card-2)]">
+                  {icon(n.kind)}
+                  {n.unread && <span className="absolute -left-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-[var(--v3-azure)] ring-2 ring-[var(--v3-card)]" />}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className={cn("text-[13px] text-[var(--v3-ink)]", n.unread ? "font-black" : "font-bold")}>{n.title}</p>
+                  <p className="mt-0.5 line-clamp-2 text-[11.5px] leading-5 text-[var(--v3-ink-2)]">{n.body}</p>
+                  {newsId !== null && <p className="mt-1 text-[10px] font-bold text-[var(--v3-azure)]">مشاهده خبر ←</p>}
+                </div>
+                <span className="shrink-0 text-[9.5px] text-[var(--v3-ink-2)]">{relTime(n.at)}</span>
+              </Row>
+            )
+          })}
         </div>
       </DialogContent>
     </Dialog>

@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const users = await db.user.findMany({ select: { id: true, fullName: true, phone: true, status: true } })
+    const users = await db.user.findMany({ select: { id: true, fullName: true, phone: true, status: true, pinHash: true } })
     const u = users.find((x) => normalizePhone(x.phone) === norm)
     if (!u) {
       return NextResponse.json(
@@ -38,6 +38,12 @@ export async function POST(req: NextRequest) {
         { ok: false, code: "rejected", error: "درخواست عضویت شما تایید نشده است." },
         { status: 403 },
       )
+    }
+
+    // حساب‌های دارای رمز دوم (PIN): در همین مرحله نشست صادر نمی‌شود؛
+    // کلاینت باید PIN را بگیرد و به /api/login/pin برود.
+    if (u.pinHash) {
+      return NextResponse.json({ ok: true, pinRequired: true, fullName: u.fullName })
     }
 
     const res = NextResponse.json({ ok: true, userId: u.id, fullName: u.fullName })
