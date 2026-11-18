@@ -7,6 +7,7 @@ import { Megaphone, ArrowLeft, Flame, Newspaper, Timer, ShieldCheck, ClipboardCh
 import { useApp } from "@/lib/store"
 import { SectionHeader, CountUp, Avatar } from "@/components/app/bits"
 import { StoryRow, ComposerCard, FeedPost, type FeedNews } from "@/components/app/social"
+import { NewsReaderDialog, type ReaderNews } from "@/components/app/news-reader"
 import { faNum, fa, durFmt, untilFmt } from "@/lib/format"
 import { CATEGORY_LABELS } from "@/lib/domain"
 import { cn } from "@/lib/utils"
@@ -16,6 +17,7 @@ export function HomeScreen({
   onQuickSubmit,
   onOpenChallenges,
   onOpenNews,
+  onOpenMyNews,
   onGotoActivity,
   onGotoReview,
   onOpenAdmin,
@@ -25,15 +27,23 @@ export function HomeScreen({
   onQuickSubmit: () => void
   onOpenChallenges: () => void
   onOpenNews: () => void
+  onOpenMyNews?: () => void
   onGotoActivity: () => void
   onGotoReview: () => void
   onOpenAdmin: () => void
   onOpenNewsDetail?: (id: number) => void
 }) {
   const router = useRouter()
-  const { state, userId } = useApp()
+  const { state, userId, viewNews } = useApp()
+  // خوانندهٔ خبر — مطالعهٔ کامل خبر در همین صفحه خانه بدون تعویض تب
+  const [reader, setReader] = useState<ReaderNews | null>(null)
   if (!state || !userId) return null
   const { user, stats, challenges, reviewQueue, news } = state
+
+  const openReader = (n: ReaderNews) => {
+    setReader(n)
+    if (n.status === "approved" || !n.status) void viewNews(n.id) // شمارش بازدید
+  }
 
   const isReporter = user.role === "reporter"
   const isReviewer = !isReporter
@@ -185,8 +195,8 @@ export function HomeScreen({
         </button>
       )}
 
-      {/* فید اجتماعی خبرگزاری */}
-      <FeedSection userId={userId} trigger={news.length + reviewQueue.length} />
+      {/* فید اجتماعی خبرگزاری — هر خبر با یک لمس در همین صفحه باز و مطالعه می‌شود */}
+      <FeedSection userId={userId} trigger={news.length + reviewQueue.length} onOpen={openReader} />
 
       {/* فعالیت من */}
       <div className="pt-1">
@@ -200,13 +210,13 @@ export function HomeScreen({
         </div>
       </div>
 
-      {/* اخبار من (با وضعیت چرخه بررسی) */}
+      {/* اخبار من (با وضعیت چرخه بررسی) — هر خبر همین‌جا باز می‌شود */}
       {news.length > 0 && (
         <div className="pt-1">
-          <SectionHeader title="خبرهای من" action="همه" onAction={onOpenNews} />
+          <SectionHeader title="خبرهای من" action="همهٔ خبرهای من" onAction={onOpenMyNews ?? onOpenNews} />
           <div className="space-y-2.5">
             {news.slice(0, 3).map((n) => (
-              <button key={n.id} onClick={onOpenNews} className="v3-card flex w-full items-center gap-3 p-3 text-right transition-transform hover:scale-[1.01]">
+              <button key={n.id} onClick={() => openReader(n)} className="v3-card flex w-full items-center gap-3 p-3 text-right transition-transform hover:scale-[1.01]">
                 <span className="relative h-14 w-14 shrink-0 overflow-hidden rounded-[14px]">
                   <img
                     src={n.mediaType === "photo" && n.mediaUrl ? n.mediaUrl : `/img/cat-${n.category === "none" ? "local" : n.category}.png`}
@@ -227,12 +237,15 @@ export function HomeScreen({
           </div>
         </div>
       )}
+
+      {/* خوانندهٔ خبر — همان صفحه خانه */}
+      <NewsReaderDialog news={reader} onClose={() => setReader(null)} />
     </div>
   )
 }
 
 /* ---------- فید: آخرین اخبار منتشرشدهٔ خبرگزاری ---------- */
-function FeedSection({ userId, trigger }: { userId: string; trigger: number }) {
+function FeedSection({ userId, trigger, onOpen }: { userId: string; trigger: number; onOpen: (n: ReaderNews) => void }) {
   const [feed, setFeed] = useState<FeedNews[] | null>(null)
   const [failed, setFailed] = useState(false)
 
@@ -272,7 +285,7 @@ function FeedSection({ userId, trigger }: { userId: string; trigger: number }) {
   return (
     <div className="flex flex-col gap-3.5 pt-1">
       {feed.map((n) => (
-        <FeedPost key={n.id} n={n} />
+        <FeedPost key={n.id} n={n} onOpen={onOpen} />
       ))}
     </div>
   )

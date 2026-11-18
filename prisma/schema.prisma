@@ -22,6 +22,7 @@ model User {
   points          Int       @default(0)
   forumPoints     Int       @default(0) // امتیاز تالار گفتگو — پاداش پیام/تاپیک/واکنش‌گیری
   canSendEitaa    Boolean   @default(false) // مجوز ارسال خبر به کانال ایتا (فقط با اجازهٔ ادمین کل)
+  canManageContent Boolean  @default(false) // مجوز مدیریت تالار و آموزش (تاپیک/درس) — فقط ادمین کل می‌دهد، معمولاً به کارشناس
   pinHash         String    @default("") // رمز دوم اختیاری (۴ تا ۶ رقم) — اگر تنظیم شود ورود دومرحله‌ای می‌شود
   levelKey        String    @default("rookie") // rookie | follower | active | pro | expert
   currentStreak   Int       @default(0)
@@ -183,6 +184,16 @@ model OrgUnits {
   id        Int      @id @default(1)
   json      String // [{key,label,bases[]}]
   updatedAt DateTime @updatedAt
+}
+
+// مخاطبان رسانه‌های بیرونی — دفترچهٔ تماس ادمین کل (یکطرفه: پیامک انبوه / کانال ایتا)
+model ExternalContact {
+  id        Int      @id @default(autoincrement())
+  fullName  String
+  mediaName String   @default("") // نام رسانه (خبرگزاری/روزنامه/کانال)
+  phone     String // شماره تماس برای پیامک انبوه
+  note      String   @default("")
+  createdAt DateTime @default(now())
 }
 
 // بخش آموزش (آکادمی) — محتوای آموزشی (متن/فایل/ویدئو) با دسته، سطح، مدت و بازدید

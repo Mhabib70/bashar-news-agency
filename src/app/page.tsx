@@ -25,6 +25,8 @@ export default function Page() {
   const [notifOpen, setNotifOpen] = useState(false)
   const [challengesOpen, setChallengesOpen] = useState(false)
   const [submitPreset, setSubmitPreset] = useState<SubmitPreset | null>(null)
+  // پیش‌فرض دامنهٔ تب اخبار (از خانه: «همهٔ خبرهای من»)
+  const [newsScope, setNewsScope] = useState<"all" | "mine">("all")
   // باز کردن مستقیم یک خبر (از اعلان‌ها یا بنر خبر هفته) — به تب اخبار + جزئیات
   const [newsDetailId, setNewsDetailId] = useState<number | null>(null)
 
@@ -63,6 +65,11 @@ export default function Page() {
   const openSubmit = (preset?: SubmitPreset) => {
     setSubmitPreset(preset ?? null)
     setSubmitOpen(true)
+  }
+
+  const openMyNews = () => {
+    setNewsScope("mine")
+    setTab("news")
   }
 
   const user = state?.user
@@ -131,7 +138,8 @@ export default function Page() {
                   onOpenNotifications={() => setNotifOpen(true)}
                   onQuickSubmit={() => openSubmit()}
                   onOpenChallenges={() => setChallengesOpen(true)}
-                  onOpenNews={() => setTab("news")}
+                  onOpenNews={() => { setNewsScope("all"); setTab("news") }}
+                  onOpenMyNews={openMyNews}
                   onGotoActivity={() => setTab("activity")}
                   onGotoReview={() => setTab("review")}
                   onOpenAdmin={openAdmin}
@@ -142,11 +150,17 @@ export default function Page() {
                 <NewsScreen
                   onQuickSubmit={(p) => openSubmit(p)}
                   draftsView
+                  initialScope={newsScope}
                   initialNewsId={newsDetailId}
                   onConsumeNewsId={() => setNewsDetailId(null)}
                 />
               )}
-              {tab === "activity" && <ActivityScreen />}
+              {tab === "activity" && (
+                <ActivityScreen
+                  onGotoNewsMine={openMyNews}
+                  onGotoProfile={() => setTab("profile")}
+                />
+              )}
               {tab === "profile" && <ProfileScreen onOpenAdmin={openAdmin} />}
               {tab === "review" && <ReviewScreen />}
             </div>

@@ -1,11 +1,9 @@
 "use client"
 
 import { FileDown, Users2, Newspaper, Map, IdCard, ShieldCheck } from "lucide-react"
-import { useApp } from "@/lib/store"
 
-// خروجی‌های CSV سازمانی (UTF-8 سازگار با اکسل فارسی)
+// خروجی‌های CSV سازمانی (UTF-8 سازگار با اکسل فارسی) — احراز هویت با کوکی نشست
 export function AdminExportsSection() {
-  const { userId } = useApp()
   const items = [
     { type: "users", label: "کاربران و نقش‌ها", desc: "همه اعضا با امتیاز، سطح، حوزه، پایگاه و وضعیت", icon: <Users2 className="h-5 w-5" /> },
     { type: "news", label: "کل اخبار", desc: "با کد پیگیری، خبرنگار، وضعیت و مرحله بررسی", icon: <Newspaper className="h-5 w-5" /> },
@@ -25,7 +23,7 @@ export function AdminExportsSection() {
         {items.map((it) => (
           <a
             key={it.type}
-            href={`/api/export?type=${it.type}&userId=${encodeURIComponent(userId ?? "")}`}
+            href={`/api/export?type=${it.type}`}
             className="group flex items-center justify-between rounded-[24px] border border-line bg-surface px-5 py-4 transition-all hover:border-neon/40 hover:shadow-[0_10px_30px_-14px_rgba(0,0,0,0.4)]"
           >
             <span className="flex items-center gap-3.5">

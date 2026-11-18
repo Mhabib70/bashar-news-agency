@@ -2,10 +2,11 @@ import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { notifyActiveUsers } from "@/lib/server/notify"
 import { activeUser } from "@/lib/server/session"
+import { canManageContent } from "@/lib/server/content-perm"
 
 // بخش آموزش (آکادمی) v2 — دسته‌بندی، سطح، مدت مطالعه، بازدید و پیشرفت «خوانده شد»
 // GET          → فهرست آموزش‌ها + پیشرفت کاربر (همه اعضای فعال)
-// POST create  → افزودن (ادمین کل و مدیر حوزه) { userId, action:"create", title, body, kind, fileUrl, category, level, minutes } + اعلان همگانی
+// POST create  → افزودن (ادمین کل یا کارشناسِ دارای مجوز مدیریت محتوا) + اعلان همگانی
 // POST delete  → حذف { userId, action:"delete", id }
 // POST view    → ثبت بازدید { userId, action:"view", id }
 // POST complete→ کلید خوانده‌شده { userId, action:"complete", id }
@@ -31,6 +32,7 @@ export async function GET(req: NextRequest) {
   }))
   return NextResponse.json({
     trainings,
+    viewer: { canManageContent: canManageContent(user) },
     stats: {
       total: trainings.length,
       completed: trainings.filter((t) => t.completed).length,
@@ -49,8 +51,8 @@ export async function POST(req: NextRequest) {
     }
 
     if (action === "create") {
-      if (!["admin", "district_manager"].includes(user.role)) {
-        return NextResponse.json({ error: "افزودن آموزش فقط برای ادمین کل و مدیر حوزه مجاز است" }, { status: 403 })
+      if (!canManageContent(user)) {
+        return NextResponse.json({ error: "انتشار آموزش فقط با ادمین کل است (یا کارشناسی که ادمین کل اجازه داده باشد)." }, { status: 403 })
       }
       const title = String(body.title ?? "").trim().slice(0, 150)
       const content = String(body.body ?? "").trim().slice(0, 8000)
@@ -81,8 +83,8 @@ export async function POST(req: NextRequest) {
     }
 
     if (action === "delete") {
-      if (!["admin", "district_manager"].includes(user.role)) {
-        return NextResponse.json({ error: "حذف آموزش فقط برای ادمین کل و مدیر حوزه مجاز است" }, { status: 403 })
+      if (!canManageContent(user)) {
+        return NextResponse.json({ error: "حذف آموزش فقط با ادمین کل است (یا کارشناسی که ادمین کل اجازه داده باشد)." }, { status: 403 })
       }
       const id = Number(body.id)
       const t = await db.training.findUnique({ where: { id } })

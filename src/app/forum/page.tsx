@@ -110,6 +110,8 @@ export default function ForumPage() {
   const [honor, setHonor] = useState<ForumHonorRow[]>([])
   const [myStats, setMyStats] = useState<ForumViewerStats | null>(null)
   const [weeklyQ, setWeeklyQ] = useState<ForumWeeklyQuestionItem | null>(null)
+  // مجوز مدیریت تالار — از سرور (ادمین کل یا کارشناسِ دارای مجوز)
+  const [canManage, setCanManage] = useState(false)
   const [filter, setFilter] = useState<string>("all")
   const [openTopic, setOpenTopic] = useState<ForumThreadResult | null>(null)
   const [newTitle, setNewTitle] = useState("")
@@ -146,6 +148,7 @@ export default function ForumPage() {
         setMembers(r.members)
         setHonor(r.honorBoard ?? [])
         setMyStats(r.viewerStats ?? null)
+        setCanManage(!!(r.viewer as { canManageContent?: boolean } | undefined)?.canManageContent)
         setWeeklyQ(r.weeklyQuestion ?? null)
       } else setTopics([])
     })
@@ -178,7 +181,7 @@ export default function ForumPage() {
   }
   const user = state.user
   const isAdmin = user.role === "admin"
-  const canPoll = isAdmin || user.role === "district_manager"
+  const canPoll = canManage
 
   const openT = async (id: number) => {
     const r = await fetchForumMessages(id)
@@ -723,13 +726,19 @@ export default function ForumPage() {
 
           {/* دکمه ساخت تاپیک + سوال هفته ادمین */}
           <div className="flex gap-2">
-            <button
-              onClick={() => setCreating(true)}
-              className="btn-glow flex flex-1 items-center justify-center gap-2 rounded-full bg-gradient-to-l from-neon to-[#4e9c5c] py-3.5 text-[14px] font-black text-neon-foreground shadow-[0_12px_28px_-10px_rgba(47,107,51,0.65)] transition-transform active:scale-[0.98]"
-            >
-              <Plus className="h-4.5 w-4.5" />
-              تاپیک جدید (موضوع گفتگو)
-            </button>
+            {canManage ? (
+              <button
+                onClick={() => setCreating(true)}
+                className="btn-glow flex flex-1 items-center justify-center gap-2 rounded-full bg-gradient-to-l from-neon to-[#4e9c5c] py-3.5 text-[14px] font-black text-neon-foreground shadow-[0_12px_28px_-10px_rgba(47,107,51,0.65)] transition-transform active:scale-[0.98]"
+              >
+                <Plus className="h-4.5 w-4.5" />
+                تاپیک جدید (موضوع گفتگو)
+              </button>
+            ) : (
+              <p className="flex flex-1 items-center justify-center rounded-full border border-dashed border-line py-3 text-[11px] font-bold text-ink-muted">
+                درج موضوع فقط با ادمین کل است{isAdmin ? "" : " (یا کارشناسِ دارای مجوز)"}
+              </p>
+            )}
             {isAdmin && (
               <button
                 onClick={() => setWqOpen(true)}

@@ -23,6 +23,9 @@ type SubmitPayload = {
 
 type Result = { ok: boolean; message?: string; pointsEarned?: number; badgesAwarded?: string[] }
 
+// مخاطبان پیام همگانی — انتخاب نقش/حوزه/پایگاه (خالی = همهٔ اعضای فعال)
+export type BroadcastTargets = { roles?: string[]; districts?: string[]; bases?: string[] }
+
 export type UserInfo = {
   id: string; fullName: string; username: string; role: string; status: string; rejectReason: string
   district: string; base: string; phone: string; age: string; education: string
@@ -32,6 +35,8 @@ export type UserInfo = {
   isSuperAdmin?: boolean
   /** مجوز ارسال خبر به کانال ایتا (کارشناس، فقط با اجازهٔ ادمین کل) */
   canSendEitaa?: boolean
+  /** مجوز مدیریت تالار گفتگو و آموزش (کارشناس، فقط با اجازهٔ ادمین کل) */
+  canManageContent?: boolean
 }
 
 export type AdminUserDetail = {
@@ -52,6 +57,7 @@ export type TrainingItem = {
 export type TrainingFeed = {
   trainings: TrainingItem[]
   stats: { total: number; completed: number; minutes: number }
+  viewer?: { canManageContent?: boolean }
 }
 
 export type ForumTopicItem = {
@@ -106,7 +112,7 @@ export type ForumViewerStats = {
 export type ForumTopicsResult = {
   topics: ForumTopicItem[]
   members: ForumMemberItem[]
-  viewer: { id: string; role: string }
+  viewer: { id: string; role: string; canManageContent?: boolean }
   honorBoard?: ForumHonorRow[]
   viewerStats?: ForumViewerStats
   weeklyQuestion?: ForumWeeklyQuestionItem | null
@@ -145,7 +151,7 @@ type Store = {
   joinChallenge: (challengeId: number) => Promise<Result>
   createChallenge: (p: { title: string; description: string; reward: string; deadlineAt: string }) => Promise<Result>
   finishChallenge: (challengeId: number) => Promise<Result>
-  broadcast: (title: string, text: string) => Promise<Result>
+  broadcast: (title: string, text: string, targets?: BroadcastTargets) => Promise<Result>
   fetchUsers: () => Promise<UserInfo[]>
   moderateUser: (targetId: string, action: "approve" | "reject", reason?: string) => Promise<Result>
   setUserRole: (targetId: string, newRole: "reporter" | "district_manager" | "specialist" | "admin", newDistrict?: string) => Promise<Result>
@@ -333,13 +339,13 @@ export const useApp = create<Store>((set, get) => ({
     }
   },
 
-  broadcast: async (title, text) => {
+  broadcast: async (title, text, targets) => {
     const uid = get().userId
     if (!uid) return { ok: false }
     try {
       const r = await api<Result & { message: string }>("/api/broadcast", {
         method: "POST",
-        body: JSON.stringify({ title, text }),
+        body: JSON.stringify({ title, text, targets: targets ?? null }),
       })
       return { ok: true, message: r.message }
     } catch (e) {

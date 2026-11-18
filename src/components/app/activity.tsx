@@ -2,10 +2,11 @@
 
 import Image from "next/image"
 import { useState } from "react"
-import { Flame, Timer, FileText, MoreHorizontal } from "lucide-react"
+import { Flame, Timer, FileText, MoreHorizontal, Trophy, CheckCircle2, XCircle, Gauge } from "lucide-react"
 import { useApp } from "@/lib/store"
 import { Ring, SectionHeader, StatCard, CountUp, Avatar } from "@/components/app/bits"
 import { StatusDot } from "@/components/app/home"
+import { NewsReaderDialog, type ReaderNews } from "@/components/app/news-reader"
 import { fa, faNum, durFmt, jalali, jalaliDay, relTime } from "@/lib/format"
 import { cn } from "@/lib/utils"
 import { LEVELS } from "@/lib/domain"
@@ -15,9 +16,21 @@ type RangeKey = "day" | "week" | "month"
 const GOALS: Record<RangeKey, number> = { day: 100, week: 700, month: 3000 }
 const RANGE_LABELS: Record<RangeKey, string> = { day: "امروز", week: "این هفته", month: "این ماه" }
 
-export function ActivityScreen() {
-  const { state } = useApp()
+export function ActivityScreen({
+  onGotoNewsMine,
+  onGotoProfile,
+}: {
+  onGotoNewsMine?: () => void
+  onGotoProfile?: () => void
+} = {}) {
+  const { state, viewNews } = useApp()
   const [range, setRange] = useState<RangeKey>("day")
+  // خوانندهٔ خبر — مطالعه در همین صفحه
+  const [reader, setReader] = useState<ReaderNews | null>(null)
+  const openReader = (n: ReaderNews) => {
+    setReader(n)
+    if (n.status === "approved" || !n.status) void viewNews(n.id)
+  }
   if (!state) return null
   const stat = state.stats[range]
   const goal = GOALS[range]
@@ -99,9 +112,52 @@ export function ActivityScreen() {
         </div>
       )}
 
+      {/* کارنامه من — آمار واقعی فردی (رتبه، نرخ تایید، تراز تایید/رد) */}
+      <div className="v3-card relative overflow-hidden p-5">
+        <div className="pointer-events-none absolute -left-8 -top-8 h-28 w-28 rounded-full bg-[var(--v3-azure)]/12 blur-2xl" />
+        <div className="relative flex items-center justify-between">
+          <div>
+            <p className="flex items-center gap-1.5 text-[11.5px] font-bold text-[var(--v3-ink-2)]">
+              <Gauge className="h-4 w-4 text-[var(--v3-azure)]" />
+              کارنامه من
+            </p>
+            <h3 className="mt-1 text-[18px] font-black text-[var(--v3-ink)]">
+              رتبه {fa(state.stats.rank || 0)} از {fa(state.stats.totalReporters)} خبرنگار
+            </h3>
+            <p className="mt-1 text-[11.5px] font-semibold text-[var(--v3-azure)]">نرخ تایید: {fa(state.stats.approveRate)}٪</p>
+          </div>
+          <button
+            onClick={onGotoProfile}
+            className="rounded-full border border-[var(--v3-azure)]/40 bg-[var(--v3-azure-soft)] px-3.5 py-2 text-[11px] font-bold text-[var(--v3-azure-deep)] transition-opacity hover:opacity-85 dark:text-[#93c5fd]"
+          >
+            جزئیات کامل در پروفایل
+          </button>
+        </div>
+        <div className="relative mt-4 grid grid-cols-3 gap-2 border-t border-[var(--v3-line)] pt-4 text-center">
+          <div>
+            <p className="flex items-center justify-center gap-1 text-[15px] font-black text-[var(--v3-azure)]">
+              <CheckCircle2 className="h-4 w-4" /> {fa(state.stats.totalApproved)}
+            </p>
+            <p className="mt-0.5 text-[9.5px] text-[var(--v3-ink-2)]">تاییدشده</p>
+          </div>
+          <div className="border-x border-[var(--v3-line)]">
+            <p className="flex items-center justify-center gap-1 text-[15px] font-black text-red-600 dark:text-red-400">
+              <XCircle className="h-4 w-4" /> {fa(state.stats.totalRejected)}
+            </p>
+            <p className="mt-0.5 text-[9.5px] text-[var(--v3-ink-2)]">بازگشتی</p>
+          </div>
+          <div>
+            <p className="flex items-center justify-center gap-1 text-[15px] font-black text-[var(--v3-amber)]">
+              <Trophy className="h-4 w-4" /> {faNum(state.user.points)}
+            </p>
+            <p className="mt-0.5 text-[9.5px] text-[var(--v3-ink-2)]">امتیاز کل</p>
+          </div>
+        </div>
+      </div>
+
       {/* رتبه‌بندی */}
       <div>
-        <SectionHeader title="برترین خبرنگاران" action="کارنامه من" />
+        <SectionHeader title="برترین خبرنگاران" action="کارنامه من" onAction={onGotoProfile} />
         <div className="space-y-2">
           {state.leaderboard.slice(0, 5).map((r) => (
             <div
@@ -138,12 +194,16 @@ export function ActivityScreen() {
         </div>
       </div>
 
-      {/* آخرین اخبار */}
+      {/* آخرین اخبار — هر خبر با یک لمس باز و مطالعه می‌شود */}
       <div>
-        <SectionHeader title="آخرین اخبار" action="مشاهده همه" />
+        <SectionHeader title="آخرین اخبار من" action="مشاهده همه" onAction={onGotoNewsMine} />
         <div className="space-y-2.5">
           {state.news.slice(0, 5).map((n) => (
-            <div key={n.id} className="v3-card flex items-center gap-3 p-3">
+            <button
+              key={n.id}
+              onClick={() => openReader(n)}
+              className="v3-card flex w-full items-center gap-3 p-3 text-right transition-transform hover:scale-[1.01]"
+            >
               <span className="relative h-14 w-14 shrink-0 overflow-hidden rounded-[14px]">
                 <Image
                   src={`/img/cat-${n.category === "none" ? "local" : n.category}.png`}
@@ -160,10 +220,13 @@ export function ActivityScreen() {
                 </p>
               </div>
               <StatusDot status={n.status} />
-            </div>
+            </button>
           ))}
         </div>
       </div>
+
+      {/* خوانندهٔ خبر — همان صفحه فعالیت */}
+      <NewsReaderDialog news={reader} onClose={() => setReader(null)} />
     </div>
   )
 }

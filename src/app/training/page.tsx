@@ -6,7 +6,7 @@ import {
   ArrowRight, GraduationCap, Loader2, ShieldCheck, Plus, Trash2, FileDown, Video, FileText, X, UploadCloud,
   Search, Eye, Clock3, CheckCircle2, Circle, Sparkles, PlayCircle, BookOpenCheck, Users,
 } from "lucide-react"
-import { useApp, type TrainingItem } from "@/lib/store"
+import { useApp, type TrainingItem, type TrainingFeed } from "@/lib/store"
 import { ThemeToggle } from "@/components/app/theme-toggle"
 import { NeonAvatar } from "@/components/app/bits"
 import { jalali, relTime, toFa } from "@/lib/format"
@@ -79,7 +79,7 @@ export default function TrainingPage() {
   const router = useRouter()
   const { userId, state, booted, login, fetchTrainings, createTraining, deleteTraining, viewTraining, toggleTrainingComplete, uploadMedia } = useApp()
   const { toast } = useToast()
-  const [feed, setFeed] = useState<{ trainings: TrainingItem[]; stats: { total: number; completed: number; minutes: number } } | null>(null)
+  const [feed, setFeed] = useState<TrainingFeed | null>(null)
   const [filter, setFilter] = useState("all")
   const [query, setQuery] = useState("")
   const [openLesson, setOpenLesson] = useState<TrainingItem | null>(null)
@@ -110,8 +110,31 @@ export default function TrainingPage() {
     )
   }
   const user = state.user
-  const canManage = user.role === "admin" || user.role === "district_manager"
+  const canManage = feed?.viewer?.canManageContent ?? user.role === "admin"
   const items = feed?.trainings ?? null
+
+  // دانلود متن درس به‌صورت فایل txt — «دانلود متن» که قبلاً کار نمی‌کرد
+  const downloadLessonText = (l: { id: number; title: string; body: string; authorName?: string }) => {
+    if (!l.body) return
+    const content = [
+      `خبرگزاری بسیج شهر رشت — بخش آموزش`,
+      `«${l.title}»`,
+      l.authorName ? `اِرائه: ${l.authorName}` : "",
+      "",
+      l.body,
+    ]
+      .filter((x) => x !== "")
+      .join("\n")
+    const blob = new Blob(["\uFEFF" + content], { type: "text/plain;charset=utf-8" })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = `${l.title.replace(/[\\/:*?"<>|]/g, "-").slice(0, 60) || "lesson"}-${l.id}.txt`
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    URL.revokeObjectURL(url)
+  }
 
   const onFile = async (file: File | undefined) => {
     if (!file) return
@@ -497,6 +520,7 @@ export default function TrainingPage() {
                       href={openLesson.fileUrl}
                       target="_blank"
                       rel="noreferrer"
+                      download
                       className={cn("mt-4 flex items-center gap-3 rounded-2xl border p-3.5", meta.chip)}
                     >
                       <span className={cn("flex h-11 w-11 items-center justify-center rounded-xl text-white", meta.tile)}>
@@ -523,6 +547,15 @@ export default function TrainingPage() {
                     >
                       {openLesson.completed ? <CheckCircle2 className="h-4.5 w-4.5" /> : <Circle className="h-4.5 w-4.5" />}
                       {openLesson.completed ? "خوانده شد — آفرین! ✓" : "این درس را خواندم ✓"}
+                    </button>
+                    <button
+                      onClick={() => downloadLessonText(openLesson)}
+                      disabled={!openLesson.body}
+                      title={openLesson.body ? "دانلود متن درس (فایل txt)" : "متن متنی برای دانلود ندارد"}
+                      className="flex h-11 w-11 items-center justify-center rounded-full border border-line text-ink-muted transition-colors hover:border-neon/40 hover:text-neon disabled:opacity-40"
+                      aria-label="دانلود متن درس"
+                    >
+                      <FileDown className="h-4.5 w-4.5" />
                     </button>
                     {canManage && (
                       <button onClick={() => remove(openLesson.id)} className="flex h-11 w-11 items-center justify-center rounded-full border border-danger/30 text-danger-soft" aria-label="حذف درس">

@@ -1,39 +1,75 @@
 "use client"
 
-import { useMemo, useState } from "react"
-import { Check, X, ClipboardList, Inbox, ChevronDown, RefreshCw, Hourglass, Filter, Pencil } from "lucide-react"
-import { useApp } from "@/lib/store"
-import { fa, relTime, durFmt } from "@/lib/format"
-import { CATEGORY_LABELS, REJECT_REASONS, reviewStageLabel, DISTRICT_LABELS, REVIEW_STAGES } from "@/lib/domain"
+import { useEffect, useMemo, useState } from "react"
+import { Check, X, ClipboardList, Inbox, ChevronDown, RefreshCw, Hourglass, Filter, Pencil, Search, Trash2, Eye, Heart } from "lucide-react"
+import { useApp, type NewsDTO } from "@/lib/store"
+import { fa, faNum, relTime, durFmt, jalali } from "@/lib/format"
+import { CATEGORY_LABELS, REJECT_REASONS, reviewStageLabel, DISTRICT_LABELS } from "@/lib/domain"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
 import { NewsEditDialog } from "@/components/app/news-edit"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
+import { Input } from "@/components/ui/input"
 
-// صف بررسی اختصاصی ادمین: همه مراحل، فیلتر مرحله/حوزه، متن کامل + رسانه
+// مدیریت کامل اخبار در پنل ادمین: «همهٔ اخبار» با جستجوی سروری (تیتر/متن/کد/خبرنگار)
+// + فیلتر وضعیت و حوزه — نه فقط صف در انتظار. تایید/رد روی خبرهای در بررسی،
+// ویرایش متن و حذف برای همهٔ اخبار (اختیار سردبیری ادمین کل).
+const STATUS_FILTERS = [
+  { key: "all", label: "همه", cls: "" },
+  { key: "pending", label: "در بررسی", cls: "text-warn" },
+  { key: "approved", label: "تاییدشده", cls: "text-neon" },
+  { key: "rejected", label: "ردشده", cls: "text-danger-soft" },
+] as const
+
+const STATUS_CHIP: Record<string, { label: string; cls: string }> = {
+  pending: { label: "در بررسی", cls: "bg-warn/12 text-warn border-warn/30" },
+  approved: { label: "تاییدشده", cls: "bg-neon/12 text-neon border-neon/30" },
+  rejected: { label: "ردشده", cls: "bg-danger/10 text-danger-soft border-danger/30" },
+}
+
 export function AdminReviewSection() {
-  const { state, reviewNews, refresh } = useApp()
+  const { fetchAllNews, reviewNews, deleteNews, refresh } = useApp()
   const { toast } = useToast()
-  const [stage, setStage] = useState("all")
+  const [rows, setRows] = useState<NewsDTO[] | null>(null)
+  const [status, setStatus] = useState<string>("all")
   const [district, setDistrict] = useState("all")
+  const [q, setQ] = useState("")
+  const [serverQ, setServerQ] = useState("")
   const [expanded, setExpanded] = useState<number | null>(null)
-  const [rejecting, setRejecting] = useState<number | null>(null)
+  const [rejecting, setRejecting] = useState<NewsDTO | null>(null)
+  const [deleting, setDeleting] = useState<NewsDTO | null>(null)
   const [reason, setReason] = useState("insufficient")
   const [note, setNote] = useState("")
   const [busy, setBusy] = useState<number | null>(null)
   const [editing, setEditing] = useState<number | null>(null)
 
-  const queue = state?.reviewQueue ?? []
+  // جستجو با تاخیر کوتاه (سروری)
+  useEffect(() => {
+    const t = setTimeout(() => setServerQ(q), 350)
+    return () => clearTimeout(t)
+  }, [q])
 
-  const filtered = useMemo(
-    () =>
-      queue.filter((n) => {
-        if (stage !== "all" && n.reviewStage !== stage) return false
-        if (district !== "all" && n.district !== district) return false
-        return true
-      }),
-    [queue, stage, district],
+  const load = async () => {
+    setRows(null)
+    const data = await fetchAllNews({ q: serverQ, status: status === "all" ? undefined : status })
+    setRows(data)
+  }
+  useEffect(() => {
+    let cancelled = false
+    void (async () => {
+      const data = await fetchAllNews({ q: serverQ, status: status === "all" ? undefined : status })
+      if (!cancelled) setRows(data)
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [serverQ, status])
+
+  // فیلتر حوزه سمت کلاینت (سرور حوزه را فیلتر نمی‌کند)
+  const list = useMemo(
+    () => (rows ?? []).filter((n) => district === "all" || n.district === district),
+    [rows, district],
   )
 
   const act = async (newsId: number, action: "approve" | "reject", r?: string, n?: string) => {
@@ -44,39 +80,60 @@ export function AdminReviewSection() {
       toast({ title: "انجام شد", description: res.message })
       setRejecting(null)
       setNote("")
+      await load()
       refresh()
     } else {
       toast({ title: "خطا", description: res.message, variant: "destructive" })
     }
   }
 
+  const doDelete = async (newsId: number) => {
+    setBusy(newsId)
+    const res = await deleteNews(newsId)
+    setBusy(null)
+    if (res.ok) {
+      toast({ title: "حذف شد", description: res.message })
+      setDeleting(null)
+      await load()
+      refresh()
+    } else {
+      toast({ title: "خطا", description: res.message, variant: "destructive" })
+    }
+  }
 
-  if (!state) return null
-
-  const editingNews = queue.find((n) => n.id === editing) ?? null
+  const editingNews = list.find((n) => n.id === editing) ?? null
 
   return (
     <div className="space-y-5">
-      {/* فیلترها */}
+      {/* جستجو + فیلترها */}
       <div className="rounded-[24px] border border-line bg-surface p-4">
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="relative">
+          <Search className="absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-muted" />
+          <Input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="جستجو در تیتر، متن، کد پیگیری یا خبرنگار..."
+            className="rounded-2xl border-line bg-surface-2 pr-10 text-ink placeholder:text-ink-muted/60"
+          />
+        </div>
+        <div className="mt-3 flex flex-wrap items-center gap-2">
           <span className="flex items-center gap-1.5 text-[11.5px] font-bold text-ink-muted">
             <Filter className="h-3.5 w-3.5" />
-            مرحله:
+            وضعیت:
           </span>
-          {[{ key: "all", label: "همه" }, ...REVIEW_STAGES].map((s) => {
-            const count = s.key === "all" ? queue.length : queue.filter((n) => n.reviewStage === s.key).length
+          {STATUS_FILTERS.map((s) => {
+            const count = s.key === "all" ? list.length : list.filter((n) => n.status === s.key).length
             return (
               <button
                 key={s.key}
-                onClick={() => setStage(s.key)}
+                onClick={() => setStatus(s.key)}
                 className={cn(
                   "flex items-center gap-1.5 rounded-full border px-3.5 py-2 text-[11.5px] font-bold transition-colors",
-                  stage === s.key ? "border-neon bg-neon text-neon-foreground" : "border-line bg-surface-2 text-ink-muted hover:text-ink",
+                  status === s.key ? "border-neon bg-neon text-neon-foreground" : "border-line bg-surface-2 text-ink-muted hover:text-ink",
                 )}
               >
                 {s.label}
-                <span className={cn("rounded-full px-1.5 text-[9.5px]", stage === s.key ? "bg-black/15" : "bg-surface")}>{fa(count)}</span>
+                <span className={cn("rounded-full px-1.5 text-[9.5px]", status === s.key ? "bg-black/15" : "bg-surface")}>{fa(count)}</span>
               </button>
             )
           })}
@@ -91,38 +148,45 @@ export function AdminReviewSection() {
             ))}
           </select>
           <button
-            onClick={refresh}
+            onClick={load}
             className="flex h-9 w-9 items-center justify-center rounded-full border border-line bg-surface-2 text-ink-muted transition-colors hover:text-neon"
-            aria-label="بارگذاری مجدد صف"
+            aria-label="بارگذاری مجدد"
           >
-            <RefreshCw className="h-4 w-4" />
+            <RefreshCw className={cn("h-4 w-4", rows === null && "animate-spin")} />
           </button>
         </div>
       </div>
 
-      {filtered.length === 0 ? (
+      {rows === null ? (
+        <div className="flex items-center justify-center gap-2 py-14 text-[13px] text-ink-muted">
+          <RefreshCw className="h-4 w-4 animate-spin" />
+          در حال دریافت اخبار...
+        </div>
+      ) : list.length === 0 ? (
         <div className="flex flex-col items-center gap-2 rounded-[26px] border border-dashed border-line py-16 text-center">
           <Inbox className="h-10 w-10 text-neon/60" />
-          <p className="text-[15px] font-bold text-ink">{queue.length === 0 ? "صف بررسی کاملاً خالی است" : "با این فیلترها خبری یافت نشد"}</p>
+          <p className="text-[15px] font-bold text-ink">{serverQ || district !== "all" ? "با این جستجو/فیلترها خبری یافت نشد" : "هنوز خبری ثبت نشده است"}</p>
           <p className="max-w-[280px] text-[12px] leading-5 text-ink-muted">
-            {queue.length === 0
-              ? "به‌محض ثبت خبر جدید توسط خبرنگاران، همین‌جا برای تصمیم‌گیری نمایش داده می‌شود."
-              : "فیلتر مرحله یا حوزه را تغییر دهید."}
+            عبارت جستجو یا فیلتر وضعیت/حوزه را تغییر دهید.
           </p>
         </div>
       ) : (
         <div className="space-y-3">
-          {filtered.map((n) => {
+          {list.map((n) => {
             const open = expanded === n.id
+            const chip = STATUS_CHIP[n.status] ?? STATUS_CHIP.pending
             return (
               <div key={n.id} className="rounded-[26px] border border-line bg-surface p-4">
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div className="flex items-center gap-2">
-                    <span className="rounded-full bg-surface-2 px-2.5 py-1 text-[10px] font-bold text-ink-muted">{CATEGORY_LABELS[n.category]}</span>
-                    <span className="flex items-center gap-1 rounded-full bg-warn/10 px-2.5 py-1 text-[10px] font-bold text-warn">
-                      <Hourglass className="h-3 w-3" />
-                      {reviewStageLabel(n.reviewStage)}
-                    </span>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className={cn("rounded-full border px-2.5 py-1 text-[10px] font-bold", chip.cls)}>{chip.label}</span>
+                    <span className="rounded-full bg-surface-2 px-2.5 py-1 text-[10px] font-bold text-ink-muted">{CATEGORY_LABELS[n.category] ?? n.category}</span>
+                    {n.status === "pending" && (
+                      <span className="flex items-center gap-1 rounded-full bg-warn/10 px-2.5 py-1 text-[10px] font-bold text-warn">
+                        <Hourglass className="h-3 w-3" />
+                        {reviewStageLabel(n.reviewStage)}
+                      </span>
+                    )}
                   </div>
                   <span className="text-[10px] text-ink-muted">
                     <span dir="ltr">{n.code}</span> · {relTime(n.createdAt)} · {durFmt(n.durationMin)}
@@ -144,16 +208,17 @@ export function AdminReviewSection() {
                   {open ? "بستن متن کامل" : "متن کامل خبر"}
                 </button>
 
-                {open && (
-                  <div className="mt-3 rounded-2xl border border-line bg-surface-2/50 p-2">
-                    <button
-                      onClick={() => setEditing(n.id)}
-                      className="flex w-full items-center justify-center gap-1.5 rounded-full border border-line bg-surface py-2.5 text-[12px] font-bold text-ink transition-colors hover:border-neon/40 hover:text-neon"
-                    >
-                      <Pencil className="h-4 w-4" />
-                      ویرایش متن خبر
-                    </button>
-                  </div>
+                {n.status === "rejected" && (
+                  <p className="mt-2 rounded-2xl border border-danger/25 bg-danger/6 px-3.5 py-2.5 text-[11px] leading-5 text-danger-soft">
+                    دلیل رد: {REJECT_REASONS.find((r) => r.key === n.rejectReason)?.label ?? n.rejectReason}
+                    {n.rejectNote ? ` — ${n.rejectNote}` : ""}
+                  </p>
+                )}
+                {(n.views > 0 || n.eitaaReactions > 0) && (
+                  <p className="mt-2 flex items-center gap-3 text-[10.5px] font-bold text-ink-muted">
+                    {n.views > 0 && <span className="flex items-center gap-1"><Eye className="h-3.5 w-3.5" /> {faNum(n.views)} بازدید</span>}
+                    {n.eitaaReactions > 0 && <span className="flex items-center gap-1"><Heart className="h-3.5 w-3.5" /> {faNum(n.eitaaReactions)} واکنش ایتا</span>}
+                  </p>
                 )}
 
                 <div className="mt-3 flex items-center gap-2 border-t border-line pt-3">
@@ -161,26 +226,48 @@ export function AdminReviewSection() {
                     {n.reporterName.slice(0, 1)}
                   </span>
                   <span className="flex-1 text-[11px] text-ink-muted">
-                    {n.reporterName} · {DISTRICT_LABELS[n.district] ?? n.district}
+                    {n.reporterName} · {DISTRICT_LABELS[n.district] ?? n.district} · {jalali(n.createdAt)}
                   </span>
                 </div>
 
-                <div className="mt-3 flex gap-2">
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {n.status === "pending" ? (
+                    <>
+                      <button
+                        onClick={() => act(n.id, "approve")}
+                        disabled={busy !== null}
+                        className="flex flex-1 items-center justify-center gap-1.5 rounded-full bg-neon py-3 text-[13px] font-bold text-neon-foreground transition-transform hover:scale-[1.01] disabled:opacity-50"
+                      >
+                        <Check className="h-4 w-4" />
+                        {busy === n.id ? "..." : "تایید خبر"}
+                      </button>
+                      <button
+                        onClick={() => { setRejecting(n); setReason("insufficient"); setNote("") }}
+                        disabled={busy !== null}
+                        className="flex flex-1 items-center justify-center gap-1.5 rounded-full border border-danger/40 py-3 text-[13px] font-bold text-danger-soft transition-colors hover:bg-danger/8 disabled:opacity-50"
+                      >
+                        <X className="h-4 w-4" />
+                        رد با دلیل
+                      </button>
+                    </>
+                  ) : (
+                    <span className="flex-1 text-[11px] text-ink-muted/70">این خبر تصمیم نهایی گرفته است — فقط قابل ویرایش یا حذف.</span>
+                  )}
                   <button
-                    onClick={() => act(n.id, "approve")}
+                    onClick={() => setEditing(n.id)}
                     disabled={busy !== null}
-                    className="flex flex-1 items-center justify-center gap-1.5 rounded-full bg-neon py-3 text-[13px] font-bold text-neon-foreground transition-transform hover:scale-[1.01] disabled:opacity-50"
+                    className="flex items-center justify-center gap-1.5 rounded-full border border-line bg-surface px-4 py-3 text-[12.5px] font-bold text-ink transition-colors hover:border-neon/40 hover:text-neon disabled:opacity-50"
                   >
-                    <Check className="h-4 w-4" />
-                    {busy === n.id ? "..." : "تایید خبر"}
+                    <Pencil className="h-3.5 w-3.5" />
+                    ویرایش
                   </button>
                   <button
-                    onClick={() => { setRejecting(n.id); setReason("insufficient"); setNote("") }}
+                    onClick={() => setDeleting(n)}
                     disabled={busy !== null}
-                    className="flex flex-1 items-center justify-center gap-1.5 rounded-full border border-danger/40 py-3 text-[13px] font-bold text-danger-soft transition-colors hover:bg-danger/8 disabled:opacity-50"
+                    className="flex items-center justify-center gap-1.5 rounded-full border border-danger/40 px-4 py-3 text-[12.5px] font-bold text-danger-soft transition-colors hover:bg-danger/8 disabled:opacity-50"
                   >
-                    <X className="h-4 w-4" />
-                    رد با دلیل
+                    <Trash2 className="h-3.5 w-3.5" />
+                    حذف
                   </button>
                 </div>
               </div>
@@ -223,11 +310,38 @@ export function AdminReviewSection() {
             <Textarea value={note} onChange={(e) => setNote(e.target.value)} rows={3} placeholder="توضیح تکمیلی برای خبرنگار (اختیاری)" className="rounded-2xl border-line bg-surface text-ink leading-6 placeholder:text-ink-muted/50" />
           </div>
           <button
-            onClick={() => rejecting !== null && act(rejecting, "reject", reason, note)}
+            onClick={() => rejecting !== null && act(rejecting.id, "reject", reason, note)}
             disabled={busy !== null}
             className="mt-4 w-full rounded-full bg-danger py-3.5 text-[14px] font-bold text-white disabled:opacity-50"
           >
             {busy !== null ? "..." : "ثبت رد خبر"}
+          </button>
+        </DialogContent>
+      </Dialog>
+
+      {/* دیالوگ حذف خبر */}
+      <Dialog open={deleting !== null} onOpenChange={(v) => !v && setDeleting(null)}>
+        <DialogContent className="rounded-[28px] border-line bg-popover p-5 sm:max-w-md">
+          <DialogHeader className="text-right">
+            <DialogTitle className="flex items-center gap-2 text-ink">
+              <Trash2 className="h-5 w-5 text-danger" />
+              حذف قطعی خبر
+            </DialogTitle>
+            <DialogDescription className="text-ink-muted">
+              این عملیات غیرقابل بازگشت است و خبر از آرشیو سازمان پاک می‌شود.
+            </DialogDescription>
+          </DialogHeader>
+          {deleting && (
+            <p className="mt-3 rounded-2xl border border-line bg-surface p-3.5 text-[12.5px] font-bold leading-6 text-ink">
+              «{deleting.title}» <span className="text-ink-muted" dir="ltr">({deleting.code})</span>
+            </p>
+          )}
+          <button
+            onClick={() => deleting !== null && doDelete(deleting.id)}
+            disabled={busy !== null}
+            className="mt-4 w-full rounded-full bg-danger py-3.5 text-[14px] font-bold text-white disabled:opacity-50"
+          >
+            {busy !== null ? "..." : "حذف کن"}
           </button>
         </DialogContent>
       </Dialog>
@@ -237,7 +351,7 @@ export function AdminReviewSection() {
         open={editing !== null}
         onClose={() => setEditing(null)}
         news={editingNews ? { id: editingNews.id, title: editingNews.title, content: editingNews.content } : null}
-        onSaved={() => setExpanded(null)}
+        onSaved={load}
       />
     </div>
   )

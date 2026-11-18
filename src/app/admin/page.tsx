@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { LayoutDashboard, Users2, ClipboardList, Trophy, Megaphone, FileDown, ArrowRight, ShieldCheck, Loader2, Landmark } from "lucide-react"
+import { LayoutDashboard, Users2, ClipboardList, Trophy, Megaphone, FileDown, ArrowRight, ShieldCheck, Loader2, Landmark, Radio } from "lucide-react"
 import { useApp } from "@/lib/store"
 import { NeonAvatar } from "@/components/app/bits"
 import { ThemeToggle } from "@/components/app/theme-toggle"
@@ -14,16 +14,18 @@ import { AdminReviewSection } from "@/components/admin/review"
 import { AdminChallengesSection } from "@/components/admin/challenges"
 import { AdminBroadcastSection } from "@/components/admin/broadcast"
 import { AdminExportsSection } from "@/components/admin/exports"
+import { AdminContactsSection } from "@/components/admin/contacts"
 
-type SectionKey = "overview" | "users" | "review" | "challenges" | "broadcast" | "exports" | "organization"
+type SectionKey = "overview" | "users" | "review" | "challenges" | "broadcast" | "contacts" | "exports" | "organization"
 
 const NAV: { key: SectionKey; label: string; icon: React.ReactNode; desc: string }[] = [
   { key: "overview", label: "داشبورد", icon: <LayoutDashboard className="h-4.5 w-4.5" />, desc: "نمای کلی سازمان" },
   { key: "users", label: "کاربران", icon: <Users2 className="h-4.5 w-4.5" />, desc: "مدیریت اعضا و پرونده‌ها" },
-  { key: "review", label: "بررسی اخبار", icon: <ClipboardList className="h-4.5 w-4.5" />, desc: "صف تصمیم‌گیری" },
+  { key: "review", label: "بررسی اخبار", icon: <ClipboardList className="h-4.5 w-4.5" />, desc: "همهٔ اخبار + جستجو" },
   { key: "organization", label: "حوزه‌ها و پایگاه‌ها", icon: <Landmark className="h-4.5 w-4.5" />, desc: "ویرایش ساختار سازمان" },
   { key: "challenges", label: "چالش‌ها", icon: <Trophy className="h-4.5 w-4.5" />, desc: "ایجاد و اعلام نتایج" },
-  { key: "broadcast", label: "پیام همگانی", icon: <Megaphone className="h-4.5 w-4.5" />, desc: "اطلاع‌رسانی سازمانی" },
+  { key: "broadcast", label: "پیام همگانی", icon: <Megaphone className="h-4.5 w-4.5" />, desc: "انتخاب مخاطب: نقش/حوزه/پایگاه" },
+  { key: "contacts", label: "رسانه‌های بیرونی", icon: <Radio className="h-4.5 w-4.5" />, desc: "مخاطبان + پیامک انبوه + ایتا" },
   { key: "exports", label: "خروجی‌ها", icon: <FileDown className="h-4.5 w-4.5" />, desc: "گزارش‌های CSV" },
 ]
 
@@ -187,6 +189,7 @@ export default function AdminPage() {
               {section === "review" && <AdminReviewSection />}
               {section === "challenges" && <AdminChallengesSection />}
               {section === "broadcast" && <AdminBroadcastSection />}
+              {section === "contacts" && <AdminContactsSection />}
               {section === "exports" && <AdminExportsSection />}
             </div>
           </div>

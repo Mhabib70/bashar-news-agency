@@ -4,10 +4,13 @@ import { notifyUser } from "@/lib/server/notify"
 import { USER_REJECT_TITLES, ROLE_LABELS, DISTRICT_LABELS } from "@/lib/domain"
 import { isSuperAdminPhone } from "@/lib/server/superadmin"
 import { activeUser } from "@/lib/server/session"
+import { normalizePhone } from "@/lib/domain"
 
 // مدیریت کاربران — فقط ادمین کل
 // GET  بدون targetId: لیست همه اعضا | GET با targetId: پرونده کامل کاربر
-// POST: تایید/رد درخواست عضویت (معادل سناریوی ۱ ربات)
+// POST: تایید/رد درخواست عضویت + نقش + مجوز ایتا (معادل سناریوی ۱ ربات)
+// PATCH: ویرایش مشخصات کاربر (نام/تلفن/حوزه/پایگاه/تحصیلات/سن)
+// DELETE: حذف کامل کاربر و همه ردپاهایش (آخرین گزینه — غیرقابل بازگشت)
 export async function GET(req: NextRequest) {
   const admin = await activeUser(req)
   if (!admin || admin.role !== "admin") {
@@ -38,7 +41,7 @@ export async function GET(req: NextRequest) {
       user: {
         id: u.id, fullName: u.fullName, username: u.username, role: u.role, status: u.status,
         rejectReason: u.rejectReason, district: u.district, base: u.base, phone: u.phone,
-        age: u.age, education: u.education, canSendEitaa: u.canSendEitaa, points: u.points, levelKey: u.levelKey,
+        age: u.age, education: u.education, canSendEitaa: u.canSendEitaa, canManageContent: u.canManageContent, points: u.points, levelKey: u.levelKey,
         currentStreak: u.currentStreak, bestStreak: u.bestStreak, avatar: u.avatar,
         isSuperAdmin: isSuperAdminPhone(u.phone),
         lastActivityAt: u.lastActivityAt?.toISOString() ?? null,
@@ -62,7 +65,7 @@ export async function GET(req: NextRequest) {
   const users = await db.user.findMany({
     select: {
       id: true, fullName: true, username: true, role: true, status: true, rejectReason: true,
-      district: true, base: true, phone: true, age: true, education: true, canSendEitaa: true,
+      district: true, base: true, phone: true, age: true, education: true, canSendEitaa: true, canManageContent: true,
       points: true, levelKey: true, currentStreak: true, bestStreak: true, avatar: true,
       lastActivityAt: true, createdAt: true,
     },
@@ -74,8 +77,9 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { userId, action, targetId, reason } = body ?? {}
-    const admin = await db.user.findUnique({ where: { id: userId } })
+    const { action, targetId, reason } = body ?? {}
+    // احراز هویت با کوکی نشست (پارامتر userId قدیمی اعتبار ندارد)
+    const admin = await activeUser(req)
     if (!admin || admin.role !== "admin") {
       return NextResponse.json({ error: "دسترسی مجاز نیست" }, { status: 403 })
     }
@@ -139,6 +143,52 @@ export async function POST(req: NextRequest) {
       })
     }
 
+    // مجوز مدیریت تالار و آموزش — فقط با ارادهٔ ادمین کل (معمولاً به کارشناس داده می‌شود)
+    if (action === "set_content_perm") {
+      const allowed = body.allowed === true
+      if (target.role !== "specialist") {
+        return NextResponse.json({ error: "این مجوز فقط برای نقش «کارشناس خبر» معنا دارد" }, { status: 400 })
+      }
+      await db.user.update({ where: { id: target.id }, data: { canManageContent: allowed } })
+      await notifyUser(
+        target.id,
+        "user_status",
+        allowed ? "🎓 مجوز مدیریت تالار و آموزش فعال شد" : "🎓 مجوز مدیریت تالار و آموزش برداشته شد",
+        allowed
+          ? `${admin.fullName} به شما اجازه داد در تالار گفتگو موضوع درج کنید و درس آموزشی منتشر کنید.`
+          : `ادمین کل مجوز مدیریت تالار و آموزش را از شما گرفت.`,
+        `user:${target.id}`,
+        { force: true },
+      )
+      return NextResponse.json({
+        ok: true,
+        message: allowed ? `مجوز مدیریت تالار/آموزش برای ${target.fullName} فعال شد.` : `مجوز مدیریت تالار/آموزش از ${target.fullName} گرفته شد.`,
+      })
+    }
+
+    // مجوز مدیریت تالار و آموزش — فقط با ارادهٔ ادمین کل (معمولاً به کارشناس داده می‌شود)
+    if (action === "set_content_perm") {
+      const allowed = body.allowed === true
+      if (target.role !== "specialist") {
+        return NextResponse.json({ error: "این مجوز فقط برای نقش «کارشناس خبر» معنا دارد" }, { status: 400 })
+      }
+      await db.user.update({ where: { id: target.id }, data: { canManageContent: allowed } })
+      await notifyUser(
+        target.id,
+        "user_status",
+        allowed ? "🎓 مجوز مدیریت تالار و آموزش فعال شد" : "🎓 مجوز مدیریت تالار و آموزش برداشته شد",
+        allowed
+          ? `${admin.fullName} به شما اجازه داد در تالار گفتگو موضوع درج کنید و درس آموزشی منتشر کنید.`
+          : `ادمین کل مجوز مدیریت تالار و آموزش را از شما گرفت.`,
+        `user:${target.id}`,
+        { force: true },
+      )
+      return NextResponse.json({
+        ok: true,
+        message: allowed ? `مجوز مدیریت تالار/آموزش برای ${target.fullName} فعال شد.` : `مجوز مدیریت تالار/آموزش از ${target.fullName} گرفته شد.`,
+      })
+    }
+
     // مجوز ارسال خبر به کانال ایتا — فقط با ارادهٔ ادمین کل به کارشناس داده/گرفته می‌شود
     if (action === "set_eitaa_perm") {
       const allowed = body.allowed === true
@@ -166,5 +216,82 @@ export async function POST(req: NextRequest) {
   } catch (e) {
     console.error(e)
     return NextResponse.json({ error: "خطا در مدیریت کاربران" }, { status: 500 })
+  }
+}
+
+// ویرایش مشخصات کاربر — ادمین کل
+export async function PATCH(req: NextRequest) {
+  try {
+    const body = await req.json()
+    const admin = await activeUser(req)
+    if (!admin || admin.role !== "admin") {
+      return NextResponse.json({ error: "دسترسی مجاز نیست" }, { status: 403 })
+    }
+    const target = await db.user.findUnique({ where: { id: String(body.id ?? "") } })
+    if (!target) return NextResponse.json({ error: "کاربر یافت نشد" }, { status: 404 })
+
+    const data: Record<string, string | boolean> = {}
+    if (typeof body.fullName === "string" && body.fullName.trim().length >= 2) data.fullName = body.fullName.trim().slice(0, 60)
+    if (typeof body.phone === "string") {
+      const norm = normalizePhone(body.phone)
+      if (norm.length !== 10) return NextResponse.json({ error: "شماره موبایل معتبر نیست" }, { status: 400 })
+      const dup = await db.user.findFirst({ where: { phone: body.phone, id: { not: target.id } } })
+      if (dup) return NextResponse.json({ error: "این شماره قبلاً برای کاربر دیگری ثبت شده" }, { status: 409 })
+      data.phone = body.phone
+    }
+    if (typeof body.district === "string") data.district = body.district
+    if (typeof body.base === "string") data.base = body.base.slice(0, 60)
+    if (typeof body.education === "string") data.education = body.education
+    if (typeof body.age === "string") data.age = body.age.slice(0, 3)
+    await db.user.update({ where: { id: target.id }, data })
+    await notifyUser(target.id, "user_status", "📋 مشخصات حساب شما به‌روزرسانی شد", `${admin.fullName} اطلاعات حساب شما را ویرایش کرد.`, `user:${target.id}`, { force: true })
+    return NextResponse.json({ ok: true, message: `مشخصات ${target.fullName} به‌روزرسانی شد.` })
+  } catch (e) {
+    console.error(e)
+    return NextResponse.json({ error: "خطا در ویرایش کاربر" }, { status: 500 })
+  }
+}
+
+// حذف کامل کاربر — ادمین کل؛ همه ردپاها (خبر، پیام تالار، امتیاز، اعلان…) پاک می‌شود
+export async function DELETE(req: NextRequest) {
+  try {
+    const admin = await activeUser(req)
+    if (!admin || admin.role !== "admin") {
+      return NextResponse.json({ error: "دسترسی مجاز نیست" }, { status: 403 })
+    }
+    const id = req.nextUrl.searchParams.get("id") ?? ""
+    const target = await db.user.findUnique({ where: { id } })
+    if (!target) return NextResponse.json({ error: "کاربر یافت نشد" }, { status: 404 })
+    if (target.id === admin.id) return NextResponse.json({ error: "حذف حساب خودتان ممکن نیست" }, { status: 400 })
+    if (isSuperAdminPhone(target.phone)) {
+      return NextResponse.json({ error: "حساب ادمین کل سامانه محافظت‌شده است و قابل حذف نیست" }, { status: 403 })
+    }
+
+    const newsIds = await db.newsItem.findMany({ where: { reporterId: target.id }, select: { id: true } })
+    await db.$transaction([
+      // اخبار و ردپای چرخهٔ بررسی (events با onDelete: Cascade خودکار پاک می‌شود)
+      db.newsItem.deleteMany({ where: { reporterId: target.id } }),
+      db.draft.deleteMany({ where: { userId: target.id } }),
+      db.notification.deleteMany({ where: { userId: target.id } }),
+      db.pointsLog.deleteMany({ where: { userId: target.id } }),
+      db.userBadge.deleteMany({ where: { userId: target.id } }),
+      db.challengeParticipation.deleteMany({ where: { userId: target.id } }),
+      db.trainingProgress.deleteMany({ where: { userId: target.id } }),
+      // تالار گفتگو: واکنش‌ها، پیام‌ها، نظرسنجی‌ها و تاپیک‌های خودش
+      db.forumReaction.deleteMany({ where: { userId: target.id } }),
+      db.forumMessage.deleteMany({ where: { userId: target.id } }),
+      db.forumPoll.deleteMany({ where: { createdBy: target.id } }),
+      db.forumTopic.deleteMany({ where: { createdBy: target.id } }),
+      db.forumWeeklyQuestion.deleteMany({ where: { createdBy: target.id } }),
+      db.notifSetting.deleteMany({ where: { userId: target.id } }),
+      db.user.delete({ where: { id: target.id } }),
+    ])
+    return NextResponse.json({
+      ok: true,
+      message: `${target.fullName} و همهٔ ردپاهای حسابش (از جمله ${newsIds.length} خبر) حذف شد.`,
+    })
+  } catch (e) {
+    console.error(e)
+    return NextResponse.json({ error: "خطا در حذف کاربر — احتمالاً رکورد وابسته باقی مانده" }, { status: 500 })
   }
 }

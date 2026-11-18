@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server"
 import { db } from "@/lib/db"
 import { CATEGORY_LABELS, DISTRICT_LABELS, ROLE_LABELS, EDUCATION_LABELS, LEVELS, levelFor } from "@/lib/domain"
+import { activeUser } from "@/lib/server/session"
 
 function csv(rows: (string | number)[][]): string {
   const esc = (v: string | number) => {
@@ -23,12 +24,13 @@ const jalaliDate = (d: Date | null) =>
   d ? new Intl.DateTimeFormat("fa-IR", { dateStyle: "short", timeZone: "Asia/Tehran" }).format(d) : ""
 
 // خروجی CSV — کاربران/اخبار/گزارش حوزه‌ها (ادمین) و کارت خبرنگاری (خود کاربر یا ادمین)
+// احراز هویت با کوکی نشست — پارامتر userId حذف شد (قبلاً خالی می‌شد و خروجی کار نمی‌کرد)
 export async function GET(req: NextRequest) {
   const sp = req.nextUrl.searchParams
   const type = sp.get("type") ?? "users"
-  const requester = await db.user.findUnique({ where: { id: sp.get("userId") ?? "" } })
+  const requester = await activeUser(req)
   if (!requester || requester.status !== "active") {
-    return new Response(JSON.stringify({ error: "دسترسی مجاز نیست" }), { status: 403 })
+    return new Response(JSON.stringify({ error: "دسترسی مجاز نیست — وارد حساب شوید" }), { status: 403 })
   }
   const isAdmin = requester.role === "admin"
 

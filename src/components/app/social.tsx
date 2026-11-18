@@ -468,14 +468,14 @@ export type FeedNews = {
   isMine: boolean
 }
 
-export function FeedPost({ n }: { n: FeedNews }) {
+export function FeedPost({ n, onOpen }: { n: FeedNews; onOpen?: (n: FeedNews) => void }) {
   const hasPhoto = n.mediaType === "photo" && !!n.mediaUrl
   const hasVideo = n.mediaType === "video" && !!n.mediaUrl
   const catImg = `/img/cat-${n.category === "none" ? "local" : n.category}.png`
 
   return (
-    <article className="v3-card stage-enter overflow-hidden">
-      <div className="flex items-center gap-2.5 px-4 pb-2.5 pt-3.5">
+    <article className="v3-card stage-enter overflow-hidden transition-shadow hover:shadow-[var(--v3-shadow-md)]">
+      <button onClick={() => onOpen?.(n)} className="flex w-full items-center gap-2.5 px-4 pb-2.5 pt-3.5 text-right">
         <Avatar name={n.reporterName} src={n.reporterAvatar} size={40} />
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">
@@ -490,21 +490,26 @@ export function FeedPost({ n }: { n: FeedNews }) {
           <CheckCircle2 className="h-3 w-3" />
           منتشر شد
         </span>
-      </div>
+      </button>
 
-      <div className="px-4 pb-3">
+      <button onClick={() => onOpen?.(n)} className="block w-full px-4 pb-3 text-right">
         <h3 className="text-[14px] font-black leading-6.5 text-[var(--v3-ink)]">{n.title}</h3>
         <p className="mt-1 line-clamp-3 text-[11.5px] leading-5.5 text-[var(--v3-ink-2)]">{n.content}</p>
-      </div>
+        <span className="mt-1.5 inline-flex items-center gap-1 text-[10.5px] font-black text-[var(--v3-azure)]">مطالعهٔ کامل خبر ←</span>
+      </button>
 
       {hasPhoto && (
-        <img src={n.mediaUrl} alt={n.title} className="max-h-[340px] w-full border-y border-[var(--v3-line)] object-cover" loading="lazy" />
+        <button onClick={() => onOpen?.(n)} className="block w-full cursor-zoom-in">
+          <img src={n.mediaUrl} alt={n.title} className="max-h-[340px] w-full border-y border-[var(--v3-line)] object-cover" loading="lazy" />
+        </button>
       )}
       {hasVideo && (
         <video src={n.mediaUrl} controls preload="metadata" className="max-h-[340px] w-full border-y border-[var(--v3-line)] bg-black" />
       )}
       {!hasPhoto && !hasVideo && (
-        <Image src={catImg} alt={n.title} width={640} height={200} className="h-[170px] w-full border-y border-[var(--v3-line)] object-cover" />
+        <button onClick={() => onOpen?.(n)} className="block w-full cursor-zoom-in">
+          <Image src={catImg} alt={n.title} width={640} height={200} className="h-[170px] w-full border-y border-[var(--v3-line)] object-cover" />
+        </button>
       )}
 
       <div className="flex items-center gap-2 px-4 py-2.5 text-[10px] font-semibold text-[var(--v3-ink-2)]">

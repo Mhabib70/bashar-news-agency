@@ -37,11 +37,13 @@ export function NewsScreen({
   onQuickSubmit,
   draftsView,
   initialNewsId,
+  initialScope,
   onConsumeNewsId,
 }: {
   onQuickSubmit: (preset?: SubmitPreset) => void
   draftsView?: boolean
   initialNewsId?: number | null
+  initialScope?: "all" | "mine"
   onConsumeNewsId?: () => void
 }) {
   const { state, fetchAllNews, deleteNews, sendToEitaa, refresh, viewNews, setEitaaStats, praiseNews, deleteDraft } = useApp()
@@ -49,7 +51,7 @@ export function NewsScreen({
   const [filter, setFilter] = useState<(typeof FILTERS)[number]["key"]>("all")
   const [detail, setDetail] = useState<number | null>(null)
   const [q, setQ] = useState("")
-  const [scope, setScope] = useState<"all" | "mine">("all")
+  const [scope, setScope] = useState<"all" | "mine">(initialScope ?? "all")
   const [allNews, setAllNews] = useState<NewsDTO[]>([])
   const [loadingAll, setLoadingAll] = useState(false)
   const [editing, setEditing] = useState<number | null>(null)

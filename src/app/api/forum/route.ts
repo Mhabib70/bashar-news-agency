@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
+import { canManageContent } from "@/lib/server/content-perm"
 import { levelFor, FORUM_POINTS } from "@/lib/domain"
 import { addForumPoints } from "@/lib/server/state"
 import { notifyUser } from "@/lib/server/notify"
@@ -77,8 +78,13 @@ async function honorBoard(since: Date): Promise<{ rows: HonorRow[]; weekly: Map<
     db.forumTopic.findMany({ where: { createdAt: { gte: since } }, select: { createdBy: true } }),
     db.forumReaction.findMany({ where: { createdAt: { gte: since } }, select: { message: { select: { userId: true } } } }),
   ])
+  // ادمین کل در سطح‌بندی و افتخارات جایی ندارد (تصمیم مدیریتی) — کلیدش از تخته حذف می‌شود
+  const admins = new Set(
+    (await db.user.findMany({ where: { role: "admin" }, select: { id: true } })).map((a) => a.id),
+  )
   const weekly = new Map<string, { score: number; msgs: number }>()
   const bump = (uid: string, score: number, msg = 0) => {
+    if (admins.has(uid)) return
     const cur = weekly.get(uid) ?? { score: 0, msgs: 0 }
     cur.score += score
     cur.msgs += msg
@@ -256,7 +262,7 @@ export async function GET(req: NextRequest) {
         : null,
     })),
     members: membersPayload,
-    viewer: { id: user.id, role: user.role },
+    viewer: { id: user.id, role: user.role, canManageContent: canManageContent(user) },
     honorBoard: honor.rows,
     viewerStats: {
       weeklyScore: myWeek.score, weeklyMessages: myWeek.msgs,
@@ -278,6 +284,10 @@ export async function POST(req: NextRequest) {
     await db.user.update({ where: { id: user.id }, data: { lastSeenAt: new Date() } }).catch(() => {})
 
     if (action === "topic") {
+      // درج موضوع فقط با ادمین کل یا کارشناسِ دارای مجوز مدیریت محتوا
+      if (!canManageContent(user)) {
+        return NextResponse.json({ error: "درج موضوع در تالار فقط با ادمین کل است (یا کارشناسی که ادمین کل اجازه داده باشد)." }, { status: 403 })
+      }
       const title = String(body.title ?? "").trim().slice(0, 150)
       const type = TOPIC_TYPES.includes(body.type) ? body.type : "class"
       if (title.length < 3) return NextResponse.json({ error: "عنوان تاپیک حداقل ۳ کاراکتر باشد" }, { status: 400 })
@@ -364,8 +374,8 @@ export async function POST(req: NextRequest) {
     }
 
     if (action === "poll_create") {
-      if (!isAdmin && user.role !== "district_manager") {
-        return NextResponse.json({ error: "فقط ادمین و مدیر حوزه می‌توانند نظرسنجی بسازند" }, { status: 403 })
+      if (!canManageContent(user)) {
+        return NextResponse.json({ error: "ساخت نظرسنجی فقط با ادمین کل است (یا کارشناسی که ادمین کل اجازه داده باشد)." }, { status: 403 })
       }
       const tid = Number(body.topicId)
       const question = String(body.question ?? "").trim().slice(0, 200)

@@ -1,8 +1,8 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import { Search, Check, X, Clock, RefreshCw, Phone, GraduationCap, CalendarDays, Activity, Flame, Trophy, Newspaper, ChevronLeft, ImageOff, Loader2, FileText, Award } from "lucide-react"
-import { useApp, type AdminUserDetail } from "@/lib/store"
+import { Search, Check, X, Clock, RefreshCw, Phone, GraduationCap, CalendarDays, Activity, Flame, Trophy, Newspaper, ChevronLeft, ImageOff, Loader2, FileText, Award, Pencil, Trash2, MessagesSquare } from "lucide-react"
+import { useApp, type AdminUserDetail, type UserInfo } from "@/lib/store"
 import { fa, faNum, relTime, jalali } from "@/lib/format"
 import { ROLE_LABELS, DISTRICT_LABELS, BASE_LISTS, USER_REJECT_TITLES, LEVELS, EDUCATION_LABELS, BADGES } from "@/lib/domain"
 import { NeonAvatar } from "@/components/app/bits"
@@ -10,13 +10,6 @@ import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-
-type UserInfo = {
-  id: string; fullName: string; username: string; role: string; status: string; rejectReason: string
-  district: string; base: string; phone: string; age: string; education: string
-  points: number; levelKey: string; currentStreak: number; bestStreak: number; avatar: string
-  lastActivityAt: string | null; createdAt: string
-}
 
 const STATUS_META: Record<string, { label: string; cls: string }> = {
   active: { label: "فعال", cls: "bg-neon/12 text-neon border-neon/30" },
@@ -36,6 +29,8 @@ export function AdminUsersSection() {
   const [rejecting, setRejecting] = useState<UserInfo | null>(null)
   const [reason, setReason] = useState("incomplete")
   const [detailId, setDetailId] = useState<string | null>(null)
+  const [editUser, setEditUser] = useState<UserInfo | null>(null)
+  const [deleteUser, setDeleteUser] = useState<UserInfo | null>(null)
 
   const load = async () => setUsers(await fetchUsers())
   useEffect(() => {
@@ -72,6 +67,54 @@ export function AdminUsersSection() {
       }),
     [users, q, district, role, status],
   )
+
+  // دیالوگ ویرایش مشخصات کاربر (نام/تلفن/حوزه/پایگاه/تحصیلات/سن)
+  const [editForm, setEditForm] = useState({ fullName: "", phone: "", district: "", base: "", education: "", age: "" })
+  const openEdit = (u: UserInfo) => {
+    setEditForm({ fullName: u.fullName, phone: u.phone, district: u.district, base: u.base, education: u.education, age: u.age })
+    setEditUser(u)
+  }
+  const submitEdit = async () => {
+    if (!editUser) return
+    setBusy(editUser.id)
+    try {
+      const res = await fetch("/api/users", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: editUser.id, ...editForm }),
+      })
+      const d = await res.json().catch(() => ({}))
+      if (res.ok && d.ok) {
+        toast({ title: "ذخیره شد", description: d.message })
+        setEditUser(null)
+        await Promise.all([load(), refresh()])
+      } else {
+        toast({ title: "خطا", description: d.error ?? "عملیات ناموفق بود", variant: "destructive" })
+      }
+    } catch {
+      toast({ title: "خطا", description: "خطای شبکه", variant: "destructive" })
+    }
+    setBusy(null)
+  }
+
+  const submitDelete = async (u: UserInfo) => {
+    setBusy(u.id)
+    try {
+      const res = await fetch(`/api/users?id=${encodeURIComponent(u.id)}`, { method: "DELETE" })
+      const d = await res.json().catch(() => ({}))
+      if (res.ok && d.ok) {
+        toast({ title: "حذف شد", description: d.message })
+        setDeleteUser(null)
+        setDetailId(null)
+        await Promise.all([load(), refresh()])
+      } else {
+        toast({ title: "خطا", description: d.error ?? "عملیات ناموفق بود", variant: "destructive" })
+      }
+    } catch {
+      toast({ title: "خطا", description: "خطای شبکه", variant: "destructive" })
+    }
+    setBusy(null)
+  }
 
   const pending = filtered.filter((u) => u.status === "pending")
   const rest = filtered.filter((u) => u.status !== "pending")
@@ -119,6 +162,89 @@ export function AdminUsersSection() {
           </select>
         </div>
       </div>
+
+      {/* دیالوگ ویرایش کاربر */}
+      <Dialog open={editUser !== null} onOpenChange={(v) => !v && setEditUser(null)}>
+        <DialogContent className="rounded-[28px] border-line bg-popover p-5 sm:max-w-md">
+          <DialogHeader className="text-right">
+            <DialogTitle className="flex items-center gap-2 text-ink">
+              <Pencil className="h-4.5 w-4.5 text-neon" />
+              ویرایش مشخصات کاربر
+            </DialogTitle>
+            <DialogDescription className="text-ink-muted">{editUser?.fullName}</DialogDescription>
+          </DialogHeader>
+          <div className="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+            <div className="sm:col-span-2">
+              <label className="mb-1.5 block text-[11.5px] font-bold text-ink-muted">نام و نام خانوادگی</label>
+              <Input value={editForm.fullName} onChange={(e) => setEditForm({ ...editForm, fullName: e.target.value })} className="rounded-2xl border-line bg-surface-2 text-ink" />
+            </div>
+            <div>
+              <label className="mb-1.5 block text-[11.5px] font-bold text-ink-muted">شماره موبایل</label>
+              <Input value={editForm.phone} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} dir="ltr" inputMode="tel" className="rounded-2xl border-line bg-surface-2 text-ink" />
+            </div>
+            <div>
+              <label className="mb-1.5 block text-[11.5px] font-bold text-ink-muted">سن</label>
+              <Input value={editForm.age} onChange={(e) => setEditForm({ ...editForm, age: e.target.value })} dir="ltr" inputMode="numeric" className="rounded-2xl border-line bg-surface-2 text-ink" />
+            </div>
+            <div>
+              <label className="mb-1.5 block text-[11.5px] font-bold text-ink-muted">حوزه</label>
+              <select value={editForm.district} onChange={(e) => setEditForm({ ...editForm, district: e.target.value, base: "" })} className="w-full rounded-2xl border border-line bg-surface-2 px-3 py-2.5 text-[12.5px] text-ink outline-none">
+                <option value="">— بدون حوزه —</option>
+                {Object.entries(DISTRICT_LABELS).map(([k, v]) => (
+                  <option key={k} value={k}>{v}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="mb-1.5 block text-[11.5px] font-bold text-ink-muted">پایگاه</label>
+              <Input value={editForm.base} onChange={(e) => setEditForm({ ...editForm, base: e.target.value })} placeholder="مثلاً پایگاه امام رضا (ع)" className="rounded-2xl border-line bg-surface-2 text-ink placeholder:text-ink-muted/50" />
+            </div>
+            <div className="sm:col-span-2">
+              <label className="mb-1.5 block text-[11.5px] font-bold text-ink-muted">تحصیلات</label>
+              <select value={editForm.education} onChange={(e) => setEditForm({ ...editForm, education: e.target.value })} className="w-full rounded-2xl border border-line bg-surface-2 px-3 py-2.5 text-[12.5px] text-ink outline-none">
+                <option value="">— انتخاب نشده —</option>
+                {Object.entries(EDUCATION_LABELS).map(([k, v]) => (
+                  <option key={k} value={k}>{v}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <button
+            onClick={submitEdit}
+            disabled={busy !== null || editForm.fullName.trim().length < 2}
+            className="mt-4 w-full rounded-full bg-neon py-3.5 text-[14px] font-bold text-neon-foreground disabled:opacity-50"
+          >
+            {busy !== null ? "..." : "ذخیره تغییرات"}
+          </button>
+        </DialogContent>
+      </Dialog>
+
+      {/* دیالوگ حذف کاربر */}
+      <Dialog open={deleteUser !== null} onOpenChange={(v) => !v && setDeleteUser(null)}>
+        <DialogContent className="rounded-[28px] border-line bg-popover p-5 sm:max-w-md">
+          <DialogHeader className="text-right">
+            <DialogTitle className="flex items-center gap-2 text-ink">
+              <Trash2 className="h-4.5 w-4.5 text-danger" />
+              حذف قطعی کاربر
+            </DialogTitle>
+            <DialogDescription className="text-ink-muted">
+              حساب و همهٔ ردپاهایش (اخبار، امتیازها، پیام‌های تالار، اعلان‌ها) برای همیشه پاک می‌شود و غیرقابل بازگشت است.
+            </DialogDescription>
+          </DialogHeader>
+          {deleteUser && (
+            <p className="mt-3 rounded-2xl border border-danger/30 bg-danger/6 p-3.5 text-[12.5px] font-bold leading-6 text-ink">
+              «{deleteUser.fullName}» — {ROLE_LABELS[deleteUser.role]} · {DISTRICT_LABELS[deleteUser.district] ?? "—"}
+            </p>
+          )}
+          <button
+            onClick={() => deleteUser && submitDelete(deleteUser)}
+            disabled={busy !== null}
+            className="mt-4 w-full rounded-full bg-danger py-3.5 text-[14px] font-bold text-white disabled:opacity-50"
+          >
+            {busy !== null ? "..." : "حذف کامل کاربر"}
+          </button>
+        </DialogContent>
+      </Dialog>
 
       {users === null && (
         <div className="flex items-center justify-center gap-2 py-10 text-[13px] text-ink-muted">
@@ -267,7 +393,7 @@ export function AdminUsersSection() {
       </Dialog>
 
       {/* پرونده کامل کاربر */}
-      <UserDetailDialog userId={detailId} onClose={() => setDetailId(null)} onChanged={load} />
+      <UserDetailDialog userId={detailId} onClose={() => setDetailId(null)} onChanged={load} onEdit={(u) => { setDetailId(null); openEdit(u) }} onDelete={(u) => setDeleteUser(u)} />
     </div>
   )
 }
@@ -293,7 +419,19 @@ export function UserPhoto({ user, size = 48, tilted = false }: { user: { fullNam
 }
 
 // ---------- پرونده کامل کاربر ----------
-function UserDetailDialog({ userId, onClose, onChanged }: { userId: string | null; onClose: () => void; onChanged: () => void }) {
+function UserDetailDialog({
+  userId,
+  onClose,
+  onChanged,
+  onEdit,
+  onDelete,
+}: {
+  userId: string | null
+  onClose: () => void
+  onChanged: () => void
+  onEdit: (u: UserInfo) => void
+  onDelete: (u: UserInfo) => void
+  }) {
   const { userId: adminUid, fetchUserDetail, moderateUser, setUserRole, refresh } = useApp()
   const { toast } = useToast()
   const [detail, setDetail] = useState<AdminUserDetail | null>(null)
@@ -345,6 +483,30 @@ function UserDetailDialog({ userId, onClose, onChanged }: { userId: string | nul
     } else {
       toast({ title: "خطا", description: res.message, variant: "destructive" })
     }
+  }
+
+  // مجوز مدیریت تالار و آموزش — فقط با ارادهٔ ادمین کل (معمولاً به کارشناس)
+  const toggleContentPerm = async (allowed: boolean) => {
+    if (!detail || busy) return
+    setBusy(true)
+    try {
+      const res = await fetch("/api/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: adminUid, action: "set_content_perm", targetId: detail.user.id, allowed }),
+      })
+      const d = await res.json().catch(() => ({}))
+      if (res.ok && d.ok) {
+        toast({ title: "انجام شد", description: d.message })
+        const dd = await fetchUserDetail(detail.user.id)
+        if (dd) setDetail(dd)
+      } else {
+        toast({ title: "خطا", description: d.error ?? "عملیات ناموفق بود", variant: "destructive" })
+      }
+    } catch {
+      toast({ title: "خطا", description: "خطای شبکه", variant: "destructive" })
+    }
+    setBusy(false)
   }
 
   // مجوز ارسال خبر به کانال ایتا — فقط برای کارشناس، با ارادهٔ ادمین کل
@@ -491,6 +653,27 @@ function UserDetailDialog({ userId, onClose, onChanged }: { userId: string | nul
                 {u.role === "specialist" && (
                   <div className="mt-3 flex items-center justify-between rounded-2xl border border-line bg-surface-2/60 px-4 py-3">
                     <div className="min-w-0">
+                      <p className="text-[12px] font-black text-ink">🎓 مدیریت تالار گفتگو و آموزش</p>
+                      <p className="mt-0.5 text-[10.5px] leading-4 text-ink-muted">
+                        با فعال بودن این مجوز، این کارشناس می‌تواند در تالار موضوع درج کند و درس آموزشی منتشر یا حذف کند (فقط با ارادهٔ ادمین کل).
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => toggleContentPerm(!u.canManageContent)}
+                      disabled={busy}
+                      className={cn(
+                        "ml-3 flex h-8 shrink-0 items-center rounded-full px-4 text-[11px] font-black transition-colors disabled:opacity-50",
+                        u.canManageContent ? "bg-neon text-neon-foreground" : "border border-line bg-surface text-ink-muted",
+                      )}
+                    >
+                      {busy ? "..." : u.canManageContent ? "فعال ✓" : "غیرفعال"}
+                    </button>
+                  </div>
+                )}
+
+                {u.role === "specialist" && (
+                  <div className="mt-3 flex items-center justify-between rounded-2xl border border-line bg-surface-2/60 px-4 py-3">
+                    <div className="min-w-0">
                       <p className="text-[12px] font-black text-ink">📨 ارسال خبر به کانال ایتا</p>
                       <p className="mt-0.5 text-[10.5px] leading-4 text-ink-muted">
                         با فعال بودن این مجوز، این کارشناس می‌تواند خبرها را مستقیم به کانال ایتا ارسال کند.
@@ -520,6 +703,28 @@ function UserDetailDialog({ userId, onClose, onChanged }: { userId: string | nul
               <InfoCell icon={<Activity className="h-3.5 w-3.5" />} label="آخرین فعالیت" value={u.lastActivityAt ? relTime(u.lastActivityAt) : "—"} />
               <InfoCell icon={<FileText className="h-3.5 w-3.5" />} label="نام کاربری" value={u.username} ltr />
             </div>
+
+            {/* ویرایش و حذف — اختیار کامل ادمین کل (نه حساب خودش، نه ادمین سامانه) */}
+            {!u.isSuperAdmin && (
+              <div className="flex gap-2">
+                <button
+                  onClick={() => onEdit(u as UserInfo)}
+                  disabled={busy}
+                  className="flex flex-1 items-center justify-center gap-1.5 rounded-full border border-neon/40 bg-neon/8 py-3 text-[13px] font-bold text-neon transition-colors hover:bg-neon/15 disabled:opacity-50"
+                >
+                  <Pencil className="h-4 w-4" />
+                  ویرایش مشخصات
+                </button>
+                <button
+                  onClick={() => onDelete(u as UserInfo)}
+                  disabled={busy}
+                  className="flex flex-1 items-center justify-center gap-1.5 rounded-full border border-danger/40 py-3 text-[13px] font-bold text-danger-soft transition-colors hover:bg-danger/8 disabled:opacity-50"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  حذف کاربر
+                </button>
+              </div>
+            )}
 
             {/* کارنامه */}
             <div>
