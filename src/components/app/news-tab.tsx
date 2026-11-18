@@ -243,7 +243,7 @@ export function NewsScreen({
               className={cn(
                 "flex flex-1 items-center justify-center gap-1.5 rounded-full py-2 text-[12px] font-bold transition-colors",
                 scope === s.key
-                  ? "bg-gradient-to-l from-[var(--v3-azure-2)] to-[var(--v3-azure-deep)] text-white shadow-[0_8px_18px_-8px_rgba(37,99,235,0.6)]"
+                  ? "bg-gradient-to-l from-[var(--v3-azure-2)] to-[var(--v3-azure-deep)] text-white shadow-[0_8px_18px_-8px_rgba(180,26,34,0.6)]"
                   : "text-[var(--v3-ink-2)]",
               )}
             >
@@ -307,7 +307,7 @@ export function NewsScreen({
               className={cn(
                 "shrink-0 rounded-full border px-3.5 py-1.5 text-[11.5px] font-bold transition-colors",
                 period === p.key
-                  ? "border-[var(--v3-azure)] bg-[var(--v3-azure-soft)] text-[var(--v3-azure-deep)] dark:text-[#93c5fd]"
+                  ? "border-[var(--v3-azure)] bg-[var(--v3-azure-soft)] text-[var(--v3-azure-deep)] dark:text-[#fca5a5]"
                   : "border-[var(--v3-line)] bg-[var(--v3-card-2)] text-[var(--v3-ink-2)] hover:text-[var(--v3-ink)]",
               )}
             >
@@ -329,7 +329,7 @@ export function NewsScreen({
               className={cn(
                 "shrink-0 rounded-full border px-4 py-2 text-[12.5px] font-bold transition-colors",
                 filter === f.key
-                  ? "border-transparent bg-gradient-to-l from-[var(--v3-azure-2)] to-[var(--v3-azure-deep)] text-white shadow-[0_8px_18px_-8px_rgba(37,99,235,0.6)]"
+                  ? "border-transparent bg-gradient-to-l from-[var(--v3-azure-2)] to-[var(--v3-azure-deep)] text-white shadow-[0_8px_18px_-8px_rgba(180,26,34,0.6)]"
                   : "border-[var(--v3-line)] bg-[var(--v3-card-2)] text-[var(--v3-ink-2)] hover:text-[var(--v3-ink)]",
               )}
             >

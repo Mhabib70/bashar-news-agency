@@ -47,7 +47,7 @@ export function Ring({
           strokeDasharray={c}
           strokeDashoffset={offset}
           className={cn(barClass)}
-          style={{ filter: "drop-shadow(0 0 8px rgba(37,99,235,0.4))" }}
+          style={{ filter: "drop-shadow(0 0 8px rgba(180,26,34,0.4))" }}
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center">{children}</div>
@@ -72,7 +72,7 @@ export function SectionHeader({ title, action, onAction }: { title: string; acti
 // ---------- چیپ وضعیت خبر ----------
 export function StatusChip({ status, small }: { status: string; small?: boolean }) {
   const map = {
-    approved: { label: "تایید شده", cls: "bg-[var(--v3-azure-soft)] text-[var(--v3-azure-deep)] border-transparent dark:text-[#93c5fd]" },
+    approved: { label: "تایید شده", cls: "bg-[var(--v3-azure-soft)] text-[var(--v3-azure-deep)] border-transparent dark:text-[#fca5a5]" },
     rejected: { label: "رد شده", cls: "bg-red-50 text-red-600 border-transparent dark:bg-red-500/12 dark:text-red-400" },
     pending: { label: "در بررسی", cls: "bg-[var(--v3-amber-soft)] text-amber-600 border-transparent dark:text-amber-400" },
   } as const
@@ -394,7 +394,7 @@ function TimelineRow({
 export function StageChip({ status, stage }: { status: string; stage: string }) {
   if (status === "approved")
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-[var(--v3-azure-soft)] px-2 py-0.5 text-[9.5px] font-black text-[var(--v3-azure-deep)] dark:text-[#93c5fd]">
+      <span className="inline-flex items-center gap-1 rounded-full bg-[var(--v3-azure-soft)] px-2 py-0.5 text-[9.5px] font-black text-[var(--v3-azure-deep)] dark:text-[#fca5a5]">
         <CheckCircle2 className="h-2.5 w-2.5" /> منتشر شد
       </span>
     )

@@ -31,7 +31,7 @@ export function TopBar({
   const { user, unreadCount } = state
   const { setTheme } = useTheme()
   return (
-    <header className="v3-hero sticky top-0 z-40 rounded-none shadow-[0_14px_34px_-18px_rgba(9,14,35,0.55)]">
+    <header className="v3-hero sticky top-0 z-40 rounded-none shadow-[0_14px_34px_-18px_rgba(34,5,8,0.55)]">
       <div className="mx-auto flex h-16 w-full max-w-[1380px] items-center gap-3 px-3 lg:h-[72px] lg:px-5">
         {/* برند */}
         <div className="flex min-w-0 items-center gap-2.5">
@@ -40,7 +40,7 @@ export function TopBar({
           </span>
           <div className="min-w-0">
             <div className="truncate text-[13.5px] font-black leading-5 text-white lg:text-[15.5px]">خبرگزاری بسیج شهر رشت</div>
-            <div className="hidden text-[10px] font-semibold leading-4 text-[#93c5fd] sm:block">روایت‌گرِ حقیقت، صدای بسیج</div>
+            <div className="hidden text-[10px] font-semibold leading-4 text-[#fca5a5] sm:block">روایت‌گرِ حقیقت، صدای بسیج</div>
           </div>
         </div>
 
@@ -95,7 +95,7 @@ export function TopBar({
 
 /* ================= ستون راست دسکتاپ: پروفایل + منو + چالش‌ها ================= */
 const CHALLENGE_ICONS = [
-  { bg: "#e3ecfe", fg: "#1d4ed8" },
+  { bg: "#fde8e9", fg: "#8f0e15" },
   { bg: "#fdf0d7", fg: "#b45309" },
   { bg: "#e6f6ec", fg: "#2f9e5f" },
   { bg: "#fdeaed", fg: "#e05252" },
@@ -187,7 +187,7 @@ export function SideNav({
             className={cn(
               "flex w-full items-center gap-2.5 rounded-[14px] px-3 py-2.5 text-[12.5px] transition-colors",
               m.active
-                ? "bg-gradient-to-l from-[var(--v3-azure-2)] to-[var(--v3-azure-deep)] font-black text-white shadow-[0_10px_22px_-10px_rgba(37,99,235,0.6)]"
+                ? "bg-gradient-to-l from-[var(--v3-azure-2)] to-[var(--v3-azure-deep)] font-black text-white shadow-[0_10px_22px_-10px_rgba(180,26,34,0.6)]"
                 : "font-semibold text-[var(--v3-ink-2)] hover:bg-[var(--v3-card-2)] hover:text-[var(--v3-ink)]",
             )}
           >
@@ -196,7 +196,7 @@ export function SideNav({
             {m.badge ? (
               <span className={cn(
                 "mr-auto flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[10px] font-black",
-                m.badgeTone === "red" ? "bg-red-100 text-red-600 dark:bg-red-500/15 dark:text-red-400" : "bg-[var(--v3-azure-soft)] text-[var(--v3-azure-deep)] dark:text-[#93c5fd]",
+                m.badgeTone === "red" ? "bg-red-100 text-red-600 dark:bg-red-500/15 dark:text-red-400" : "bg-[var(--v3-azure-soft)] text-[var(--v3-azure-deep)] dark:text-[#fca5a5]",
                 m.active && "bg-white/25 text-white",
               )}>
                 {fa(m.badge)}
@@ -300,7 +300,7 @@ export function RightRail({
 
       {/* چالش فعال */}
       {active && (
-        <button onClick={onOpenChallenges} className="v3-tile-blue rounded-2xl p-4 text-right shadow-[0_16px_36px_-16px_rgba(37,99,235,0.6)]">
+        <button onClick={onOpenChallenges} className="v3-tile-blue rounded-2xl p-4 text-right shadow-[0_16px_36px_-16px_rgba(180,26,34,0.6)]">
           <div className="flex items-center justify-between">
             <span className="flex items-center gap-1.5 text-[10.5px] font-bold opacity-90">
               <Megaphone className="h-3.5 w-3.5" /> چالش فعال
@@ -344,7 +344,7 @@ export function StoryRow({
         </button>
         {leaders.slice(0, 9).map((r) => (
           <button key={r.id} onClick={() => setPicked(r)} className="flex w-[68px] shrink-0 flex-col items-center gap-1.5" aria-label={r.fullName}>
-            <span className="flex h-[58px] w-[58px] items-center justify-center rounded-full bg-[conic-gradient(from_30deg,#3b82f6,#93c5fd,#3b82f6)] p-[3px]">
+            <span className="flex h-[58px] w-[58px] items-center justify-center rounded-full bg-[conic-gradient(from_30deg,#e0202b,#fca5a5,#e0202b)] p-[3px]">
               <span className="flex h-full w-full items-center justify-center rounded-full bg-[var(--v3-card)] p-[2px]">
                 <Avatar name={r.fullName} src={r.avatar} size={48} />
               </span>
@@ -363,7 +363,7 @@ export function StoryRow({
                 <DialogTitle className="text-[var(--v3-ink)]">{picked.fullName}</DialogTitle>
               </DialogHeader>
               <div className="flex flex-col items-center gap-2 pb-1">
-                <span className="flex h-[74px] w-[74px] items-center justify-center rounded-full bg-[conic-gradient(from_30deg,#3b82f6,#93c5fd,#3b82f6)] p-[3px]">
+                <span className="flex h-[74px] w-[74px] items-center justify-center rounded-full bg-[conic-gradient(from_30deg,#e0202b,#fca5a5,#e0202b)] p-[3px]">
                   <span className="flex h-full w-full items-center justify-center rounded-full bg-[var(--v3-card)] p-[2px]">
                     <Avatar name={picked.fullName} src={picked.avatar} size={62} />
                   </span>

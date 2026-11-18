@@ -180,7 +180,7 @@ export function SubmitFlow({
         {done ? (
           <div className="stage-enter flex flex-col items-center py-4 text-center">
             {/* کارت جشن موفقیت */}
-            <div className="v3-tile-blue w-full rounded-[22px] p-5 shadow-[0_18px_40px_-18px_rgba(37,99,235,0.7)]">
+            <div className="v3-tile-blue w-full rounded-[22px] p-5 shadow-[0_18px_40px_-18px_rgba(180,26,34,0.7)]">
               <span className="relative mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-white/18 shadow-[inset_0_1px_0_rgba(255,255,255,0.25)]">
                 <CheckCircle2 className="h-10 w-10" />
               </span>
@@ -218,7 +218,7 @@ export function SubmitFlow({
 
             {challengeId && (
               <div className="mt-3 flex items-center justify-between rounded-[14px] border border-[var(--v3-azure)]/30 bg-[var(--v3-azure-soft)] px-4 py-2.5">
-                <p className="text-[12px] font-bold text-[var(--v3-azure-deep)] dark:text-[#93c5fd]">
+                <p className="text-[12px] font-bold text-[var(--v3-azure-deep)] dark:text-[#fca5a5]">
                   🎯 ثبت محتوا برای چالش: {activeChallenges.find((c) => c.id === challengeId)?.title ?? "چالش"}
                 </p>
                 <button onClick={() => setChallengeId(null)} className="text-[11px] font-bold text-[var(--v3-ink-2)] transition-colors hover:text-[var(--v3-ink)]">
@@ -250,7 +250,7 @@ export function SubmitFlow({
                       className={cn(
                         "flex flex-col items-center gap-1.5 rounded-[14px] border px-2 py-3 text-[11.5px] font-bold transition-colors",
                         category === c.code
-                          ? "border-[var(--v3-azure)] bg-[var(--v3-azure-soft)] text-[var(--v3-azure-deep)] dark:text-[#93c5fd]"
+                          ? "border-[var(--v3-azure)] bg-[var(--v3-azure-soft)] text-[var(--v3-azure-deep)] dark:text-[#fca5a5]"
                           : "border-[var(--v3-line)] bg-[var(--v3-card-2)] text-[var(--v3-ink-2)] hover:text-[var(--v3-ink)]",
                       )}
                     >
@@ -265,7 +265,7 @@ export function SubmitFlow({
                     className={cn(
                       "flex flex-col items-center justify-center gap-1.5 rounded-[14px] border px-2 py-3 text-[11.5px] font-bold transition-colors",
                       category === "none"
-                        ? "border-[var(--v3-azure)] bg-[var(--v3-azure-soft)] text-[var(--v3-azure-deep)] dark:text-[#93c5fd]"
+                        ? "border-[var(--v3-azure)] bg-[var(--v3-azure-soft)] text-[var(--v3-azure-deep)] dark:text-[#fca5a5]"
                         : "border-[var(--v3-line)] bg-[var(--v3-card-2)] text-[var(--v3-ink-2)] hover:text-[var(--v3-ink)]",
                     )}
                   >
@@ -364,7 +364,7 @@ export function SubmitFlow({
                             className={cn(
                               "rounded-full px-3.5 py-2 text-[11.5px] font-bold transition-colors",
                               challengeId === c.id
-                                ? "bg-gradient-to-l from-[var(--v3-azure-2)] to-[var(--v3-azure-deep)] text-white shadow-[0_8px_18px_-8px_rgba(37,99,235,0.6)]"
+                                ? "bg-gradient-to-l from-[var(--v3-azure-2)] to-[var(--v3-azure-deep)] text-white shadow-[0_8px_18px_-8px_rgba(180,26,34,0.6)]"
                                 : "border border-[var(--v3-line)] bg-[var(--v3-card-2)] text-[var(--v3-ink-2)] hover:text-[var(--v3-ink)]",
                             )}
                           >
@@ -390,7 +390,7 @@ export function SubmitFlow({
                   <h4 className="mt-3 text-[15.5px] font-black leading-7 text-[var(--v3-ink)]">{title}</h4>
                   <p className="mt-2 line-clamp-6 whitespace-pre-line text-[12.5px] leading-6 text-[var(--v3-ink-2)]">{content}</p>
                   {challengeId && (
-                    <p className="mt-3 rounded-[12px] bg-[var(--v3-azure-soft)] px-3 py-2 text-[11px] font-bold text-[var(--v3-azure-deep)] dark:text-[#93c5fd]">
+                    <p className="mt-3 rounded-[12px] bg-[var(--v3-azure-soft)] px-3 py-2 text-[11px] font-bold text-[var(--v3-azure-deep)] dark:text-[#fca5a5]">
                       ثبت‌شده برای چالش: {activeChallenges.find((c) => c.id === challengeId)?.title}
                     </p>
                   )}

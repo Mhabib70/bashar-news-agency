@@ -7,11 +7,11 @@ import { UpdateBanner } from "@/components/app/update-banner";
 export const metadata: Metadata = {
   title: "خبرگزاری بسیج شهر رشت | اپ خبرنگاران",
   description: "خبرگزاری بسیج شهر رشت — روایت‌گر حقیقت، صدای بسیج. ارسال خبر، چرخه بررسی سه‌مرحله‌ای، امتیاز، سطح و چالش",
-  icons: { icon: "https://z-cdn.chatglm.cn/z-ai/static/logo.svg" },
+  icons: { icon: "/img/logo-mark.png", apple: "/img/logo-mark.png" },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#eef1f8",
+  themeColor: "#f7f2f2",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,

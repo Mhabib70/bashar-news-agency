@@ -68,7 +68,7 @@ export function HomeScreen({
       <div className="grid grid-cols-2 gap-2.5">
         <button
           onClick={() => router.push("/forum")}
-          className="v3-tile-blue group relative overflow-hidden rounded-[22px] p-4 text-right shadow-[0_16px_34px_-16px_rgba(37,99,235,0.65)] transition-transform duration-200 active:scale-[0.98]"
+          className="v3-tile-blue group relative overflow-hidden rounded-[22px] p-4 text-right shadow-[0_16px_34px_-16px_rgba(180,26,34,0.65)] transition-transform duration-200 active:scale-[0.98]"
         >
           <span className="relative flex h-10 w-10 items-center justify-center rounded-[14px] bg-white/18 shadow-[inset_0_1px_0_rgba(255,255,255,0.25)]">
             <MessagesSquare className="h-5 w-5" />
@@ -142,7 +142,7 @@ export function HomeScreen({
 
       {/* چالش فعال (کارت گرادیانی آبی) */}
       {activeChallenge && (
-        <button onClick={onOpenChallenges} className="v3-tile-blue relative overflow-hidden rounded-[22px] p-4 text-right shadow-[0_18px_40px_-18px_rgba(37,99,235,0.7)]">
+        <button onClick={onOpenChallenges} className="v3-tile-blue relative overflow-hidden rounded-[22px] p-4 text-right shadow-[0_18px_40px_-18px_rgba(180,26,34,0.7)]">
           <div className="flex items-start justify-between">
             <span className="flex items-center gap-1.5 text-[11px] font-bold opacity-90">
               <Megaphone className="h-4 w-4" />

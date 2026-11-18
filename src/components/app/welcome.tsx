@@ -122,7 +122,7 @@ export function Welcome() {
       </div>
 
       {/* پنل روشنِ لغزان روی هیرو — شعار و دکمه */}
-      <div className="relative -mt-16 z-10 flex flex-1 flex-col rounded-t-[34px] bg-[var(--v3-page)] px-6 pt-7 shadow-[0_-18px_44px_-24px_rgba(9,14,35,0.5)]">
+      <div className="relative -mt-16 z-10 flex flex-1 flex-col rounded-t-[34px] bg-[var(--v3-page)] px-6 pt-7 shadow-[0_-18px_44px_-24px_rgba(34,5,8,0.5)]">
         <span className="v3-chip mb-3 w-fit">خبرگزاری بسیج شهر رشت</span>
         <h1 className="text-[33px] font-black leading-[1.25] text-[var(--v3-ink)]">
           روایت‌گرِ
@@ -346,7 +346,7 @@ function RegisterDialog({
                       className={cn(
                         "rounded-full border px-3.5 py-2 text-[12px] font-semibold transition-colors",
                         f.education === ed.key
-                          ? "border-transparent bg-gradient-to-l from-[var(--v3-azure-2)] to-[var(--v3-azure-deep)] text-white shadow-[0_8px_18px_-8px_rgba(37,99,235,0.6)]"
+                          ? "border-transparent bg-gradient-to-l from-[var(--v3-azure-2)] to-[var(--v3-azure-deep)] text-white shadow-[0_8px_18px_-8px_rgba(180,26,34,0.6)]"
                           : "border-[var(--v3-line)] bg-[var(--v3-card-2)] text-[var(--v3-ink-2)]",
                       )}
                     >
@@ -369,7 +369,7 @@ function RegisterDialog({
                       className={cn(
                         "rounded-xl border px-3 py-2.5 text-[12px] font-semibold transition-colors",
                         f.district === k
-                          ? "border-[var(--v3-azure)] bg-[var(--v3-azure-soft)] text-[var(--v3-azure-deep)] dark:text-[#93c5fd]"
+                          ? "border-[var(--v3-azure)] bg-[var(--v3-azure-soft)] text-[var(--v3-azure-deep)] dark:text-[#fca5a5]"
                           : "border-[var(--v3-line)] bg-[var(--v3-card-2)] text-[var(--v3-ink-2)]",
                       )}
                     >
@@ -388,7 +388,7 @@ function RegisterDialog({
                       className={cn(
                         "rounded-xl border px-3 py-2.5 text-[11.5px] font-semibold leading-4 transition-colors",
                         f.base === b
-                          ? "border-[var(--v3-azure)] bg-[var(--v3-azure-soft)] text-[var(--v3-azure-deep)] dark:text-[#93c5fd]"
+                          ? "border-[var(--v3-azure)] bg-[var(--v3-azure-soft)] text-[var(--v3-azure-deep)] dark:text-[#fca5a5]"
                           : "border-[var(--v3-line)] bg-[var(--v3-card-2)] text-[var(--v3-ink-2)]",
                       )}
                     >

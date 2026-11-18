@@ -85,7 +85,7 @@ export default function Page() {
         </div>
       ) : !userId || !state ? (
         /* ورود: در موبایل تمام‌صفحه، در دسکتاپ قاب مرکزی */
-        <div className="mx-auto flex h-dvh w-full max-w-[460px] flex-col overflow-hidden sm:my-6 sm:h-[min(880px,94dvh)] sm:rounded-[36px] sm:border sm:border-[var(--v3-line)] sm:shadow-[0_40px_120px_-40px_rgba(16,33,84,0.4)]">
+        <div className="mx-auto flex h-dvh w-full max-w-[460px] flex-col overflow-hidden sm:my-6 sm:h-[min(880px,94dvh)] sm:rounded-[36px] sm:border sm:border-[var(--v3-line)] sm:shadow-[0_40px_120px_-40px_rgba(74,8,14,0.4)]">
           <Welcome />
         </div>
       ) : user?.status === "pending" ? (

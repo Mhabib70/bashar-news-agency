@@ -132,13 +132,13 @@ export function ProfileScreen({ onOpenAdmin }: { onOpenAdmin?: () => void }) {
       {/* هدر پروفایل */}
       <div className="flex items-center gap-4">
         <div className="relative">
-          <span className="inline-flex rounded-full border-[3px] border-[var(--v3-azure)]/50 p-1 shadow-[0_12px_28px_-12px_rgba(37,99,235,0.55)]">
+          <span className="inline-flex rounded-full border-[3px] border-[var(--v3-azure)]/50 p-1 shadow-[0_12px_28px_-12px_rgba(180,26,34,0.55)]">
             <Avatar name={user.fullName} src={user.avatar} size={72} />
           </span>
           <button
             onClick={() => fileRef.current?.click()}
             disabled={uploading}
-            className="absolute -bottom-1.5 -left-1.5 flex h-8 w-8 items-center justify-center rounded-full bg-[var(--v3-azure)] text-white shadow-[0_8px_18px_-6px_rgba(37,99,235,0.7)] ring-2 ring-[var(--v3-page)] transition-transform hover:scale-105 active:scale-95 disabled:opacity-60"
+            className="absolute -bottom-1.5 -left-1.5 flex h-8 w-8 items-center justify-center rounded-full bg-[var(--v3-azure)] text-white shadow-[0_8px_18px_-6px_rgba(180,26,34,0.7)] ring-2 ring-[var(--v3-page)] transition-transform hover:scale-105 active:scale-95 disabled:opacity-60"
             aria-label="تغییر عکس پروفایل"
           >
             {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}
@@ -174,7 +174,7 @@ export function ProfileScreen({ onOpenAdmin }: { onOpenAdmin?: () => void }) {
               <BadgeCheck className="h-4 w-4" />
               خبرگزاری بسیج شهر رشت
             </span>
-            <span className="rounded-full bg-[var(--v3-azure-soft)] px-2.5 py-1 font-mono text-[9px] font-bold text-[var(--v3-azure-deep)] dark:text-[#93c5fd]" dir="ltr">
+            <span className="rounded-full bg-[var(--v3-azure-soft)] px-2.5 py-1 font-mono text-[9px] font-bold text-[var(--v3-azure-deep)] dark:text-[#fca5a5]" dir="ltr">
               {user.username}
             </span>
           </div>
@@ -204,7 +204,7 @@ export function ProfileScreen({ onOpenAdmin }: { onOpenAdmin?: () => void }) {
           </div>
           {user.base && <p className="relative mt-3 text-center text-[10px] text-[var(--v3-ink-2)]/80">پایگاه: {user.base}</p>}
           <div className="relative mt-3 flex gap-2">
-            <button onClick={shareCard} className="flex flex-1 items-center justify-center gap-1.5 rounded-[14px] border border-[var(--v3-azure)]/40 bg-[var(--v3-azure-soft)] py-2.5 text-[11.5px] font-bold text-[var(--v3-azure-deep)] transition-opacity hover:opacity-85 dark:text-[#93c5fd]">
+            <button onClick={shareCard} className="flex flex-1 items-center justify-center gap-1.5 rounded-[14px] border border-[var(--v3-azure)]/40 bg-[var(--v3-azure-soft)] py-2.5 text-[11.5px] font-bold text-[var(--v3-azure-deep)] transition-opacity hover:opacity-85 dark:text-[#fca5a5]">
               <Share2 className="h-4 w-4" />
               اشتراک‌گذاری
             </button>
@@ -250,7 +250,7 @@ export function ProfileScreen({ onOpenAdmin }: { onOpenAdmin?: () => void }) {
       </div>
 
       {/* سالنامه */}
-      <button onClick={openRecap} className="v3-tile-blue relative w-full overflow-hidden rounded-[22px] p-5 text-right shadow-[0_18px_40px_-18px_rgba(37,99,235,0.7)] transition-transform hover:scale-[1.01] active:scale-[0.99]">
+      <button onClick={openRecap} className="v3-tile-blue relative w-full overflow-hidden rounded-[22px] p-5 text-right shadow-[0_18px_40px_-18px_rgba(180,26,34,0.7)] transition-transform hover:scale-[1.01] active:scale-[0.99]">
         <div className="pointer-events-none absolute -left-10 -bottom-12 h-36 w-36 rounded-full bg-white/12 blur-2xl" />
         <div className="relative flex items-center gap-4">
           <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[18px] bg-white/18 shadow-[inset_0_1px_0_rgba(255,255,255,0.25)]">
@@ -457,7 +457,7 @@ export function ProfileScreen({ onOpenAdmin }: { onOpenAdmin?: () => void }) {
           {!recapBusy && recap && (
             <div className="mt-2 space-y-4">
               {/* کارت قهرمانی سال */}
-              <div className="v3-tile-blue rounded-[20px] p-4 text-center shadow-[0_18px_40px_-18px_rgba(37,99,235,0.7)]">
+              <div className="v3-tile-blue rounded-[20px] p-4 text-center shadow-[0_18px_40px_-18px_rgba(180,26,34,0.7)]">
                 <p className="text-[11.5px] font-bold text-white/85">در سال {faNum(recap.jy)} شما</p>
                 <p className="v3-num mt-1 text-[34px] font-black leading-none">{fa(recap.totals.approved)}</p>
                 <p className="mt-1 text-[12.5px] font-bold text-white/90">خبر تاییدشده منتشر کردید</p>
@@ -559,7 +559,7 @@ export function ProfileScreen({ onOpenAdmin }: { onOpenAdmin?: () => void }) {
         {user.role === "admin" && (
           <button
             onClick={onOpenAdmin}
-            className="flex flex-1 items-center justify-center gap-2 rounded-[14px] border border-[var(--v3-azure)]/40 bg-[var(--v3-azure-soft)] py-3.5 text-[13.5px] font-bold text-[var(--v3-azure-deep)] transition-colors hover:bg-[var(--v3-azure)]/25 dark:text-[#93c5fd]"
+            className="flex flex-1 items-center justify-center gap-2 rounded-[14px] border border-[var(--v3-azure)]/40 bg-[var(--v3-azure-soft)] py-3.5 text-[13.5px] font-bold text-[var(--v3-azure-deep)] transition-colors hover:bg-[var(--v3-azure)]/25 dark:text-[#fca5a5]"
           >
             <ShieldCheck className="h-4.5 w-4.5" />
             پنل مدیریت

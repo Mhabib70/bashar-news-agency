@@ -171,7 +171,7 @@ export function ReviewScreen() {
                       <button
                         onClick={() => act(n.id, "approve", undefined, undefined, "advance")}
                         disabled={busy !== null}
-                        className="flex flex-1 items-center justify-center gap-1.5 rounded-full border border-[var(--v3-azure)]/35 bg-[var(--v3-azure-soft)] py-3 text-[12.5px] font-bold text-[var(--v3-azure-deep)] transition-transform hover:scale-[1.01] disabled:opacity-50 dark:text-[#93c5fd]"
+                        className="flex flex-1 items-center justify-center gap-1.5 rounded-full border border-[var(--v3-azure)]/35 bg-[var(--v3-azure-soft)] py-3 text-[12.5px] font-bold text-[var(--v3-azure-deep)] transition-transform hover:scale-[1.01] disabled:opacity-50 dark:text-[#fca5a5]"
                       >
                         <ArrowUpCircle className="h-4 w-4" />
                         {busy === n.id ? "..." : "تایید و ارجاع"}
@@ -263,7 +263,7 @@ export function ReviewScreen() {
                   <button
                     onClick={() => act(detailNews.id, "approve", undefined, undefined, "advance")}
                     disabled={busy !== null}
-                    className="rounded-full border border-[var(--v3-azure)]/35 bg-[var(--v3-azure-soft)] py-3 text-[12.5px] font-bold text-[var(--v3-azure-deep)] disabled:opacity-50 dark:text-[#93c5fd]"
+                    className="rounded-full border border-[var(--v3-azure)]/35 bg-[var(--v3-azure-soft)] py-3 text-[12.5px] font-bold text-[var(--v3-azure-deep)] disabled:opacity-50 dark:text-[#fca5a5]"
                   >
                     تایید و ارجاع به بعدی
                   </button>

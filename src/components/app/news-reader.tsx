@@ -72,7 +72,7 @@ export function NewsReaderDialog({
               <span
                 className={cn(
                   "mr-auto flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-black",
-                  status === "approved" && "bg-[var(--v3-azure-soft)] text-[var(--v3-azure-deep)] dark:text-[#93c5fd]",
+                  status === "approved" && "bg-[var(--v3-azure-soft)] text-[var(--v3-azure-deep)] dark:text-[#fca5a5]",
                   status === "rejected" && "bg-red-50 text-red-600 dark:bg-red-500/12 dark:text-red-400",
                   status === "pending" && "bg-[var(--v3-amber-soft)] text-amber-600 dark:text-amber-400",
                 )}

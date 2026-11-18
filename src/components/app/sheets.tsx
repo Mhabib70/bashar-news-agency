@@ -187,7 +187,7 @@ export function ChallengesSheet({
                   </span>
                   {active ? (
                     c.joined ? (
-                      <span className="flex items-center gap-1 rounded-full bg-[var(--v3-azure-soft)] px-3 py-1.5 text-[11.5px] font-bold text-[var(--v3-azure-deep)] dark:text-[#93c5fd]">
+                      <span className="flex items-center gap-1 rounded-full bg-[var(--v3-azure-soft)] px-3 py-1.5 text-[11.5px] font-bold text-[var(--v3-azure-deep)] dark:text-[#fca5a5]">
                         <CheckCircle2 className="h-4 w-4" />
                         شرکت کرده‌ای
                       </span>

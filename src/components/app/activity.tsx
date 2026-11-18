@@ -56,7 +56,7 @@ export function ActivityScreen({
             className={cn(
               "flex-1 rounded-full py-2.5 text-[13px] font-bold transition-all",
               range === k
-                ? "bg-gradient-to-l from-[var(--v3-azure-2)] to-[var(--v3-azure-deep)] text-white shadow-[0_8px_18px_-8px_rgba(37,99,235,0.65)]"
+                ? "bg-gradient-to-l from-[var(--v3-azure-2)] to-[var(--v3-azure-deep)] text-white shadow-[0_8px_18px_-8px_rgba(180,26,34,0.65)]"
                 : "text-[var(--v3-ink-2)] hover:text-[var(--v3-ink)]",
             )}
           >
@@ -128,7 +128,7 @@ export function ActivityScreen({
           </div>
           <button
             onClick={onGotoProfile}
-            className="rounded-full border border-[var(--v3-azure)]/40 bg-[var(--v3-azure-soft)] px-3.5 py-2 text-[11px] font-bold text-[var(--v3-azure-deep)] transition-opacity hover:opacity-85 dark:text-[#93c5fd]"
+            className="rounded-full border border-[var(--v3-azure)]/40 bg-[var(--v3-azure-soft)] px-3.5 py-2 text-[11px] font-bold text-[var(--v3-azure-deep)] transition-opacity hover:opacity-85 dark:text-[#fca5a5]"
           >
             جزئیات کامل در پروفایل
           </button>

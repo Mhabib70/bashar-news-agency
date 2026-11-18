@@ -119,7 +119,7 @@ export function ContentCalendar({ mine, onOpenNews }: { mine?: boolean; onOpenNe
                 className={cn(
                   "relative flex h-11 flex-col items-center justify-center rounded-xl text-[12px] font-bold transition-colors",
                   isSel
-                    ? "bg-gradient-to-b from-[var(--v3-azure-2)] to-[var(--v3-azure-deep)] text-white shadow-[0_8px_18px_-8px_rgba(37,99,235,0.6)]"
+                    ? "bg-gradient-to-b from-[var(--v3-azure-2)] to-[var(--v3-azure-deep)] text-white shadow-[0_8px_18px_-8px_rgba(180,26,34,0.6)]"
                     : isToday
                       ? "border border-[var(--v3-azure)]/45 text-[var(--v3-azure)]"
                       : dayItems.length
@@ -168,7 +168,7 @@ export function ContentCalendar({ mine, onOpenNews }: { mine?: boolean; onOpenNe
                   {it.code} · {it.time} · {it.reporterName} · {CATEGORY_LABELS[it.category] ?? "بدون دسته"}
                 </span>
               </span>
-              <span className={cn("shrink-0 rounded-full px-2 py-0.5 text-[9.5px] font-black", it.status === "approved" ? "bg-[var(--v3-azure-soft)] text-[var(--v3-azure-deep)] dark:text-[#93c5fd]" : it.status === "rejected" ? "bg-red-50 text-red-600 dark:bg-red-500/12 dark:text-red-400" : "bg-[var(--v3-amber-soft)] text-amber-600 dark:text-amber-400")}>
+              <span className={cn("shrink-0 rounded-full px-2 py-0.5 text-[9.5px] font-black", it.status === "approved" ? "bg-[var(--v3-azure-soft)] text-[var(--v3-azure-deep)] dark:text-[#fca5a5]" : it.status === "rejected" ? "bg-red-50 text-red-600 dark:bg-red-500/12 dark:text-red-400" : "bg-[var(--v3-amber-soft)] text-amber-600 dark:text-amber-400")}>
                 {STATUS_LABEL[it.status] ?? it.status}
               </span>
             </button>

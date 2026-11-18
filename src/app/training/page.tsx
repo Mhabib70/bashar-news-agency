@@ -26,10 +26,10 @@ const IMG_RE = /\.(png|jpe?g|gif|webp|avif|bmp)(\?|$)/i
 const CATEGORY_META: Record<string, { emoji: string; label: string; tile: string; tileShadow: string; chip: string; activeChip: string }> = {
   writing: {
     emoji: "✍️", label: "نگارش و لید",
-    tile: "bg-gradient-to-br from-[#7bb661] to-[#2f6b33]",
-    tileShadow: "shadow-[0_10px_22px_-8px_rgba(47,107,51,0.65)]",
+    tile: "bg-gradient-to-br from-[#e64852] to-[#b41a22]",
+    tileShadow: "shadow-[0_10px_22px_-8px_rgba(180,26,34,0.65)]",
     chip: "bg-neon/10 text-neon border-neon/30",
-    activeChip: "bg-[#2f6b33] text-white border-transparent",
+    activeChip: "bg-[#b41a22] text-white border-transparent",
   },
   photo: {
     emoji: "📷", label: "عکاسی خبری",
@@ -210,7 +210,7 @@ export default function TrainingPage() {
         <div className={cn(
           "relative overflow-hidden rounded-[26px] border p-3.5 transition-all",
           t.completed
-            ? "border-neon/45 bg-gradient-to-l from-neon/10 to-surface/85 shadow-[0_12px_30px_-16px_rgba(47,107,51,0.55)]"
+            ? "border-neon/45 bg-gradient-to-l from-neon/10 to-surface/85 shadow-[0_12px_30px_-16px_rgba(180,26,34,0.55)]"
             : "border-line bg-surface/85 shadow-sm backdrop-blur",
         )}>
           <div className="flex items-start gap-3">
@@ -274,7 +274,7 @@ export default function TrainingPage() {
           </button>
           <div className="min-w-0 flex-1">
             <p className="flex items-center gap-2 truncate text-[13.5px] font-black text-ink">
-              <span className="type-tile h-7 w-7 rounded-[9px] bg-gradient-to-br from-[#7bb661] to-[#2f6b33] shadow-[0_6px_14px_-6px_rgba(47,107,51,0.6)]">
+              <span className="type-tile h-7 w-7 rounded-[9px] bg-gradient-to-br from-[#e64852] to-[#b41a22] shadow-[0_6px_14px_-6px_rgba(180,26,34,0.6)]">
                 <GraduationCap className="h-3.5 w-3.5" />
               </span>
               آکادمی خبرنگاران
@@ -288,7 +288,7 @@ export default function TrainingPage() {
 
       <div className="relative z-10 mx-auto w-full max-w-[720px] space-y-3.5 px-4 py-5">
         {/* هیرو پنل آکادمی */}
-        <section className="fade-up relative overflow-hidden rounded-[28px] border border-neon/25 bg-gradient-to-l from-neon/14 via-surface/90 to-surface/75 p-5 shadow-[0_18px_44px_-20px_rgba(47,107,51,0.5)] backdrop-blur-xl">
+        <section className="fade-up relative overflow-hidden rounded-[28px] border border-neon/25 bg-gradient-to-l from-neon/14 via-surface/90 to-surface/75 p-5 shadow-[0_18px_44px_-20px_rgba(180,26,34,0.5)] backdrop-blur-xl">
           <span className="float-emoji absolute left-4 top-3 text-[26px] opacity-90" style={{ "--fr": "-12deg", "--fd": "0.2s" } as CSSProperties}>🎓</span>
           <span className="float-emoji absolute left-1/3 top-2.5 text-[15px] opacity-60" style={{ "--fr": "8deg", "--fd": "1.3s" } as CSSProperties}>✨</span>
           <span className="float-emoji absolute bottom-3 left-16 text-[17px] opacity-50" style={{ "--fr": "10deg", "--fd": "0.7s" } as CSSProperties}>📝</span>
@@ -304,7 +304,7 @@ export default function TrainingPage() {
           </p>
           <h1 className="relative mt-2.5 text-[21px] font-black leading-8 text-ink">
             خبرنگار حرفه‌ای،
-            <span className="bg-gradient-to-l from-neon to-[#7bb661] bg-clip-text text-transparent"> اینجا ساخته می‌شود </span>
+            <span className="bg-gradient-to-l from-neon to-[#e64852] bg-clip-text text-transparent"> اینجا ساخته می‌شود </span>
           </h1>
           <p className="relative mt-1 text-[11.5px] leading-5 text-ink-muted">
             درس‌های کوتاه و کاربردی در پنج دسته — هر درس را که خواندید علامت بزنید تا پیشرفت‌تان کامل شود.
@@ -317,7 +317,7 @@ export default function TrainingPage() {
             </div>
             <div className="h-3 w-full overflow-hidden rounded-full border border-line bg-[var(--page)]/70">
               <div
-                className="relative h-full rounded-full bg-gradient-to-l from-neon to-[#7bb661] shadow-[0_0_14px_rgba(47,107,51,0.55)] transition-all duration-700"
+                className="relative h-full rounded-full bg-gradient-to-l from-neon to-[#e64852] shadow-[0_0_14px_rgba(180,26,34,0.55)] transition-all duration-700"
                 style={{ width: `${Math.max(pct, stats.total > 0 ? 4 : 0)}%` }}
               >
                 <span className="absolute inset-0 rounded-full bg-white/25 mix-blend-overlay" />
@@ -331,7 +331,7 @@ export default function TrainingPage() {
         {canManage && (
           <button
             onClick={() => setAddOpen(true)}
-            className="btn-glow flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-l from-neon to-[#4e9c5c] py-3.5 text-[14px] font-black text-neon-foreground shadow-[0_12px_28px_-10px_rgba(47,107,51,0.65)] transition-transform active:scale-[0.98]"
+            className="btn-glow flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-l from-neon to-[#d3232e] py-3.5 text-[14px] font-black text-neon-foreground shadow-[0_12px_28px_-10px_rgba(180,26,34,0.65)] transition-transform active:scale-[0.98]"
           >
             <Plus className="h-4.5 w-4.5" />
             آموزش جدید (انتشار برای همه + اعلان)
@@ -387,7 +387,7 @@ export default function TrainingPage() {
           <div className="no-scrollbar flex gap-2 overflow-x-auto pb-1">
             <button
               onClick={() => setFilter("all")}
-              className={cn("shrink-0 rounded-full border px-3.5 py-1.5 text-[11.5px] font-bold transition-all", filter === "all" ? "border-neon bg-neon text-neon-foreground shadow-[0_8px_18px_-8px_rgba(47,107,51,0.7)]" : "border-line bg-surface/85 text-ink-muted backdrop-blur")}
+              className={cn("shrink-0 rounded-full border px-3.5 py-1.5 text-[11.5px] font-bold transition-all", filter === "all" ? "border-neon bg-neon text-neon-foreground shadow-[0_8px_18px_-8px_rgba(180,26,34,0.7)]" : "border-line bg-surface/85 text-ink-muted backdrop-blur")}
             >
               همه ({toFa(items.length)})
             </button>
@@ -420,7 +420,7 @@ export default function TrainingPage() {
           <div className="fade-up relative flex flex-col items-center gap-3 overflow-hidden rounded-[28px] border border-dashed border-line bg-surface/70 px-4 py-10 text-center backdrop-blur">
             <span className="float-emoji absolute left-6 top-6 text-[22px] opacity-70" style={{ "--fr": "-10deg" } as CSSProperties}>🎓</span>
             <span className="float-emoji absolute right-8 top-10 text-[18px] opacity-60" style={{ "--fr": "8deg", "--fd": "0.8s" } as CSSProperties}>✨</span>
-            <img src="/img/hero.png" alt="آکادمی خبرنگاران" className="w-44 rounded-[22px] opacity-90 shadow-[0_0_44px_rgba(47,107,51,0.25)]" />
+            <img src="/img/hero.png" alt="آکادمی خبرنگاران" className="w-44 rounded-[22px] opacity-90 shadow-[0_0_44px_rgba(180,26,34,0.25)]" />
             <p className="mt-1 text-[15px] font-black text-ink">آکادمی هنوز درسی ندارد</p>
             <p className="max-w-[320px] text-[11.5px] leading-5 text-ink-muted">
               {canManage ? "اولین درس را منتشر کنید — خبرنگاران با اعلان از آن باخبر می‌شوند." : "مدیران خبرگزاری به‌زودی درس‌های آموزشی را اینجا منتشر می‌کنند."}
@@ -542,7 +542,7 @@ export default function TrainingPage() {
                         "flex flex-1 items-center justify-center gap-2 rounded-full py-3.5 text-[13.5px] font-black transition-all active:scale-[0.98]",
                         openLesson.completed
                           ? "border border-neon/50 bg-neon/12 text-neon"
-                          : "bg-gradient-to-l from-neon to-[#4e9c5c] text-neon-foreground shadow-[0_12px_28px_-10px_rgba(47,107,51,0.65)]",
+                          : "bg-gradient-to-l from-neon to-[#d3232e] text-neon-foreground shadow-[0_12px_28px_-10px_rgba(180,26,34,0.65)]",
                       )}
                     >
                       {openLesson.completed ? <CheckCircle2 className="h-4.5 w-4.5" /> : <Circle className="h-4.5 w-4.5" />}
@@ -578,7 +578,7 @@ export default function TrainingPage() {
         <DialogContent className="max-h-[88dvh] overflow-y-auto nice-scroll rounded-[28px] border-line bg-popover p-5">
           <DialogHeader className="text-right">
             <DialogTitle className="flex items-center gap-2 text-ink">
-              <span className="type-tile h-8 w-8 rounded-xl bg-gradient-to-br from-[#7bb661] to-[#2f6b33] text-[15px]">🎓</span>
+              <span className="type-tile h-8 w-8 rounded-xl bg-gradient-to-br from-[#e64852] to-[#b41a22] text-[15px]">🎓</span>
               انتشار درس جدید
             </DialogTitle>
             <DialogDescription className="text-ink-muted">برای همه خبرنگاران منتشر می‌شود و اعلان همگانی می‌رود.</DialogDescription>
@@ -654,7 +654,7 @@ export default function TrainingPage() {
             <button
               onClick={submit}
               disabled={busy || f.title.trim().length < 3}
-              className="flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-l from-neon to-[#4e9c5c] py-3.5 text-[14px] font-black text-neon-foreground shadow-[0_12px_28px_-10px_rgba(47,107,51,0.65)] disabled:opacity-50"
+              className="flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-l from-neon to-[#d3232e] py-3.5 text-[14px] font-black text-neon-foreground shadow-[0_12px_28px_-10px_rgba(180,26,34,0.65)] disabled:opacity-50"
             >
               {busy ? <Loader2 className="h-4.5 w-4.5 animate-spin" /> : <ShieldCheck className="h-4.5 w-4.5" />}
               {busy ? "در حال انتشار..." : "انتشار درس + اعلان همگانی"}

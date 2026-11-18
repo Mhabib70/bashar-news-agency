@@ -33,9 +33,9 @@ const TOPIC_TYPE_META: Record<string, { emoji: string; label: string; chip: stri
   class: {
     emoji: "🎓", label: "کلاس تصویری",
     chip: "bg-neon/10 text-neon border-neon/30",
-    tile: "bg-gradient-to-br from-[#7bb661] to-[#2f6b33]",
-    tileShadow: "shadow-[0_10px_22px_-8px_rgba(47,107,51,0.65)]",
-    activeChip: "bg-[#2f6b33] text-white border-transparent",
+    tile: "bg-gradient-to-br from-[#e64852] to-[#b41a22]",
+    tileShadow: "shadow-[0_10px_22px_-8px_rgba(180,26,34,0.65)]",
+    activeChip: "bg-[#b41a22] text-white border-transparent",
   },
   brainstorm: {
     emoji: "🤝", label: "هم‌فکری",
@@ -440,7 +440,7 @@ export default function ForumPage() {
               className={cn(
                 "border px-3.5 pb-1.5 pt-2.5",
                 mine
-                  ? "rounded-[20px] rounded-tl-[6px] border-neon/45 bg-gradient-to-b from-neon/22 to-neon/6 shadow-[0_8px_22px_-10px_rgba(47,107,51,0.55)]"
+                  ? "rounded-[20px] rounded-tl-[6px] border-neon/45 bg-gradient-to-b from-neon/22 to-neon/6 shadow-[0_8px_22px_-10px_rgba(180,26,34,0.55)]"
                   : "rounded-[20px] rounded-tr-[6px] border-line bg-surface/95 shadow-sm backdrop-blur",
               )}
             >
@@ -652,7 +652,7 @@ export default function ForumPage() {
                 </>
               ) : (
                 <>
-                  <span className="type-tile h-7 w-7 rounded-[9px] bg-gradient-to-br from-[#7bb661] to-[#2f6b33] shadow-[0_6px_14px_-6px_rgba(47,107,51,0.6)]">
+                  <span className="type-tile h-7 w-7 rounded-[9px] bg-gradient-to-br from-[#e64852] to-[#b41a22] shadow-[0_6px_14px_-6px_rgba(180,26,34,0.6)]">
                     <MessagesSquare className="h-3.5 w-3.5" />
                   </span>
                   تالار گفتگو
@@ -679,7 +679,7 @@ export default function ForumPage() {
         /* ───────────ه لابی تالار — فضای گرافیکی ─────────── */
         <div className="relative z-10 mx-auto w-full max-w-[720px] space-y-3.5 px-4 py-5">
           {/* هیرو پنل */}
-          <section className="fade-up relative overflow-hidden rounded-[28px] border border-neon/25 bg-gradient-to-l from-neon/14 via-surface/90 to-surface/75 p-5 shadow-[0_18px_44px_-20px_rgba(47,107,51,0.5)] backdrop-blur-xl">
+          <section className="fade-up relative overflow-hidden rounded-[28px] border border-neon/25 bg-gradient-to-l from-neon/14 via-surface/90 to-surface/75 p-5 shadow-[0_18px_44px_-20px_rgba(180,26,34,0.5)] backdrop-blur-xl">
             <span className="float-emoji absolute left-4 top-3 text-[26px] opacity-90" style={{ "--fr": "-12deg", "--fd": "0.2s" } as CSSProperties}>💬</span>
             <span className="float-emoji absolute left-1/3 top-2.5 text-[15px] opacity-60" style={{ "--fr": "8deg", "--fd": "1.3s" } as CSSProperties}>✨</span>
             <span className="absolute -bottom-10 -right-8 h-36 w-36 rounded-full bg-neon/20 blur-3xl" aria-hidden />
@@ -694,7 +694,7 @@ export default function ForumPage() {
             </p>
             <h1 className="relative mt-2.5 text-[21px] font-black leading-8 text-ink">
               صدای شما،
-              <span className="bg-gradient-to-l from-neon to-[#7bb661] bg-clip-text text-transparent"> فضای خبرگزاری </span>
+              <span className="bg-gradient-to-l from-neon to-[#e64852] bg-clip-text text-transparent"> فضای خبرگزاری </span>
               را زنده نگه می‌دارد
             </h1>
             <p className="relative mt-1 text-[11.5px] leading-5 text-ink-muted">
@@ -729,7 +729,7 @@ export default function ForumPage() {
             {canManage ? (
               <button
                 onClick={() => setCreating(true)}
-                className="btn-glow flex flex-1 items-center justify-center gap-2 rounded-full bg-gradient-to-l from-neon to-[#4e9c5c] py-3.5 text-[14px] font-black text-neon-foreground shadow-[0_12px_28px_-10px_rgba(47,107,51,0.65)] transition-transform active:scale-[0.98]"
+                className="btn-glow flex flex-1 items-center justify-center gap-2 rounded-full bg-gradient-to-l from-neon to-[#d3232e] py-3.5 text-[14px] font-black text-neon-foreground shadow-[0_12px_28px_-10px_rgba(180,26,34,0.65)] transition-transform active:scale-[0.98]"
               >
                 <Plus className="h-4.5 w-4.5" />
                 تاپیک جدید (موضوع گفتگو)
@@ -866,7 +866,7 @@ export default function ForumPage() {
             <div className="no-scrollbar flex gap-2 overflow-x-auto pb-1">
               <button
                 onClick={() => setFilter("all")}
-                className={cn("shrink-0 rounded-full border px-3.5 py-1.5 text-[11.5px] font-bold transition-all", filter === "all" ? "border-neon bg-neon text-neon-foreground shadow-[0_8px_18px_-8px_rgba(47,107,51,0.7)]" : "border-line bg-surface/85 text-ink-muted backdrop-blur")}
+                className={cn("shrink-0 rounded-full border px-3.5 py-1.5 text-[11.5px] font-bold transition-all", filter === "all" ? "border-neon bg-neon text-neon-foreground shadow-[0_8px_18px_-8px_rgba(180,26,34,0.7)]" : "border-line bg-surface/85 text-ink-muted backdrop-blur")}
               >
                 همه ({toFa(topics.length)})
               </button>
@@ -899,7 +899,7 @@ export default function ForumPage() {
             <div className="fade-up relative flex flex-col items-center gap-3 overflow-hidden rounded-[28px] border border-dashed border-line bg-surface/70 px-4 py-10 text-center backdrop-blur">
               <span className="float-emoji absolute left-6 top-6 text-[22px] opacity-70" style={{ "--fr": "-10deg" } as CSSProperties}>💬</span>
               <span className="float-emoji absolute right-8 top-10 text-[18px] opacity-60" style={{ "--fr": "8deg", "--fd": "0.8s" } as CSSProperties}>✨</span>
-              <img src="/img/hero.png" alt="تالار گفتگو" className="w-44 rounded-[22px] opacity-90 shadow-[0_0_44px_rgba(47,107,51,0.25)]" />
+              <img src="/img/hero.png" alt="تالار گفتگو" className="w-44 rounded-[22px] opacity-90 shadow-[0_0_44px_rgba(180,26,34,0.25)]" />
               <p className="mt-1 text-[15px] font-black text-ink">هنوز گفتگویی شروع نشده است</p>
               <p className="max-w-[320px] text-[11.5px] leading-5 text-ink-muted">
                 تالار را زنده کنید — کلاس تصویری بگذارید، هم‌فکری راه بیندازید یا اطلاع‌رسانی کنید.
@@ -941,7 +941,7 @@ export default function ForumPage() {
                   <div className={cn(
                     "relative overflow-hidden rounded-[26px] border p-3.5 transition-all",
                     t.pinned
-                      ? "border-neon/50 bg-gradient-to-l from-neon/10 to-surface/85 shadow-[0_12px_30px_-16px_rgba(47,107,51,0.55)]"
+                      ? "border-neon/50 bg-gradient-to-l from-neon/10 to-surface/85 shadow-[0_12px_30px_-16px_rgba(180,26,34,0.55)]"
                       : "border-line bg-surface/85 shadow-sm backdrop-blur",
                     !t.pinned && live && "border-neon/30",
                   )}>
@@ -1004,7 +1004,7 @@ export default function ForumPage() {
             {timeline.length === 0 && (
               <div className="flex flex-col items-center gap-2 py-12 text-center">
                 <span className="float-emoji text-[42px]" style={{ "--fr": "-6deg" } as CSSProperties}>💬</span>
-                <p className="bg-gradient-to-l from-neon to-[#7bb661] bg-clip-text text-[15px] font-black text-transparent">اولین پیام را بفرستید</p>
+                <p className="bg-gradient-to-l from-neon to-[#e64852] bg-clip-text text-[15px] font-black text-transparent">اولین پیام را بفرستید</p>
                 <p className="max-w-[280px] text-[11px] leading-5 text-ink-muted">مثلاً لینک کلاس تصویری یا سوال خود را بپرسید — هر پیام ‎+۲ امتیاز تالار دارد.</p>
               </div>
             )}
@@ -1099,7 +1099,7 @@ export default function ForumPage() {
               <button
                 onClick={send}
                 disabled={busy || (!msg.trim() && !fileUrl)}
-                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-neon to-[#2f6b33] text-neon-foreground shadow-[0_0_18px_rgba(47,107,51,0.45)] transition-transform active:scale-95 disabled:opacity-40 disabled:shadow-none"
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-neon to-[#b41a22] text-neon-foreground shadow-[0_0_18px_rgba(180,26,34,0.45)] transition-transform active:scale-95 disabled:opacity-40 disabled:shadow-none"
                 aria-label="ارسال"
               >
                 <Send className="h-4.5 w-4.5 -translate-x-px" />
@@ -1133,7 +1133,7 @@ export default function ForumPage() {
             ))}
           </div>
           <Input value={newTitle} onChange={(e) => setNewTitle(e.target.value)} onKeyDown={(e) => e.key === "Enter" && createTopic()} placeholder="عنوان تاپیک — مثلاً «کلاس تصویری اصول خبرنویسی»" className="mt-3 rounded-2xl border-line bg-surface text-ink" />
-          <button onClick={createTopic} disabled={busy || newTitle.trim().length < 3} className="mt-4 w-full rounded-full bg-gradient-to-l from-neon to-[#4e9c5c] py-3.5 text-[14px] font-black text-neon-foreground disabled:opacity-50">
+          <button onClick={createTopic} disabled={busy || newTitle.trim().length < 3} className="mt-4 w-full rounded-full bg-gradient-to-l from-neon to-[#d3232e] py-3.5 text-[14px] font-black text-neon-foreground disabled:opacity-50">
             {busy ? "..." : "ایجاد تاپیک"}
           </button>
         </DialogContent>

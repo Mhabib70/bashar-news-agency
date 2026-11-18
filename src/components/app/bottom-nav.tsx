@@ -61,7 +61,7 @@ function NavBtn({ label, icon, active, onClick }: { label: string; icon: React.R
         className={cn(
           "flex h-10 w-10 items-center justify-center rounded-full transition-all",
           active
-            ? "bg-white text-[var(--v3-navy-deep)] shadow-[0_8px_18px_-6px_rgba(4,9,30,0.45)]"
+            ? "bg-white text-[var(--v3-navy-deep)] shadow-[0_8px_18px_-6px_rgba(20,3,5,0.45)]"
             : "bg-transparent text-white/55",
         )}
       >
