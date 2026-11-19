@@ -102,3 +102,6 @@ android/build/
 # دیتابیس محلی SQLite (مسیر واقعی نسبت به prisma/schema.prisma)
 prisma/db/
 docs/qa-fix/
+
+# طرح‌های Stitch — فقط لوکال
+design-ui/

@@ -159,6 +159,8 @@ export default function Page() {
                 <ActivityScreen
                   onGotoNewsMine={openMyNews}
                   onGotoProfile={() => setTab("profile")}
+                  onOpenChallenges={() => setChallengesOpen(true)}
+                  onQuickSubmit={() => openSubmit()}
                 />
               )}
               {tab === "profile" && <ProfileScreen onOpenAdmin={openAdmin} />}

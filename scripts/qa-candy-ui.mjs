@@ -38,21 +38,22 @@ if (await tel.count()) {
 }
 await shot('02-home')
 
-// ۳) تب اخبار (کارتابل)
-await tryClick('nav button:has-text("اخبار")')
+// ۳) تب اخبار (کارتابل) — باتم‌نو موبایل (نه سایدبار دسکتاپ)
+const NAV = 'nav[aria-label="ناوبری اصلی"]'
+await tryClick(NAV + ' button:has-text("اخبار")')
 await shot('03-news')
 
 // ۴) فرم ارسال
 await page.goto(BASE + '/', { waitUntil: 'networkidle' }).catch(() => {})
-await tryClick('nav button[aria-label*="ارسال"]')
+await tryClick(NAV + ' button:nth(2)')
 await shot('04-submit')
 
 // ۵) کارنامه
-await tryClick('nav button:has-text("کارنامه")')
+await tryClick(NAV + ' button:has-text("کارنامه")')
 await shot('05-activity')
 
 // ۶) پروفایل
-await tryClick('nav button:has-text("پروفایل")')
+await tryClick(NAV + ' button:has-text("پروفایل")')
 await shot('06-profile')
 
 // ۷) پنل ادمین
