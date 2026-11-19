@@ -70,9 +70,9 @@ elif PHASE == "build":
     cmd = (f"cd /www/wwwroot/vodda && nohup sh -c "
            f"'docker build -q -t vodda-bashar:migrator bashar && "
            f"docker build --target runner -q -t vodda-bashar:prod bashar' "
-           f"> {BUILD_LOG} 2>&1 & echo started")
-    run(cmd)
-    run(f"sleep 3; tail -2 {BUILD_LOG} 2>/dev/null; echo BUILD_STARTED")
+           f"< /dev/null > {BUILD_LOG} 2>&1 & echo started")
+    run(cmd, timeout=30)
+    run(f"sleep 3; tail -2 {BUILD_LOG} 2>/dev/null; echo BUILD_STARTED", timeout=30)
 
 elif PHASE == "status":
     rc, o, _ = run(f"tail -3 {BUILD_LOG} 2>/dev/null; echo ---; pgrep -f 'docker build' >/dev/null && echo RUNNING || echo NOT_RUNNING", show=False)
