@@ -76,7 +76,7 @@ export default function Page() {
   const loggedIn = !!(userId && state && user && user.status === "active")
 
   return (
-    <main className="flex min-h-dvh flex-col bg-[var(--v3-page)]">
+    <main className="flex min-h-dvh flex-col bg-surface">
       {!booted ? (
         <div className="mx-auto flex w-full max-w-[520px] flex-1 flex-col gap-6 p-6">
           <Skeleton className="h-[54%] w-full rounded-[28px] bg-[var(--v3-card-2)]" />
@@ -172,7 +172,7 @@ export default function Page() {
           </div>
 
           <div className="lg:hidden">
-            <BottomNav onReview={() => setTab("review")} />
+            <BottomNav onReview={() => setTab("review")} onSubmit={() => openSubmit()} />
           </div>
         </>
       )}

@@ -23,6 +23,7 @@ model User {
   forumPoints     Int       @default(0) // امتیاز تالار گفتگو — پاداش پیام/تاپیک/واکنش‌گیری
   canSendEitaa    Boolean   @default(false) // مجوز ارسال خبر به کانال ایتا (فقط با اجازهٔ ادمین کل)
   canManageContent Boolean  @default(false) // مجوز مدیریت تالار و آموزش (تاپیک/درس) — فقط ادمین کل می‌دهد، معمولاً به کارشناس
+  active          Boolean   @default(true) // دسترسی فعال — ادمین کل می‌تواند موقتاً قطع کند (toggle پنل مدیریت)
   pinHash         String    @default("") // رمز دوم اختیاری (۴ تا ۶ رقم) — اگر تنظیم شود ورود دومرحله‌ای می‌شود
   levelKey        String    @default("rookie") // rookie | follower | active | pro | expert
   currentStreak   Int       @default(0)
@@ -53,6 +54,7 @@ model NewsItem {
   district     String    @default("")
   category     String    @default("none")
   title        String
+  lead         String    @default("") // لید خبر — خلاصهٔ واقع‌بین کلیدی (طراحی فرم ارسال)
   content      String    @default("")
   mediaType    String    @default("none") // none | photo | video
   status       String    @default("pending") // pending | approved | rejected
@@ -143,6 +145,7 @@ model Draft {
   user        User      @relation(fields: [userId], references: [id])
   category    String    @default("none")
   title       String    @default("")
+  lead        String    @default("")
   content     String    @default("")
   mediaType   String    @default("none") // none | photo | video
   mediaUrl    String    @default("")
@@ -158,9 +161,25 @@ model NotifSetting {
   challenges Boolean @default(true)
   broadcast Boolean  @default(true)
   rejections Boolean @default(true)
+  trainings Boolean  @default(true) // جشن‌ها و درس‌های جدید آموزشی
+  soundAlerts Boolean @default(false) // اعلان‌های صوتی فوری
   quietStart String  @default("22:00")
   quietEnd   String  @default("08:00")
   updatedAt DateTime @updatedAt
+}
+
+// لاگ زندهٔ رویدادهای امنیتی و مدیریتی — پایش راهبردی ادمین کل (طراحی _17)
+model SecurityLog {
+  id        Int      @id @default(autoincrement())
+  kind      String   // login | login_failed | logout | user_status | user_role | user_active | review | broadcast | settings | export | org | pin
+  title     String
+  detail    String   @default("")
+  actorName String   @default("")
+  phone     String   @default("")
+  severity  String   @default("info") // info | warn | danger
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
 }
 
 // اعلان‌های درون‌برنامه‌ای — معادل پیام‌های ربات با احترام به تنظیمات و ساعت سکوت

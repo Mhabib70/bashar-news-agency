@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import Image from "next/image"
-import { Menu, Bell, ArrowLeft, X, Check, LogIn, KeyRound } from "lucide-react"
+import { ArrowLeft, Check, LogIn, KeyRound, ShieldCheck } from "lucide-react"
 import { useApp } from "@/lib/store"
 import { toFa } from "@/lib/format"
 import { DISTRICT_LABELS, BASE_LISTS, EDUCATION_LEVEL_LABELS, applyOrgUnits } from "@/lib/domain"
@@ -105,45 +105,87 @@ export function Welcome() {
   }
 
   return (
-    <div className="relative flex h-full flex-col overflow-hidden bg-[var(--v3-navy)]">
-      {/* هیرو — لوگوی خبرگزاری بسیج شهر رشت روی سرمه‌ای */}
-      <div className="relative h-[52%] w-full shrink-0">
-        <Image src="/img/agency-logo.png" alt="خبرگزاری بسیج شهر رشت" fill priority sizes="430px" className="object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-b from-[var(--v3-navy-deep)]/45 via-transparent to-[var(--v3-navy)]" />
-        <div className="absolute inset-x-0 top-0 flex items-center justify-between p-5">
-          <button className="flex h-10 w-10 items-center justify-center rounded-full border border-white/12 bg-white/10 text-white backdrop-blur transition-colors hover:bg-white/20" aria-label="منو">
-            <Menu className="h-5 w-5" />
+    <div className="splash-container relative flex h-full flex-col overflow-hidden">
+      {/* لایه‌های هنری پس‌زمینه: گرید ظریف + هاله‌های گرم + قاب معماری */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 select-none overflow-hidden">
+        <div className="absolute -right-24 -top-20 h-96 w-96 rounded-full bg-gradient-to-br from-success-soft/60 via-surface-container/40 to-transparent blur-3xl" />
+        <div className="absolute -left-28 top-1/4 h-80 w-80 rounded-full bg-gradient-to-tr from-primary/15 via-primary-container/20 to-transparent blur-3xl" />
+        <div className="absolute bottom-10 right-0 h-72 w-80 rounded-full bg-gradient-to-t from-primary/10 via-surface-container-highest/30 to-transparent blur-3xl" />
+        <div className="subtle-news-grid absolute inset-0 opacity-50" />
+        {/* قاب گوشه‌های معماری */}
+        <div className="absolute right-6 top-12 h-8 w-8 rounded-tr-lg border-r-2 border-t-2 border-primary-container/70" />
+        <div className="absolute left-6 top-12 h-8 w-8 rounded-tl-lg border-l-2 border-t-2 border-primary-container/70" />
+        <div className="absolute bottom-12 right-6 h-8 w-8 rounded-br-lg border-b-2 border-r-2 border-outline-variant/50" />
+        <div className="absolute bottom-12 left-6 h-8 w-8 rounded-bl-lg border-b-2 border-l-2 border-outline-variant/50" />
+      </div>
+
+      {/* هیرو مرکزی: لوگو با حلقه‌های prestige */}
+      <div className="relative z-10 flex flex-1 flex-col items-center justify-center px-6 text-center">
+        <div className="relative mb-6 flex items-center justify-center">
+          <div className="absolute -inset-8 animate-pulse-slow rounded-full border border-success/25" />
+          <div className="absolute -inset-5 animate-spin-slow rounded-full border border-dashed border-primary-container/70" />
+          <div className="absolute -inset-2 rounded-full bg-gradient-to-tr from-primary/25 via-surface-container-highest/30 to-success/15 blur-xl" />
+          {/* کرهٔ مرکزی لوگو */}
+          <div className="glow-ring relative flex h-44 w-44 items-center justify-center overflow-hidden rounded-full border-2 border-white/90 bg-gradient-to-b from-white via-surface-container-low to-surface-container p-2 shadow-2xl ring-4 ring-primary-container/30">
+            <Image src="/img/logo-mark.png" alt="نشان رسمی خبرگزاری بسیج شهر رشت" width={164} height={164} priority className="rounded-full object-cover" />
+          </div>
+          {/* نشان تایید رسمی */}
+          <div className="absolute -left-1 bottom-1 z-10 rounded-full border border-surface-container-highest bg-white p-1 shadow-md" title="خبرگزاری رسمی بسیج">
+            <div className="rounded-full bg-primary p-1.5 text-on-primary shadow-xs">
+              <Check className="h-4 w-4" strokeWidth={3} />
+            </div>
+          </div>
+        </div>
+
+        {/* عنوان‌ها */}
+        <div className="max-w-[330px] space-y-3">
+          <div className="inline-flex items-center gap-1.5 rounded-full border border-primary-container/60 bg-gradient-to-l from-surface-container-lowest via-surface-container-low to-surface-container px-3 py-1 text-[11px] font-bold text-primary shadow-xs">
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />
+            <span>سامانه هوشمند رسانه‌ای شهر باران</span>
+            <span className="font-normal text-on-surface-variant">| رشت</span>
+          </div>
+          <h1 className="text-[26px] font-black leading-tight tracking-tight text-on-surface">
+            خبرگزاری بسیج شهر رشت
+          </h1>
+          <p className="px-2 text-[12px] font-medium leading-relaxed text-on-surface-variant">
+            مرجع رسمی، لحظه‌ای و تحلیلی اخبار، رویدادها، خدمات اجتماعی و گزارش‌های چندرسانه‌ای کلانشهر رشت
+          </p>
+        </div>
+
+        {/* لودر متحرک */}
+        <div className="mt-6 w-full max-w-[260px]">
+          <div className="relative h-1.5 w-full overflow-hidden rounded-full border border-outline-variant/50 bg-surface-container-low shadow-inner">
+            <div className="animate-progress-infinite absolute inset-y-0 right-0 w-2/3 rounded-full bg-gradient-to-l from-primary via-primary-container to-warn" />
+          </div>
+          <div className="mt-2.5 flex items-center justify-center gap-1.5 text-[11px] font-medium text-on-surface-variant">
+            <span className="h-2 w-2 animate-ping rounded-full bg-primary" />
+            <span>در حال دریافت آخرین سرخط اخبار و برقراری ارتباط امن…</span>
+          </div>
+        </div>
+
+        <div className="mt-5 flex flex-col items-center gap-2">
+          <button
+            onClick={() => setOpen(true)}
+            className="v3-btn group inline-flex items-center justify-center gap-2 px-6 py-3 text-[13px] ring-2 ring-primary-container/50"
+          >
+            ورود به داشبورد تحریریه
+            <ArrowLeft className="h-4 w-4 transition-transform duration-300 group-hover:-translate-x-1" />
           </button>
-          <button className="relative flex h-10 w-10 items-center justify-center rounded-full border border-white/12 bg-white/10 text-white backdrop-blur transition-colors hover:bg-white/20" aria-label="اعلان‌ها">
-            <Bell className="h-5 w-5" />
-            <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-[var(--v3-amber-2)]" />
-          </button>
+          <span className="text-[10px] font-medium text-on-surface-variant/80">دسترسی سریع خبرنگاران و کادر رسانه‌ای</span>
         </div>
       </div>
 
-      {/* پنل روشنِ لغزان روی هیرو — شعار و دکمه */}
-      <div className="relative -mt-16 z-10 flex flex-1 flex-col rounded-t-[34px] bg-[var(--v3-page)] px-6 pt-7 shadow-[0_-18px_44px_-24px_rgba(34,5,8,0.5)]">
-        <span className="v3-chip mb-3 w-fit">خبرگزاری بسیج شهر رشت</span>
-        <h1 className="text-[33px] font-black leading-[1.25] text-[var(--v3-ink)]">
-          روایت‌گرِ
-          <br />
-          <span className="bg-gradient-to-l from-[var(--v3-azure-2)] to-[var(--v3-azure-deep)] bg-clip-text text-transparent">حقیقت</span>
-          <br />
-          صدای بسیج
-        </h1>
-        <p className="mt-3 text-[13.5px] leading-6 text-[var(--v3-ink-2)]">
-          از قلبِ رویداد تا صفحهٔ خبر؛
-          <br />
-          روایتی معتبر با تعهّد به حقیقت و اعتماد.
-        </p>
-        <button
-          onClick={() => setOpen(true)}
-          className="v3-btn mt-6 flex w-[68%] items-center justify-between px-6 py-4 text-[15px]"
-        >
-          شروع کن
-          <ArrowLeft className="h-5 w-5" />
-        </button>
-      </div>
+      {/* فوتر */}
+      <footer className="relative z-10 space-y-3 px-6 pb-6 text-center">
+        <div className="inline-flex items-center gap-1.5 rounded-full border border-outline-variant/50 bg-white/80 px-3.5 py-1 text-[10px] font-semibold text-on-surface shadow-xs backdrop-blur-sm">
+          <ShieldCheck className="h-3.5 w-3.5 text-success" />
+          <span>رمزنگاری اختصاصی پروتکل خبری ۲۵۶ بیتی SSL</span>
+        </div>
+        <div className="text-[10px] font-normal leading-5 text-on-surface-variant">
+          <div className="font-medium text-ink">معاونت روابط عمومی و تبلیغات ناحیه مقاومت بسیج رشت</div>
+          <div>نسخه ۲.۹ پایدار • پاییز و زمستان ۱۴۰۵</div>
+        </div>
+      </footer>
 
       {/* ورود — با شماره موبایل؛ هیچ فهرست حسابی نمایش داده نمی‌شود */}
       <Dialog open={open} onOpenChange={setOpen}>
@@ -232,7 +274,6 @@ export function Welcome() {
                   }}
                   className="v3-btn-ghost flex w-full items-center justify-center gap-2 py-3.5 text-[14px]"
                 >
-                  <X className="hidden" />
                   ثبت‌نام خبرنگار جدید
                 </button>
               </>

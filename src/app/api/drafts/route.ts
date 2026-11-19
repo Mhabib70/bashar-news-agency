@@ -6,13 +6,14 @@ import { activeUser } from "@/lib/server/session"
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { category, title, content, mediaType, mediaUrl, durationMin, preparedAt, draftId } = body ?? {}
+    const { category, title, lead, content, mediaType, mediaUrl, durationMin, preparedAt, draftId } = body ?? {}
     const user = await activeUser(req)
     if (!user) return NextResponse.json({ error: "نشست معتبر نیست — دوباره وارد شوید" }, { status: 401 })
     const userId = user.id
     const patch = {
       category: category || "none",
       title: typeof title === "string" ? title.slice(0, 200) : undefined,
+      lead: typeof lead === "string" ? lead.slice(0, 300) : undefined,
       content: typeof content === "string" ? content : undefined,
       mediaType: ["photo", "video", "none"].includes(mediaType) ? mediaType : undefined,
       mediaUrl: typeof mediaUrl === "string" && mediaUrl.startsWith("/uploads/") ? mediaUrl : undefined,
@@ -32,6 +33,7 @@ export async function POST(req: NextRequest) {
         userId,
         category: patch.category,
         title: patch.title ?? "",
+        lead: patch.lead ?? "",
         content: patch.content ?? "",
         mediaType: patch.mediaType ?? "none",
         mediaUrl: patch.mediaUrl ?? "",

@@ -1,47 +1,54 @@
 "use client"
 
-import { Home, Newspaper, BarChart3, UserRound, ClipboardCheck } from "lucide-react"
+import { Home, Newspaper, Trophy, UserRound, ClipboardCheck, SquarePen } from "lucide-react"
 import { useApp, type Tab } from "@/lib/store"
 import { fa } from "@/lib/format"
 import { cn } from "@/lib/utils"
 
-export function BottomNav({ onReview, className }: { onReview: () => void; className?: string }) {
+export function BottomNav({
+  onReview,
+  onSubmit,
+  className,
+}: {
+  onReview: () => void
+  onSubmit: () => void
+  className?: string
+}) {
   const { state, tab, setTab } = useApp()
   if (!state) return null
   const isReviewer = state.user.role !== "reporter"
 
   const items: { id: Tab; label: string; icon: React.ReactNode }[] = [
-    { id: "home", label: "خانه", icon: <Home className="h-5 w-5" /> },
-    { id: "news", label: "اخبار", icon: <Newspaper className="h-5 w-5" /> },
-    { id: "activity", label: "فعالیت", icon: <BarChart3 className="h-5 w-5" /> },
-    { id: "profile", label: "پروفایل", icon: <UserRound className="h-5 w-5" /> },
+    { id: "home", label: "خانه", icon: <Home className="h-[22px] w-[22px]" /> },
+    { id: "news", label: "اخبار", icon: <Newspaper className="h-[22px] w-[22px]" /> },
+    { id: "activity", label: "کارنامه", icon: <Trophy className="h-[22px] w-[22px]" /> },
+    { id: "profile", label: "پروفایل", icon: <UserRound className="h-[22px] w-[22px]" /> },
   ]
 
   return (
     <nav
-      className={cn("fixed inset-x-4 bottom-3 z-40 lg:hidden", className)}
+      className={cn("fixed inset-x-0 bottom-0 z-40 px-4 pb-safe lg:hidden", className)}
       aria-label="ناوبری اصلی"
     >
-      <div className="v3-navpill mx-auto flex max-w-[440px] items-end justify-around rounded-[26px] px-2.5 pb-2 pt-2">
+      <div className="v3-navpill mx-auto mb-2 flex max-w-md items-center justify-between rounded-[24px] p-1.5">
         {items.slice(0, 2).map((it) => (
           <NavBtn key={it.id} label={it.label} icon={it.icon} active={tab === it.id} onClick={() => setTab(it.id)} />
         ))}
-        {isReviewer ? (
+        {/* دکمهٔ مرکزی شناور: ارسال خبر برای خبرنگار / صف بررسی برای مدیران */}
+        <div className="-mt-5 flex items-center justify-center px-1">
           <button
-            onClick={onReview}
-            className="relative -mt-8 flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-gradient-to-b from-[var(--v3-amber-2)] to-[var(--v3-amber)] text-[#42290a] shadow-[0_14px_30px_-8px_rgba(245,158,11,0.65)] ring-4 ring-[var(--v3-page)] transition-transform hover:scale-105 active:scale-95"
-            aria-label="صف بررسی"
+            onClick={isReviewer ? onReview : onSubmit}
+            className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-gradient-to-tr from-primary to-primary-container text-on-primary shadow-[0_12px_28px_-6px_rgba(157,66,58,0.5)] transition-transform hover:scale-105 active:scale-95"
+            aria-label={isReviewer ? "صف بررسی" : "ارسال خبر جدید"}
           >
-            <ClipboardCheck className="h-6 w-6" />
-            {state.reviewQueue.length > 0 && (
-              <span className="absolute -left-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#ef4444] px-1 text-[10px] font-black text-white">
+            {isReviewer ? <ClipboardCheck className="h-7 w-7" /> : <SquarePen className="h-7 w-7" />}
+            {isReviewer && state.reviewQueue.length > 0 && (
+              <span className="absolute -left-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-error px-1 text-[10px] font-black text-white">
                 {fa(state.reviewQueue.length)}
               </span>
             )}
           </button>
-        ) : (
-          <span className="w-14 shrink-0" />
-        )}
+        </div>
         {items.slice(2).map((it) => (
           <NavBtn key={it.id} label={it.label} icon={it.icon} active={tab === it.id} onClick={() => setTab(it.id)} />
         ))}
@@ -54,22 +61,14 @@ function NavBtn({ label, icon, active, onClick }: { label: string; icon: React.R
   return (
     <button
       onClick={onClick}
-      className="flex min-w-[62px] flex-col items-center gap-0.5 py-0.5 transition-colors"
+      className={cn(
+        "flex min-h-[44px] min-w-[62px] flex-1 flex-col items-center justify-center gap-0.5 px-1 py-2 transition-colors",
+        active ? "font-bold text-primary" : "text-on-surface-variant hover:text-on-surface",
+      )}
       aria-current={active ? "page" : undefined}
     >
-      <span
-        className={cn(
-          "flex h-10 w-10 items-center justify-center rounded-full transition-all",
-          active
-            ? "bg-white text-[var(--v3-navy-deep)] shadow-[0_8px_18px_-6px_rgba(20,3,5,0.45)]"
-            : "bg-transparent text-white/55",
-        )}
-      >
-        {icon}
-      </span>
-      <span className={cn("text-[9.5px] leading-none font-bold", active ? "text-white" : "text-white/45")}>
-        {label}
-      </span>
+      {icon}
+      <span className="text-[10.5px] font-medium leading-none">{label}</span>
     </button>
   )
 }

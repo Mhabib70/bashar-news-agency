@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react"
 import { useRouter } from "next/navigation"
-import { LogOut, SwitchCamera, Zap, Trophy, Flame, BellRing, ShieldCheck, Users2, Timer, Award, ChevronDown, BadgeCheck, Share2, FileDown, Camera, Trash2, Loader2, Landmark, KeyRound, Sparkles, Eye, Heart, Star, Clock3, CalendarCheck2, Newspaper } from "lucide-react"
+import { LogOut, SwitchCamera, Zap, Trophy, Flame, BellRing, ShieldCheck, Users2, Timer, Award, ChevronDown, BadgeCheck, Share2, FileDown, Camera, Trash2, Loader2, Landmark, KeyRound, Sparkles, Eye, Heart, Star, Clock3, CalendarCheck2, Newspaper, GraduationCap, Volume2, MoonStar } from "lucide-react"
 import { useApp } from "@/lib/store"
 import { Ring, SectionHeader, Avatar } from "@/components/app/bits"
 import { fa, faNum, jalali } from "@/lib/format"
@@ -349,44 +349,62 @@ export function ProfileScreen({ onOpenAdmin }: { onOpenAdmin?: () => void }) {
         </div>
       </div>
 
-      {/* تنظیمات اعلان */}
+      {/* تنظیمات هوشمند اعلان‌ها — باز و همیشه در دسترس (طراحی _5) */}
       <div>
-        <button onClick={() => setShowSettings(!showSettings)} className="flex w-full items-center justify-between">
-          <SectionHeader title="تنظیمات اعلان" />
-          <ChevronDown className={cn("h-5 w-5 text-[var(--v3-ink-2)] transition-transform", showSettings && "rotate-180")} />
-        </button>
-        {showSettings && (
-          <div className="v3-card stage-enter space-y-1 p-4">
-            {[
-              { key: "approvals", label: "تایید خبرها", icon: <ShieldCheck className="h-4.5 w-4.5" /> },
-              { key: "rejections", label: "رد خبرها (با دلیل)", icon: <Award className="h-4.5 w-4.5" /> },
-              { key: "challenges", label: "چالش‌های جدید", icon: <Trophy className="h-4.5 w-4.5" /> },
-              { key: "broadcast", label: "اطلاع‌رسانی گروهی", icon: <Users2 className="h-4.5 w-4.5" /> },
-            ].map((s) => (
-              <div key={s.key} className="flex items-center justify-between border-b border-[var(--v3-line)] py-2.5">
-                <span className="flex items-center gap-2.5 text-[13px] font-semibold text-[var(--v3-ink)]">
-                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--v3-azure-soft)] text-[var(--v3-azure)]">{s.icon}</span>
-                  {s.label}
+        <SectionHeader title="تنظیمات هوشمند اعلان‌ها" />
+        <div className="v3-card stage-enter space-y-1 p-4">
+          {[
+            { key: "approvals", label: "تایید و رد صحت خبر", desc: "اطلاع فوری پس از تصمیم بازبین", icon: <ShieldCheck className="h-4.5 w-4.5" /> },
+            { key: "rejections", label: "دریافت اصلاحیه و پیشنهادها", desc: "یادداشت بازبین‌ها برای بازنگری خبر", icon: <Award className="h-4.5 w-4.5" /> },
+            { key: "challenges", label: "چالش‌های جدید تحریریه", desc: "اعلام چالش و یادآور مهلت", icon: <Trophy className="h-4.5 w-4.5" /> },
+            { key: "broadcast", label: "اطلاع‌رسانی گروهی", desc: "پیام‌های همگانی خبرگزاری", icon: <Users2 className="h-4.5 w-4.5" /> },
+            { key: "trainings", label: "جشن‌ها و درس‌های جدید آموزشی", desc: "XP افتتاح درس‌ها و نشان‌های تازه", icon: <GraduationCap className="h-4.5 w-4.5" /> },
+            { key: "soundAlerts", label: "اعلان‌های صوتی فوری", desc: "آگاهی کوتاه صوتی هنگام رخداد مهم", icon: <Volume2 className="h-4.5 w-4.5" /> },
+          ].map((s) => (
+            <div key={s.key} className="flex items-center justify-between gap-2 py-2.5">
+              <span className="flex min-w-0 items-center gap-2.5">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-fixed/50 text-primary">{s.icon}</span>
+                <span className="min-w-0">
+                  <span className="block truncate text-[13px] font-semibold text-ink">{s.label}</span>
+                  <span className="block truncate text-[10px] text-ink-muted">{s.desc}</span>
                 </span>
-                <Switch checked={state.notifSettings[s.key as keyof typeof state.notifSettings] as boolean} onCheckedChange={(v) => setNotif(s.key, v)} disabled={busy} className="data-[state=checked]:bg-[var(--v3-azure)]" />
-              </div>
-            ))}
-            <div className="mt-1 flex items-center justify-between pt-3">
-              <span className="flex items-center gap-2.5 text-[13px] font-semibold text-[var(--v3-ink)]">
-                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--v3-amber-soft)] text-[var(--v3-amber)]">
-                  <Timer className="h-4.5 w-4.5" />
-                </span>
-                ساعت سکوت
               </span>
-              <span className="rounded-full bg-[var(--v3-card-2)] px-3 py-1.5 text-[11.5px] font-bold text-[var(--v3-ink-2)]" dir="ltr">
-                {toFaTime(state.notifSettings.quietStart)} تا {toFaTime(state.notifSettings.quietEnd)}
-              </span>
+              <Switch checked={state.notifSettings[s.key as keyof typeof state.notifSettings] as boolean} onCheckedChange={(v) => setNotif(s.key, v)} disabled={busy} className="data-[state=checked]:bg-primary" />
             </div>
-            <p className="pt-1 text-[10px] leading-4 text-[var(--v3-ink-2)]/70">
-              در بازه ساعت سکوت، اعلان‌های غیرضروری ارسال نمی‌شوند (مطابق سناریوی ۹ ربات).
-            </p>
+          ))}
+          {/* حالت Do Not Disturb — بازه سکوت با ویرایش زنده */}
+          <div className="mt-1 flex items-center justify-between gap-2 border-t border-line pt-3">
+            <span className="flex min-w-0 items-center gap-2.5">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-warn/15 text-warn">
+                <MoonStar className="h-4.5 w-4.5" />
+              </span>
+              <span className="min-w-0">
+                <span className="block text-[13px] font-semibold text-ink">حالت Do Not Disturb</span>
+                <span className="block text-[10px] text-ink-muted">خاموشی اعلان‌ها در بازه زمانی مشخص</span>
+              </span>
+            </span>
+            <span className="flex shrink-0 items-center gap-1" dir="ltr">
+              <input
+                type="time"
+                value={state.notifSettings.quietStart}
+                onChange={(e) => void saveSettings({ quietStart: e.target.value })}
+                className="rounded-lg border border-line bg-surface-2 px-1.5 py-1 text-center text-[11px] font-bold text-ink"
+                aria-label="شروع سکوت"
+              />
+              <span className="text-[10px] text-ink-muted">تا</span>
+              <input
+                type="time"
+                value={state.notifSettings.quietEnd}
+                onChange={(e) => void saveSettings({ quietEnd: e.target.value })}
+                className="rounded-lg border border-line bg-surface-2 px-1.5 py-1 text-center text-[11px] font-bold text-ink"
+                aria-label="پایان سکوت"
+              />
+            </span>
           </div>
-        )}
+          <p className="pt-1 text-[10px] leading-4 text-ink-muted/70">
+            در بازهٔ سکوت، اعلان‌های غیرضروری ارسال نمی‌شوند و به پایان سکوت موکول می‌گردند.
+          </p>
+        </div>
       </div>
 
       {/* شیت مدیریت رمز دوم */}

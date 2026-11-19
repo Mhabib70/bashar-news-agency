@@ -118,5 +118,7 @@ export async function currentUser(req: NextRequest): Promise<User | null> {
 export async function activeUser(req: NextRequest): Promise<User | null> {
   const user = await currentUser(req)
   if (!user || user.status !== "active") return null
+  // حساب غیرفعال‌شده توسط ادمین کل — نشست موجود هم بی‌اثر می‌شود
+  if (user.active === false) return null
   return user
 }

@@ -2,11 +2,11 @@ import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { activeUser } from "@/lib/server/session"
 
-// تنظیمات اعلان + ساعت سکوت (سناریوی ۹)
+// تنظیمات اعلان + ساعت سکوت (سناریوی ۹) + trainings + soundAlerts (طراحی جدید)
 export async function PUT(req: NextRequest) {
   try {
     const body = await req.json()
-    const { approvals, challenges, broadcast, rejections, quietStart, quietEnd } = body ?? {}
+    const { approvals, challenges, broadcast, rejections, trainings, soundAlerts, quietStart, quietEnd } = body ?? {}
     const user = await activeUser(req)
     if (!user) return NextResponse.json({ error: "نشست معتبر نیست — دوباره وارد شوید" }, { status: 401 })
     const userId = user.id
@@ -16,6 +16,8 @@ export async function PUT(req: NextRequest) {
       ...(typeof challenges === "boolean" ? { challenges } : {}),
       ...(typeof broadcast === "boolean" ? { broadcast } : {}),
       ...(typeof rejections === "boolean" ? { rejections } : {}),
+      ...(typeof trainings === "boolean" ? { trainings } : {}),
+      ...(typeof soundAlerts === "boolean" ? { soundAlerts } : {}),
       ...(quietStart ? { quietStart: String(quietStart) } : {}),
       ...(quietEnd ? { quietEnd: String(quietEnd) } : {}),
       updatedAt: new Date(),

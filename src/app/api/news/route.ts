@@ -19,6 +19,7 @@ export async function GET(req: NextRequest) {
     ...(canAll ? {} : { reporterId: user.id }),
     OR: [
       { title: { contains: q } },
+      { lead: { contains: q } },
       { content: { contains: q } },
       { code: { contains: q } },
     ],
@@ -36,7 +37,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { category, title, content, mediaType, mediaUrl, durationMin, preparedAt, challengeId, draftId } = body ?? {}
+    const { category, title, lead, content, mediaType, mediaUrl, durationMin, preparedAt, challengeId, draftId } = body ?? {}
     if (!title || !content) {
       return NextResponse.json({ error: "عنوان و متن خبر الزامی است" }, { status: 400 })
     }
@@ -53,6 +54,7 @@ export async function POST(req: NextRequest) {
         district: user.district,
         category: category || "none",
         title: String(title).slice(0, 200),
+        lead: typeof lead === "string" ? lead.slice(0, 300) : "",
         content: String(content),
         mediaType: ["photo", "video"].includes(mediaType) ? mediaType : "none",
         mediaUrl: typeof mediaUrl === "string" && mediaUrl.startsWith("/uploads/") ? mediaUrl : "",

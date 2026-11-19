@@ -4,6 +4,7 @@ import { notifyUser } from "@/lib/server/notify"
 import { USER_REJECT_TITLES, ROLE_LABELS, DISTRICT_LABELS } from "@/lib/domain"
 import { isSuperAdminPhone } from "@/lib/server/superadmin"
 import { activeUser } from "@/lib/server/session"
+import { logSec } from "@/lib/server/security-log"
 import { normalizePhone } from "@/lib/domain"
 
 // مدیریت کاربران — فقط ادمین کل
@@ -39,7 +40,7 @@ export async function GET(req: NextRequest) {
     const decided = approved + rejected
     return NextResponse.json({
       user: {
-        id: u.id, fullName: u.fullName, username: u.username, role: u.role, status: u.status,
+        id: u.id, fullName: u.fullName, username: u.username, role: u.role, status: u.status, active: u.active,
         rejectReason: u.rejectReason, district: u.district, base: u.base, phone: u.phone,
         age: u.age, education: u.education, canSendEitaa: u.canSendEitaa, canManageContent: u.canManageContent, points: u.points, levelKey: u.levelKey,
         currentStreak: u.currentStreak, bestStreak: u.bestStreak, avatar: u.avatar,
@@ -64,7 +65,7 @@ export async function GET(req: NextRequest) {
 
   const users = await db.user.findMany({
     select: {
-      id: true, fullName: true, username: true, role: true, status: true, rejectReason: true,
+      id: true, fullName: true, username: true, role: true, status: true, active: true, rejectReason: true,
       district: true, base: true, phone: true, age: true, education: true, canSendEitaa: true, canManageContent: true,
       points: true, levelKey: true, currentStreak: true, bestStreak: true, avatar: true,
       lastActivityAt: true, createdAt: true,
@@ -125,6 +126,15 @@ export async function POST(req: NextRequest) {
       const wasRole = target.role
       await db.user.update({ where: { id: target.id }, data: { role: newRole, district: newDistrict } })
       const roleChanged = wasRole !== newRole
+      if (roleChanged) {
+        void logSec({
+          kind: "user_role",
+          title: `تغییر نقش کاربر به «${ROLE_LABELS[newRole]}»`,
+          detail: `${target.fullName} — نقش قبلی: ${ROLE_LABELS[wasRole] ?? wasRole}`,
+          actorName: admin.fullName,
+          severity: "warn",
+        })
+      }
       await notifyUser(
         target.id,
         "user_status",
@@ -209,6 +219,36 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({
         ok: true,
         message: allowed ? `مجوز ارسال به ایتا برای ${target.fullName} فعال شد.` : `مجوز ارسال به ایتا از ${target.fullName} گرفته شد.`,
+      })
+    }
+
+    // قطع/وصل دسترسی کاربر — toggle پنل مدیریت (کاربر غیرفعال نمی‌تواند وارد شود)
+    if (action === "set_active") {
+      const enabled = body.enabled === true
+      if (target.status === "pending") {
+        return NextResponse.json({ error: "اول عضویت این کاربر را تایید کنید" }, { status: 409 })
+      }
+      await db.user.update({ where: { id: target.id }, data: { active: enabled } })
+      await notifyUser(
+        target.id,
+        "user_status",
+        enabled ? "✅ دسترسی حساب شما فعال شد" : "⛔ دسترسی حساب شما موقتاً غیرفعال شد",
+        enabled
+          ? `${admin.fullName} دسترسی شما را بازگرداند. از این پس می‌توانید وارد شوید.`
+          : `دسترسی شما توسط ${admin.fullName} موقتاً قطع شد. برای پیگیری با دفتر خبرگزاری تماس بگیرید.`,
+        `user:${target.id}`,
+        { force: true },
+      )
+      void logSec({
+        kind: "user_active",
+        title: enabled ? "فعال‌سازی دسترسی کاربر" : "غیرفعال‌سازی دسترسی کاربر",
+        detail: `${target.fullName} (${target.phone})`,
+        actorName: admin.fullName,
+        severity: enabled ? "info" : "warn",
+      })
+      return NextResponse.json({
+        ok: true,
+        message: enabled ? `دسترسی ${target.fullName} فعال شد.` : `دسترسی ${target.fullName} موقتاً قطع شد.`,
       })
     }
 

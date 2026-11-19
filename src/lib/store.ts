@@ -11,6 +11,8 @@ export type Tab = "home" | "news" | "activity" | "profile" | "review"
 type SubmitPayload = {
   category: string
   title: string
+  /** لید خبر — خلاصهٔ واقع‌بین کلیدی */
+  lead?: string
   content: string
   mediaType: string
   mediaUrl?: string
@@ -185,7 +187,7 @@ type Store = {
   uploadAvatar: (dataUrl: string) => Promise<Result>
   fetchUserDetail: (targetId: string) => Promise<AdminUserDetail | null>
   fetchAdminOverview: () => Promise<AdminOverview | null>
-  saveDraft: (p: { category: string; title: string; content: string; mediaType?: string; mediaUrl?: string; durationMin?: number; preparedAt?: string | null; draftId?: number | null }) => Promise<Result & { id?: number }>
+  saveDraft: (p: { category: string; title: string; lead?: string; content: string; mediaType?: string; mediaUrl?: string; durationMin?: number; preparedAt?: string | null; draftId?: number | null }) => Promise<Result & { id?: number }>
   deleteDraft: (id: number) => Promise<Result>
   saveSettings: (p: Partial<AppState["notifSettings"]>) => Promise<Result>
   register: (p: { fullName: string; phone: string; age: string; education: string; district: string; base: string }) => Promise<{ ok: boolean; userId?: string; status?: string; message?: string }>

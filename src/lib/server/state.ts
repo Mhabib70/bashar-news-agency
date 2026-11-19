@@ -57,6 +57,7 @@ export type NewsDTO = {
   district: string
   category: string
   title: string
+  lead: string
   content: string
   mediaType: string
   mediaUrl: string
@@ -124,7 +125,7 @@ export type AppState = {
   notifications: { id: string; kind: string; title: string; body: string; ref: string; at: string; unread: boolean }[]
   unreadCount: number
   districts: { key: string; label: string; bases: string[] }[]
-  notifSettings: { approvals: boolean; challenges: boolean; broadcast: boolean; rejections: boolean; quietStart: string; quietEnd: string }
+  notifSettings: { approvals: boolean; challenges: boolean; broadcast: boolean; rejections: boolean; trainings: boolean; soundAlerts: boolean; quietStart: string; quietEnd: string }
   pendingUsersCount: number
   staffCounts: { district: number; specialist: number; admin: number }
 }
@@ -153,7 +154,7 @@ async function periodStat(userId: string, kind: "day" | "week" | "month"): Promi
 
 function toNewsDTO(
   n: {
-    id: number; code: string; reporterId: string; district: string; category: string; title: string; content: string
+    id: number; code: string; reporterId: string; district: string; category: string; title: string; lead?: string; content: string
     mediaType: string; mediaUrl: string; status: string; reviewStage: string; rejectReason: string; rejectNote: string; reviewedBy: string
     challengeId: number | null; durationMin: number; views: number; eitaaReactions: number; createdAt: Date
     reporter: { fullName: string; district: string; avatar: string }
@@ -162,7 +163,7 @@ function toNewsDTO(
 ): NewsDTO {
   return {
     id: n.id, code: n.code, reporterId: n.reporterId, reporterName: n.reporter.fullName, reporterAvatar: n.reporter.avatar, reporterDistrict: n.reporter.district,
-    district: n.district, category: n.category, title: n.title, content: n.content, mediaType: n.mediaType, mediaUrl: n.mediaUrl,
+    district: n.district, category: n.category, title: n.title, lead: n.lead ?? "", content: n.content, mediaType: n.mediaType, mediaUrl: n.mediaUrl,
     status: n.status, reviewStage: n.reviewStage, rejectReason: n.rejectReason, rejectNote: n.rejectNote,
     reviewedBy: n.reviewedBy, challengeId: n.challengeId, durationMin: n.durationMin,
     views: n.views, eitaaReactions: n.eitaaReactions, createdAt: n.createdAt.toISOString(),
@@ -369,6 +370,7 @@ export async function getAppState(userId: string): Promise<AppState | null> {
     notifSettings: {
       approvals: u.notifSetting?.approvals ?? true, challenges: u.notifSetting?.challenges ?? true,
       broadcast: u.notifSetting?.broadcast ?? true, rejections: u.notifSetting?.rejections ?? true,
+      trainings: u.notifSetting?.trainings ?? true, soundAlerts: u.notifSetting?.soundAlerts ?? false,
       quietStart: u.notifSetting?.quietStart ?? "22:00", quietEnd: u.notifSetting?.quietEnd ?? "08:00",
     },
     pendingUsersCount,

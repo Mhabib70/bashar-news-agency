@@ -13,12 +13,15 @@ import {
 import { type Tab } from "@/lib/store"
 import type { AppState, AppUser, LeaderRow } from "@/lib/server/state"
 import { fa, faNum, relTime, durFmt, untilFmt, preparedFmt } from "@/lib/format"
+import { jalaliToday, JALALI_MONTHS } from "@/lib/jalali"
 import { CATEGORY_LABELS, DISTRICT_LABELS, LEVELS } from "@/lib/domain"
 import { Avatar } from "@/components/app/bits"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { cn } from "@/lib/utils"
 
-/* ================= نوار بالای اجتماعی (v3 — سرمه‌ای) ================= */
+const TODAY = jalaliToday()
+
+/* ================= نوار بالای اپ (تم Candy — سفید شیشه‌ای + قرمز آجری) ================= */
 export function TopBar({
   state,
   onOpenNotifications,
@@ -31,61 +34,64 @@ export function TopBar({
   const { user, unreadCount } = state
   const { setTheme } = useTheme()
   return (
-    <header className="v3-hero sticky top-0 z-40 rounded-none shadow-[0_14px_34px_-18px_rgba(34,5,8,0.55)]">
-      <div className="mx-auto flex h-16 w-full max-w-[1380px] items-center gap-3 px-3 lg:h-[72px] lg:px-5">
-        {/* برند */}
+    <header className="sticky top-0 z-40 bg-surface-container-lowest/85 pt-safe shadow-[0_1px_8px_rgba(0,0,0,0.04)] backdrop-blur-xl">
+      <div className="mx-auto flex h-16 w-full max-w-[1380px] items-center justify-between gap-3 px-3 lg:h-[72px] lg:px-5">
+        {/* برند + نقطهٔ زنده */}
         <div className="flex min-w-0 items-center gap-2.5">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] bg-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] lg:h-11 lg:w-11">
-            <Image src="/img/agency-logo.png" alt="لوگو" width={34} height={34} className="rounded-[10px] object-cover" />
-          </span>
-          <div className="min-w-0">
-            <div className="truncate text-[13.5px] font-black leading-5 text-white lg:text-[15.5px]">خبرگزاری بسیج شهر رشت</div>
-            <div className="hidden text-[10px] font-semibold leading-4 text-[#fca5a5] sm:block">روایت‌گرِ حقیقت، صدای بسیج</div>
+          <div className="flex min-w-0 flex-col">
+            <div className="flex items-center gap-space-xs">
+              <span className="truncate text-[15px] font-bold tracking-tight text-on-surface lg:text-[16.5px]">خبرگزاری بسیج شهر رشت</span>
+              <span className="relative flex h-2 w-2 shrink-0">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-secondary opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-secondary" />
+              </span>
+            </div>
+            <span className="text-[10.5px] font-medium tracking-wide text-secondary">زنده • پوشش خبری ۲۴/۷</span>
           </div>
         </div>
 
         {/* جستجو (دسکتاپ) — می‌برد به تب اخبار که جستجوی کامل دارد */}
         <button
           onClick={onGotoNews}
-          className="mx-auto hidden h-10 w-full max-w-[430px] items-center gap-2.5 rounded-2xl border border-white/12 bg-white/8 px-3.5 text-[12.5px] text-white/55 transition-colors hover:border-white/25 hover:bg-white/12 lg:flex"
+          className="mx-auto hidden h-10 w-full max-w-[430px] items-center gap-2.5 rounded-full border border-outline-variant/50 bg-surface-container-low px-3.5 text-[12.5px] text-on-surface-variant transition-colors hover:bg-surface-container lg:flex"
         >
           <Search className="h-4 w-4 shrink-0" />
           <span>جستجو در اخبار، کد خبر، دسته‌بندی…</span>
         </button>
 
         {/* اکشن‌ها */}
-        <div className="mr-auto flex items-center gap-2 lg:mr-0">
+        <div className="flex shrink-0 items-center gap-space-sm lg:mr-0">
+          {/* پیل استریک */}
+          <div className="hidden items-center gap-1 rounded-full bg-secondary-fixed/50 px-2.5 py-1 text-on-secondary-fixed sm:flex">
+            <span className="text-[11px] font-bold tracking-tight">🔥 {fa(user.currentStreak)} روز</span>
+          </div>
+          {/* تاریخ شمسی (موبایل) */}
+          <span className="text-[10px] font-medium text-on-surface-variant sm:hidden">{fa(`${TODAY.jd}`)} {JALALI_MONTHS[TODAY.jm - 1]}</span>
           <button
             onClick={onOpenNotifications}
-            className="relative flex h-10 w-10 items-center justify-center rounded-2xl border border-white/12 bg-white/8 text-white/85 transition-colors hover:bg-white/14"
+            className="relative flex h-11 w-11 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-surface-container"
             aria-label="اعلان‌ها"
           >
-            <Bell className="h-4.5 w-4.5" />
+            <Bell className="h-[22px] w-[22px]" />
             {unreadCount > 0 && (
-              <span className="absolute -left-1 -top-1 flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-[#ef4444] px-1 text-[9px] font-black text-white shadow-[0_4px_10px_-2px_rgba(239,68,68,0.6)]">
-                {fa(unreadCount)}
-              </span>
+              <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-secondary ring-2 ring-surface-container-lowest" />
             )}
           </button>
           <button
             onClick={() => setTheme(document.documentElement.classList.contains("light") ? "dark" : "light")}
-            className="hidden h-10 w-10 items-center justify-center rounded-2xl border border-white/12 bg-white/8 text-white/85 transition-colors hover:bg-white/14 sm:flex"
+            className="hidden h-11 w-11 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-surface-container sm:flex"
             aria-label="تغییر حالت روشن/تیره"
             title="تغییر حالت روشن/تیره"
           >
-            <Sun className="hidden h-4.5 w-4.5 dark:block" />
-            <Moon className="h-4.5 w-4.5 dark:hidden" />
+            <Sun className="hidden h-[20px] w-[20px] dark:block" />
+            <Moon className="h-[20px] w-[20px] dark:hidden" />
           </button>
           {/* نمایش کاربر جاری — صرفاً اطلاع‌رسان؛ ورود/خروج از صفحه پروفایل */}
           <div
-            className="flex items-center gap-2 rounded-2xl border border-white/12 bg-white/8 py-1 pl-2.5 pr-1.5"
+            className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-primary sm:h-9 sm:w-9"
             aria-label="حساب کاربری شما"
           >
-            <Avatar name={user.fullName} src={user.avatar} size={30} />
-            <span className="hidden min-w-0 text-right md:block">
-              <span className="block max-w-[120px] truncate text-[11.5px] font-bold leading-4 text-white">{user.fullName}</span>
-              <span className="block text-[9.5px] leading-3.5 text-white/60">{user.levelEmoji} {user.levelTitle}</span>
-            </span>
+            <Avatar name={user.fullName} src={user.avatar} size={36} />
           </div>
         </div>
       </div>
