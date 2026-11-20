@@ -537,10 +537,6 @@ body {
   filter: drop-shadow(0 0 10px rgba(157, 66, 58, 0.35));
 }
 
-/* حلقه استوری قرمز */
-.story-ring {
-  background: conic-gradient(from 30deg, #9d423a, #e05a4e, #9d423a);
-}
 .btn-glow {
   box-shadow: 0 10px 26px -8px rgba(157, 66, 58, 0.5);
 }
