@@ -10,7 +10,7 @@ import {
 } from "lucide-react"
 import { useApp } from "@/lib/store"
 import { SectionHeader, CountUp, Avatar } from "@/components/app/bits"
-import { StoryRow, ComposerCard, FeedPost, type FeedNews } from "@/components/app/social"
+import { ComposerCard, FeedPost, type FeedNews } from "@/components/app/social"
 import { NewsReaderDialog, type ReaderNews } from "@/components/app/news-reader"
 import { faNum, fa, durFmt, untilFmt, relTime } from "@/lib/format"
 import { CATEGORY_LABELS, DISTRICT_LABELS, LEVELS } from "@/lib/domain"
@@ -95,6 +95,38 @@ export function HomeScreen({
         <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-surface-container-low text-primary shadow-[0_4px_16px_rgba(83,37,23,0.06)]">
           <BadgeCheck className="h-6 w-6" />
         </span>
+      </div>
+
+      {/* ===== تالار گفتگو و آموزش — میانبرهای بالای صفحه ===== */}
+      <div className="grid grid-cols-2 gap-2.5">
+        <button
+          onClick={() => router.push("/forum")}
+          className="v3-tile-blue group relative overflow-hidden rounded-[22px] p-4 text-right shadow-[0_16px_34px_-16px_rgba(157,66,58,0.55)] transition-transform duration-200 active:scale-[0.98]"
+        >
+          <span className="relative flex h-10 w-10 items-center justify-center rounded-[14px] bg-white/18 shadow-[inset_0_1px_0_rgba(255,255,255,0.25)]">
+            <MessagesSquare className="h-5 w-5" />
+          </span>
+          <span className="relative mt-3 block text-[15px] font-black">تالار گفتگو</span>
+          <span className="relative mt-1 block text-[10.5px] leading-4 text-white/80">تجربه‌ها، پرسش‌ها و هم‌فکری خبرنگارها</span>
+          <span className="relative mt-3 inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1.5 text-[11px] font-bold backdrop-blur-sm">
+            ورود
+            <ArrowLeft className="h-3.5 w-3.5 transition-transform duration-200 group-hover:-translate-x-0.5" />
+          </span>
+        </button>
+        <button
+          onClick={() => router.push("/training")}
+          className="v3-tile-amber group relative overflow-hidden rounded-[22px] p-4 text-right shadow-[0_16px_34px_-16px_rgba(217,119,6,0.5)] transition-transform duration-200 active:scale-[0.98]"
+        >
+          <span className="relative flex h-10 w-10 items-center justify-center rounded-[14px] bg-white/22 shadow-[inset_0_1px_0_rgba(255,255,255,0.3)]">
+            <GraduationCap className="h-5 w-5" />
+          </span>
+          <span className="relative mt-3 block text-[15px] font-black">آموزش</span>
+          <span className="relative mt-1 block text-[10.5px] leading-4 text-white/85">راهنمای گام‌به‌گام خبرنگاری و رشد</span>
+          <span className="relative mt-3 inline-flex items-center gap-1.5 rounded-full bg-white/25 px-3 py-1.5 text-[11px] font-bold backdrop-blur-sm">
+            شروع
+            <ArrowLeft className="h-3.5 w-3.5 transition-transform duration-200 group-hover:-translate-x-0.5" />
+          </span>
+        </button>
       </div>
 
       {/* ===== کارنامه عملکرد هفتگی — حلقه‌های سه‌گانه ===== */}
@@ -335,40 +367,7 @@ export function HomeScreen({
         </div>
       )}
 
-      {/* ===== تالار گفتگو و آموزش ===== */}
-      <div className="grid grid-cols-2 gap-2.5 pt-1">
-        <button
-          onClick={() => router.push("/forum")}
-          className="v3-tile-blue group relative overflow-hidden rounded-[22px] p-4 text-right shadow-[0_16px_34px_-16px_rgba(157,66,58,0.55)] transition-transform duration-200 active:scale-[0.98]"
-        >
-          <span className="relative flex h-10 w-10 items-center justify-center rounded-[14px] bg-white/18 shadow-[inset_0_1px_0_rgba(255,255,255,0.25)]">
-            <MessagesSquare className="h-5 w-5" />
-          </span>
-          <span className="relative mt-3 block text-[15px] font-black">تالار گفتگو</span>
-          <span className="relative mt-1 block text-[10.5px] leading-4 text-white/80">تجربه‌ها، پرسش‌ها و هم‌فکری خبرنگارها</span>
-          <span className="relative mt-3 inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1.5 text-[11px] font-bold backdrop-blur-sm">
-            ورود
-            <ArrowLeft className="h-3.5 w-3.5 transition-transform duration-200 group-hover:-translate-x-0.5" />
-          </span>
-        </button>
-        <button
-          onClick={() => router.push("/training")}
-          className="v3-tile-amber group relative overflow-hidden rounded-[22px] p-4 text-right shadow-[0_16px_34px_-16px_rgba(217,119,6,0.5)] transition-transform duration-200 active:scale-[0.98]"
-        >
-          <span className="relative flex h-10 w-10 items-center justify-center rounded-[14px] bg-white/22 shadow-[inset_0_1px_0_rgba(255,255,255,0.3)]">
-            <GraduationCap className="h-5 w-5" />
-          </span>
-          <span className="relative mt-3 block text-[15px] font-black">آموزش</span>
-          <span className="relative mt-1 block text-[10.5px] leading-4 text-white/85">راهنمای گام‌به‌گام خبرنگاری و رشد</span>
-          <span className="relative mt-3 inline-flex items-center gap-1.5 rounded-full bg-white/25 px-3 py-1.5 text-[11px] font-bold backdrop-blur-sm">
-            شروع
-            <ArrowLeft className="h-3.5 w-3.5 transition-transform duration-200 group-hover:-translate-x-0.5" />
-          </span>
-        </button>
-      </div>
-
-      {/* ===== جریان خبری خبرگزاری (استوری‌ها + کمپوزر + فید) ===== */}
-      <StoryRow user={user} leaders={state.leaderboard} onQuickSubmit={onQuickSubmit} />
+      {/* ===== جریان خبری خبرگزاری (کمپوزر + فید) ===== */}
       <ComposerCard
         user={user}
         isReporter={isReporter}

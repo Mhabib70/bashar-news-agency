@@ -400,17 +400,17 @@ export function NewsScreen({
           </div>
         )}
         {list.map((n) => (
-          <button key={n.id} onClick={() => openDetail(n.id)} className="v3-card w-full p-4 text-right transition-transform hover:scale-[1.01]">
+          <button key={n.id} onClick={() => openDetail(n.id)} className="w-full rounded-3xl border border-outline-variant/50 bg-surface-container-lowest p-4 text-right shadow-[0_8px_24px_-4px_rgba(83,37,23,0.05)] transition-transform hover:scale-[1.01]">
             <div className="flex items-start gap-3">
-              <span className="relative h-16 w-16 shrink-0 overflow-hidden rounded-[14px]">
+              <span className="relative h-16 w-16 shrink-0 overflow-hidden rounded-2xl border border-line">
                 <Image src={`/img/cat-${n.category === "none" ? "local" : n.category}.png`} alt="" fill sizes="64px" className="object-cover" />
               </span>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-between gap-2">
                   <span className="flex min-w-0 items-center gap-1.5">
-                    <span className="shrink-0 rounded-full bg-[var(--v3-card-2)] px-2.5 py-0.5 text-[10px] font-bold text-[var(--v3-ink-2)]">{CATEGORY_LABELS[n.category]}</span>
+                    <span className="shrink-0 rounded-full bg-surface-container px-2.5 py-0.5 text-[10px] font-bold text-on-surface-variant">{CATEGORY_LABELS[n.category]}</span>
                     {(n as { isWeekFeatured?: boolean }).isWeekFeatured && (
-                      <span className="flex shrink-0 items-center gap-1 rounded-full bg-[var(--v3-amber-soft)] px-2 py-0.5 text-[9.5px] font-black text-amber-600 dark:text-amber-400">
+                      <span className="flex shrink-0 items-center gap-1 rounded-full bg-warn/15 px-2 py-0.5 text-[9.5px] font-black text-warn">
                         <Trophy className="h-2.5 w-2.5" />
                         خبر هفته
                       </span>
@@ -418,8 +418,8 @@ export function NewsScreen({
                   </span>
                   <StatusChip status={n.status} small />
                 </div>
-                <p className="mt-1.5 line-clamp-2 text-[13.5px] font-bold leading-6 text-[var(--v3-ink)]">{n.title}</p>
-                <p className="mt-1 flex flex-wrap items-center gap-x-2 text-[10.5px] text-[var(--v3-ink-2)]">
+                <p className="mt-1.5 line-clamp-2 text-[14px] font-bold leading-6 text-on-surface">{n.title}</p>
+                <p className="mt-1 flex flex-wrap items-center gap-x-2 text-[10.5px] text-on-surface-variant">
                   <span>{n.reporterId === me.id ? "شما" : n.reporterName} · {n.code} · {jalali(n.createdAt)}</span>
                   <span className="flex items-center gap-2.5">
                     {n.views > 0 && <span className="flex items-center gap-1"><Eye className="h-3 w-3" />{faNum(n.views)}</span>}
@@ -429,7 +429,7 @@ export function NewsScreen({
                 </p>
               </div>
             </div>
-            <div className="mt-3 flex items-center justify-between border-t border-[var(--v3-line)] pt-3">
+            <div className="mt-3 flex items-center justify-between border-t border-line pt-3">
               <StageDots status={n.status} stage={n.reviewStage} />
               <StageChip status={n.status} stage={n.reviewStage} />
             </div>

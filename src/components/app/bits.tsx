@@ -59,9 +59,9 @@ export function Ring({
 export function SectionHeader({ title, action, onAction }: { title: string; action?: string; onAction?: () => void }) {
   return (
     <div className="mb-3 flex items-center justify-between">
-      <h2 className="text-[17px] font-black text-[var(--v3-ink)]">{title}</h2>
+      <h2 className="text-[17px] font-bold text-on-surface">{title}</h2>
       {action && (
-        <button onClick={onAction} className="text-[13px] font-bold text-[var(--v3-azure)] transition-opacity hover:opacity-80">
+        <button onClick={onAction} className="text-[12px] font-semibold text-primary transition-opacity hover:opacity-80">
           {action}
         </button>
       )}
@@ -69,12 +69,12 @@ export function SectionHeader({ title, action, onAction }: { title: string; acti
   )
 }
 
-// ---------- چیپ وضعیت خبر ----------
+// ---------- چیپ وضعیت خبر (Candy) ----------
 export function StatusChip({ status, small }: { status: string; small?: boolean }) {
   const map = {
-    approved: { label: "تایید شده", cls: "bg-[var(--v3-azure-soft)] text-[var(--v3-azure-deep)] border-transparent dark:text-[#fca5a5]" },
-    rejected: { label: "رد شده", cls: "bg-red-50 text-red-600 border-transparent dark:bg-red-500/12 dark:text-red-400" },
-    pending: { label: "در بررسی", cls: "bg-[var(--v3-amber-soft)] text-amber-600 border-transparent dark:text-amber-400" },
+    approved: { label: "تایید شده", cls: "bg-tertiary-fixed/40 text-tertiary border-transparent" },
+    rejected: { label: "رد شده", cls: "bg-error-container/30 text-on-error-container border-transparent" },
+    pending: { label: "در بررسی", cls: "bg-primary-fixed/50 text-on-primary-fixed border-transparent" },
   } as const
   const it = map[status as keyof typeof map] ?? map.pending
   return (
@@ -85,13 +85,13 @@ export function StatusChip({ status, small }: { status: string; small?: boolean 
   )
 }
 
-// ---------- نقاط مراحل بررسی ----------
+// ---------- نقاط مراحل بررسی (Candy) ----------
 export function StageDots({ status, stage }: { status: string; stage: string }) {
   if (status === "approved") {
     return (
       <div className="flex items-center gap-1.5">
         {REVIEW_STAGES.map((s) => (
-          <span key={s.key} className="h-1.5 w-6 rounded-full bg-[var(--v3-azure)]/80" />
+          <span key={s.key} className="h-1.5 w-6 rounded-full bg-tertiary" />
         ))}
       </div>
     )
@@ -99,9 +99,9 @@ export function StageDots({ status, stage }: { status: string; stage: string }) 
   if (status === "rejected") {
     return (
       <div className="flex items-center gap-1.5">
-        <span className="h-1.5 w-6 rounded-full bg-red-500/70" />
-        <span className="h-1.5 w-6 rounded-full bg-[var(--v3-line)]" />
-        <span className="h-1.5 w-6 rounded-full bg-[var(--v3-line)]" />
+        <span className="h-1.5 w-6 rounded-full bg-error" />
+        <span className="h-1.5 w-6 rounded-full bg-line" />
+        <span className="h-1.5 w-6 rounded-full bg-line" />
       </div>
     )
   }
@@ -111,7 +111,7 @@ export function StageDots({ status, stage }: { status: string; stage: string }) 
       {REVIEW_STAGES.map((s, i) => (
         <span
           key={s.key}
-          className={cn("h-1.5 w-6 rounded-full", i < idx ? "bg-[var(--v3-azure)]/50" : i === idx ? "bg-[var(--v3-amber)]" : "bg-[var(--v3-line)]")}
+          className={cn("h-1.5 w-6 rounded-full", i < idx ? "bg-primary/60" : i === idx ? "bg-secondary" : "bg-line")}
         />
       ))}
     </div>
@@ -390,23 +390,23 @@ function TimelineRow({
   )
 }
 
-// چیپ کوچک مرحله فعلی برای کارت‌های صف
+// چیپ کوچک مرحله فعلی برای کارت‌های صف (Candy)
 export function StageChip({ status, stage }: { status: string; stage: string }) {
   if (status === "approved")
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-[var(--v3-azure-soft)] px-2 py-0.5 text-[9.5px] font-black text-[var(--v3-azure-deep)] dark:text-[#fca5a5]">
+      <span className="inline-flex items-center gap-1 rounded-full bg-tertiary-fixed/40 px-2 py-0.5 text-[9.5px] font-black text-tertiary">
         <CheckCircle2 className="h-2.5 w-2.5" /> منتشر شد
       </span>
     )
   if (status === "rejected")
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-red-50 px-2 py-0.5 text-[9.5px] font-black text-red-600 dark:bg-red-500/12 dark:text-red-400">
+      <span className="inline-flex items-center gap-1 rounded-full bg-error-container/30 px-2 py-0.5 text-[9.5px] font-black text-on-error-container">
         <XCircle className="h-2.5 w-2.5" /> بازگشت به خبرنگار
       </span>
     )
   const idx = Math.max(0, REVIEW_STAGES.findIndex((s) => s.key === stage))
   return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-[var(--v3-amber-soft)] px-2 py-0.5 text-[9.5px] font-black text-amber-600 dark:text-amber-400">
+    <span className="inline-flex items-center gap-1 rounded-full bg-primary-fixed/50 px-2 py-0.5 text-[9.5px] font-black text-on-primary-fixed">
       <Clock className="h-2.5 w-2.5" /> مرحله {fa(idx + 1)} از {fa(3)}: {REVIEW_STAGES[idx]?.label}
     </span>
   )

@@ -2,21 +2,19 @@
 
 
 import Image from "next/image"
-import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useTheme } from "next-themes"
 import {
   Bell, Home, Newspaper, BarChart3, UserRound, ClipboardCheck, ShieldCheck, Search,
-  Megaphone, Target, Trophy, Plus, ChevronLeft, Rss, CheckCircle2, PlayCircle, Smile, Landmark,
+  Megaphone, Target, Trophy, ChevronLeft, Rss, CheckCircle2, PlayCircle, Smile, Landmark,
   Sun, Moon, CalendarClock, Eye, Heart,
 } from "lucide-react"
 import { type Tab } from "@/lib/store"
-import type { AppState, AppUser, LeaderRow } from "@/lib/server/state"
+import type { AppState, AppUser } from "@/lib/server/state"
 import { fa, faNum, relTime, durFmt, untilFmt, preparedFmt } from "@/lib/format"
 import { jalaliToday, JALALI_MONTHS } from "@/lib/jalali"
-import { CATEGORY_LABELS, DISTRICT_LABELS, LEVELS } from "@/lib/domain"
+import { CATEGORY_LABELS, DISTRICT_LABELS } from "@/lib/domain"
 import { Avatar } from "@/components/app/bits"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { cn } from "@/lib/utils"
 
 const TODAY = jalaliToday()
@@ -323,80 +321,6 @@ export function RightRail({
   )
 }
 
-/* ================= ردیف استوری‌ها ================= */
-export function StoryRow({
-  user,
-  leaders,
-  onQuickSubmit,
-}: {
-  user: AppUser
-  leaders: LeaderRow[]
-  onQuickSubmit: () => void
-}) {
-  const [picked, setPicked] = useState<LeaderRow | null>(null)
-  const levelOf = (k: string) => LEVELS.find((l) => l.key === k)
-
-  return (
-    <>
-      <div className="v3-card no-scrollbar flex gap-1 overflow-x-auto px-3 py-3 sm:justify-between sm:gap-0">
-        <button onClick={onQuickSubmit} className="flex w-[68px] shrink-0 flex-col items-center gap-1.5" aria-label="ثبت خبر جدید">
-          <span className="relative flex h-[58px] w-[58px] items-center justify-center rounded-full border-[1.6px] border-dashed border-[var(--v3-azure)]">
-            <Avatar name={user.fullName} src={user.avatar} size={50} />
-            <span className="absolute -bottom-0.5 -left-0.5 flex h-[18px] w-[18px] items-center justify-center rounded-full border-2 border-[var(--v3-card)] bg-[var(--v3-azure)] text-white">
-              <Plus className="h-3 w-3" strokeWidth={3} />
-            </span>
-          </span>
-          <span className="max-w-[66px] truncate text-[10px] font-semibold text-[var(--v3-ink-2)]">خبر شما</span>
-        </button>
-        {leaders.slice(0, 9).map((r) => (
-          <button key={r.id} onClick={() => setPicked(r)} className="flex w-[68px] shrink-0 flex-col items-center gap-1.5" aria-label={r.fullName}>
-            <span className="flex h-[58px] w-[58px] items-center justify-center rounded-full bg-[conic-gradient(from_30deg,#e0202b,#fca5a5,#e0202b)] p-[3px]">
-              <span className="flex h-full w-full items-center justify-center rounded-full bg-[var(--v3-card)] p-[2px]">
-                <Avatar name={r.fullName} src={r.avatar} size={48} />
-              </span>
-            </span>
-            <span className="max-w-[66px] truncate text-[10px] font-semibold text-[var(--v3-ink-2)]">{r.fullName.split(" ")[0]}</span>
-          </button>
-        ))}
-      </div>
-
-      {/* کارت خبرنگار پس از لمس استوری */}
-      <Dialog open={!!picked} onOpenChange={(v) => !v && setPicked(null)}>
-        <DialogContent className="max-w-[320px] rounded-[24px] border-[var(--v3-line)] bg-[var(--v3-card)] p-5">
-          {picked && (
-            <>
-              <DialogHeader className="items-center text-center">
-                <DialogTitle className="text-[var(--v3-ink)]">{picked.fullName}</DialogTitle>
-              </DialogHeader>
-              <div className="flex flex-col items-center gap-2 pb-1">
-                <span className="flex h-[74px] w-[74px] items-center justify-center rounded-full bg-[conic-gradient(from_30deg,#e0202b,#fca5a5,#e0202b)] p-[3px]">
-                  <span className="flex h-full w-full items-center justify-center rounded-full bg-[var(--v3-card)] p-[2px]">
-                    <Avatar name={picked.fullName} src={picked.avatar} size={62} />
-                  </span>
-                </span>
-                <span className="text-[11.5px] text-[var(--v3-ink-2)]">{DISTRICT_LABELS[picked.district] ?? picked.district}</span>
-                <div className="mt-1 grid w-full grid-cols-2 gap-2">
-                  <div className="v3-card-flat p-2.5 text-center">
-                    <b className="v3-num block text-[14px] text-[var(--v3-ink)]">{faNum(picked.points)}</b>
-                    <span className="text-[10px] text-[var(--v3-ink-2)]">امتیاز</span>
-                  </div>
-                  <div className="v3-card-flat p-2.5 text-center">
-                    <b className="v3-num block text-[14px] text-[var(--v3-ink)]">{fa(picked.rank)}</b>
-                    <span className="text-[10px] text-[var(--v3-ink-2)]">رتبه</span>
-                  </div>
-                </div>
-                <span className="v3-chip mt-1 px-3 py-1.5 text-[11px]">
-                  {levelOf(picked.levelKey)?.emoji} سطح {levelOf(picked.levelKey)?.title ?? picked.levelKey}
-                </span>
-              </div>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
-    </>
-  )
-}
-
 /* ================= کارت کمپوزر ================= */
 export function ComposerCard({
   user,
@@ -480,74 +404,76 @@ export function FeedPost({ n, onOpen }: { n: FeedNews; onOpen?: (n: FeedNews) =>
   const catImg = `/img/cat-${n.category === "none" ? "local" : n.category}.png`
 
   return (
-    <article className="v3-card stage-enter overflow-hidden transition-shadow hover:shadow-[var(--v3-shadow-md)]">
+    <article className="stage-enter overflow-hidden rounded-3xl border border-outline-variant/50 bg-surface-container-lowest shadow-[0_8px_24px_-4px_rgba(83,37,23,0.05)] transition-shadow hover:shadow-[0_12px_32px_-8px_rgba(83,37,23,0.12)]">
       <button onClick={() => onOpen?.(n)} className="flex w-full items-center gap-2.5 px-4 pb-2.5 pt-3.5 text-right">
         <Avatar name={n.reporterName} src={n.reporterAvatar} size={40} />
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">
-            <b className="truncate text-[12.5px] font-bold text-[var(--v3-ink)]">{n.reporterName}</b>
-            {n.isMine && <span className="v3-chip shrink-0 px-2 py-0.5 text-[9px]">خبر شما</span>}
+            <b className="truncate text-[12.5px] font-bold text-on-surface">{n.reporterName}</b>
+            {n.isMine && (
+              <span className="shrink-0 rounded-full bg-primary-fixed/50 px-2 py-0.5 text-[9px] font-bold text-on-primary-fixed">خبر شما</span>
+            )}
           </div>
-          <div className="truncate text-[10px] text-[var(--v3-ink-2)]">
+          <div className="truncate text-[10px] text-on-surface-variant">
             {n.reporterBase || DISTRICT_LABELS[n.reporterDistrict] || ""} · {relTime(n.createdAt)}
           </div>
         </div>
-        <span className="v3-chip flex items-center gap-1 px-2 py-1 text-[9.5px]">
+        <span className="flex shrink-0 items-center gap-1 rounded-full bg-tertiary-fixed/40 px-2.5 py-1 text-[9.5px] font-bold text-tertiary">
           <CheckCircle2 className="h-3 w-3" />
           منتشر شد
         </span>
       </button>
 
       <button onClick={() => onOpen?.(n)} className="block w-full px-4 pb-3 text-right">
-        <h3 className="text-[14px] font-black leading-6.5 text-[var(--v3-ink)]">{n.title}</h3>
-        <p className="mt-1 line-clamp-3 text-[11.5px] leading-5.5 text-[var(--v3-ink-2)]">{n.content}</p>
-        <span className="mt-1.5 inline-flex items-center gap-1 text-[10.5px] font-black text-[var(--v3-azure)]">مطالعهٔ کامل خبر ←</span>
+        <h3 className="text-[15px] font-bold leading-6.5 text-on-surface">{n.title}</h3>
+        <p className="mt-1 line-clamp-3 text-[11.5px] leading-5.5 text-on-surface-variant">{n.content}</p>
+        <span className="mt-1.5 inline-flex items-center gap-1 text-[10.5px] font-black text-primary">مطالعهٔ کامل خبر ←</span>
       </button>
 
       {hasPhoto && (
         <button onClick={() => onOpen?.(n)} className="block w-full cursor-zoom-in">
-          <img src={n.mediaUrl} alt={n.title} className="max-h-[340px] w-full border-y border-[var(--v3-line)] object-cover" loading="lazy" />
+          <img src={n.mediaUrl} alt={n.title} className="max-h-[340px] w-full border-y border-line object-cover" loading="lazy" />
         </button>
       )}
       {hasVideo && (
-        <video src={n.mediaUrl} controls preload="metadata" className="max-h-[340px] w-full border-y border-[var(--v3-line)] bg-black" />
+        <video src={n.mediaUrl} controls preload="metadata" className="max-h-[340px] w-full border-y border-line bg-black" />
       )}
       {!hasPhoto && !hasVideo && (
         <button onClick={() => onOpen?.(n)} className="block w-full cursor-zoom-in">
-          <Image src={catImg} alt={n.title} width={640} height={200} className="h-[170px] w-full border-y border-[var(--v3-line)] object-cover" />
+          <Image src={catImg} alt={n.title} width={640} height={200} className="h-[170px] w-full border-y border-line object-cover" />
         </button>
       )}
 
-      <div className="flex items-center gap-2 px-4 py-2.5 text-[10px] font-semibold text-[var(--v3-ink-2)]">
-        <span className="rounded-full bg-[var(--v3-card-2)] px-2.5 py-1">{CATEGORY_LABELS[n.category] ?? n.category}</span>
-        <span className="rounded-full bg-[var(--v3-card-2)] px-2.5 py-1" dir="ltr">{n.code}</span>
-        {n.durationMin > 0 && <span className="rounded-full bg-[var(--v3-card-2)] px-2.5 py-1">{durFmt(n.durationMin)}</span>}
+      <div className="flex flex-wrap items-center gap-2 px-4 py-2.5 text-[10px] font-semibold text-on-surface-variant">
+        <span className="rounded-full bg-surface-container px-2.5 py-1 text-[10px] font-bold text-on-surface-variant">{CATEGORY_LABELS[n.category] ?? n.category}</span>
+        <span className="rounded-full bg-surface-container px-2.5 py-1 font-mono" dir="ltr">{n.code}</span>
+        {n.durationMin > 0 && <span className="rounded-full bg-surface-container px-2.5 py-1">{durFmt(n.durationMin)}</span>}
         {n.preparedAt && (
-          <span className="flex items-center gap-1 rounded-full bg-[var(--v3-card-2)] px-2.5 py-1">
+          <span className="flex items-center gap-1 rounded-full bg-surface-container px-2.5 py-1">
             <CalendarClock className="h-3 w-3" />
             {preparedFmt(n.preparedAt)}
           </span>
         )}
         {typeof n.views === "number" && n.views > 0 && (
-          <span className="flex items-center gap-1 rounded-full bg-[var(--v3-card-2)] px-2.5 py-1">
+          <span className="flex items-center gap-1 rounded-full bg-surface-container px-2.5 py-1">
             <Eye className="h-3 w-3" />
             {faNum(n.views)}
           </span>
         )}
         {typeof n.eitaaReactions === "number" && n.eitaaReactions > 0 && (
-          <span className="flex items-center gap-1 rounded-full bg-red-50 px-2.5 py-1 text-red-500 dark:bg-red-500/12 dark:text-red-400">
+          <span className="flex items-center gap-1 rounded-full bg-error-container/25 px-2.5 py-1 font-bold text-on-error-container">
             <Heart className="h-3 w-3" />
             {faNum(n.eitaaReactions)}
           </span>
         )}
         {n.isWeekFeatured && (
-          <span className="flex items-center gap-1 rounded-full bg-[var(--v3-amber)] px-2.5 py-1 font-black text-[#42290a]">
+          <span className="flex items-center gap-1 rounded-full bg-warn/15 px-2.5 py-1 font-black text-warn">
             <Trophy className="h-3 w-3" />
             خبر هفته
           </span>
         )}
         {n.isMine && (
-          <span className="mr-auto flex items-center gap-1 font-bold text-[var(--v3-amber)]">
+          <span className="mr-auto flex items-center gap-1 font-bold text-tertiary">
             <PlayCircle className="h-3.5 w-3.5" />
             +{fa(25)} امتیاز
           </span>
