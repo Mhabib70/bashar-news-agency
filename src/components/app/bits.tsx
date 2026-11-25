@@ -13,8 +13,8 @@ export function Ring({
   size = 168,
   stroke = 12,
   children,
-  trackClass = "stroke-[var(--v3-line)]",
-  barClass = "stroke-[var(--v3-azure)]",
+  trackClass = "stroke-[var(--outline-variant)]",
+  barClass = "stroke-[var(--primary)]",
 }: {
   value: number
   max: number
@@ -100,8 +100,8 @@ export function StageDots({ status, stage }: { status: string; stage: string }) 
     return (
       <div className="flex items-center gap-1.5">
         <span className="h-1.5 w-6 rounded-full bg-error" />
-        <span className="h-1.5 w-6 rounded-full bg-line" />
-        <span className="h-1.5 w-6 rounded-full bg-line" />
+        <span className="h-1.5 w-6 rounded-full bg-outline-variant/40" />
+        <span className="h-1.5 w-6 rounded-full bg-outline-variant/40" />
       </div>
     )
   }
@@ -111,7 +111,7 @@ export function StageDots({ status, stage }: { status: string; stage: string }) 
       {REVIEW_STAGES.map((s, i) => (
         <span
           key={s.key}
-          className={cn("h-1.5 w-6 rounded-full", i < idx ? "bg-primary/60" : i === idx ? "bg-secondary" : "bg-line")}
+          className={cn("h-1.5 w-6 rounded-full", i < idx ? "bg-primary/60" : i === idx ? "bg-secondary" : "bg-outline-variant/40")}
         />
       ))}
     </div>
@@ -135,12 +135,12 @@ export function StatCard({
   return (
     <button
       onClick={onClick}
-      className="v3-card flex flex-1 flex-col items-center gap-1.5 px-2 py-4 text-center transition-transform hover:scale-[1.02] active:scale-[0.98]"
+      className="rounded-3xl border border-outline-variant/40 bg-surface-container-lowest shadow-[0_8px_24px_-4px_rgba(83,37,23,0.05)] flex flex-1 flex-col items-center gap-1.5 px-2 py-4 text-center transition-transform hover:scale-[1.02] active:scale-[0.98]"
     >
-      <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--v3-azure-soft)] text-[var(--v3-azure)]">{icon}</span>
-      <span className="v3-num text-[19px] leading-none text-[var(--v3-ink)]">{value}</span>
-      <span className="text-[11px] font-medium text-[var(--v3-ink-2)]">{label}</span>
-      {sub && <span className="text-[9.5px] text-[var(--v3-ink-2)]/70">{sub}</span>}
+      <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-fixed/40 text-primary">{icon}</span>
+      <span className="font-black tracking-tight text-[19px] leading-none text-on-surface">{value}</span>
+      <span className="text-[11px] font-medium text-on-surface-variant">{label}</span>
+      {sub && <span className="text-[9.5px] text-on-surface-variant/70">{sub}</span>}
     </button>
   )
 }
@@ -152,7 +152,7 @@ export function Avatar({ name, size = 44, tone = "neon", src }: { name: string; 
       <img
         src={src}
         alt={name}
-        className="shrink-0 rounded-full border border-[var(--v3-line)] object-cover"
+        className="shrink-0 rounded-full border border-outline-variant/50 object-cover"
         style={{ width: size, height: size }}
       />
     )
@@ -163,8 +163,8 @@ export function Avatar({ name, size = 44, tone = "neon", src }: { name: string; 
       className={cn(
         "flex shrink-0 items-center justify-center rounded-full font-bold",
         tone === "neon"
-          ? "bg-gradient-to-br from-[var(--v3-azure-2)] to-[var(--v3-azure-deep)] text-white"
-          : "bg-[var(--v3-card-2)] text-[var(--v3-ink)] border border-[var(--v3-line)]",
+          ? "bg-gradient-to-br from-[var(--primary)] to-[var(--primary-deep, #7c2923)] text-white"
+          : "bg-surface-container-low text-on-surface border border-outline-variant/50",
       )}
       style={{ width: size, height: size, fontSize: size * 0.34 }}
       aria-hidden
@@ -265,35 +265,35 @@ export function StageTimeline({ news, compact }: { news: TimelineNews; compact?:
   const waitingMs = now - new Date(lastActivity).getTime()
 
   return (
-    <div className="v3-card p-4">
+    <div className="rounded-3xl border border-outline-variant/40 bg-surface-container-lowest shadow-[0_8px_24px_-4px_rgba(83,37,23,0.05)] p-4">
       {/* نوار پیشرفت + وضعیت زنده */}
       <div className="mb-1 flex items-center justify-between">
-        <p className="flex items-center gap-1.5 text-[12.5px] font-black text-[var(--v3-ink)]">
+        <p className="flex items-center gap-1.5 text-[12.5px] font-black text-on-surface">
           <span className="relative flex h-2 w-2">
             {news.status === "pending" && (
               <>
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--v3-amber)] opacity-60" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-[var(--v3-amber)]" />
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-warn opacity-60" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-warn" />
               </>
             )}
-            {news.status === "approved" && <span className="inline-flex h-2 w-2 rounded-full bg-[var(--v3-azure)]" />}
+            {news.status === "approved" && <span className="inline-flex h-2 w-2 rounded-full bg-primary" />}
             {news.status === "rejected" && <span className="inline-flex h-2 w-2 rounded-full bg-red-500" />}
           </span>
           {news.status === "pending" ? "در جریان چرخه بررسی" : news.status === "approved" ? "چرخه کامل شد — منتشر شد" : "چرخه متوقف شد"}
         </p>
-        <span className={cn("text-[10.5px] font-black", news.status === "approved" ? "text-[var(--v3-azure)]" : news.status === "rejected" ? "text-red-500" : "text-[var(--v3-amber)]")}>
+        <span className={cn("text-[10.5px] font-black", news.status === "approved" ? "text-primary" : news.status === "rejected" ? "text-red-500" : "text-warn")}>
           {fa(progress)}٪
         </span>
       </div>
-      <div className="mb-3.5 h-1.5 overflow-hidden rounded-full bg-[var(--v3-card-2)]">
+      <div className="mb-3.5 h-1.5 overflow-hidden rounded-full bg-surface-container-low">
         <div
-          className={cn("h-full rounded-full transition-all duration-700", news.status === "approved" ? "bg-[var(--v3-azure)]" : news.status === "rejected" ? "bg-red-500/70" : "bg-[var(--v3-amber)]")}
+          className={cn("h-full rounded-full transition-all duration-700", news.status === "approved" ? "bg-primary" : news.status === "rejected" ? "bg-red-500/70" : "bg-warn")}
           style={{ width: `${Math.max(4, progress)}%` }}
         />
       </div>
 
       {news.status === "pending" && (
-        <p className="mb-3 rounded-xl bg-[var(--v3-amber-soft)] px-3 py-2 text-[11px] font-semibold text-amber-600 dark:text-amber-400">
+        <p className="mb-3 rounded-xl bg-warn/15 px-3 py-2 text-[11px] font-semibold text-amber-600 dark:text-amber-400">
           ⏱ {waitFmt(waitingMs)} است که در مرحله «{REVIEW_STAGES[currentIdx]?.label}» منتظر تصمیم است
         </p>
       )}
@@ -371,20 +371,20 @@ function TimelineRow({
   first?: boolean
 }) {
   const styles = {
-    done: { dot: "bg-[var(--v3-azure)] text-white", title: "text-[var(--v3-ink)]", sub: "text-[var(--v3-ink-2)]" },
-    current: { dot: "bg-[var(--v3-amber)] text-[#42290a] animate-pulse", title: "text-[var(--v3-ink)] font-black", sub: "text-[var(--v3-amber)]" },
-    failed: { dot: "bg-red-500 text-white", title: "text-red-500", sub: "text-[var(--v3-ink-2)]" },
-    waiting: { dot: "bg-[var(--v3-card-2)] text-[var(--v3-ink-2)]/50 border border-[var(--v3-line)]", title: "text-[var(--v3-ink-2)]/60", sub: "text-[var(--v3-ink-2)]/50" },
-    muted: { dot: "bg-[var(--v3-card-2)] text-[var(--v3-ink-2)] border border-[var(--v3-line)]", title: "text-[var(--v3-ink-2)]", sub: "text-[var(--v3-ink-2)]/70" },
-    final: { dot: "bg-[var(--v3-azure)] text-white", title: "text-[var(--v3-azure)]", sub: "text-[var(--v3-ink-2)]" },
+    done: { dot: "bg-primary text-white", title: "text-on-surface", sub: "text-on-surface-variant" },
+    current: { dot: "bg-warn text-[#42290a] animate-pulse", title: "text-on-surface font-black", sub: "text-warn" },
+    failed: { dot: "bg-red-500 text-white", title: "text-red-500", sub: "text-on-surface-variant" },
+    waiting: { dot: "bg-surface-container-low text-on-surface-variant/50 border border-outline-variant/50", title: "text-on-surface-variant/60", sub: "text-on-surface-variant/50" },
+    muted: { dot: "bg-surface-container-low text-on-surface-variant border border-outline-variant/50", title: "text-on-surface-variant", sub: "text-on-surface-variant/70" },
+    final: { dot: "bg-primary text-white", title: "text-primary", sub: "text-on-surface-variant" },
   }[tone]
   return (
     <div className={cn("relative flex gap-3 pr-0.5", first ? "" : "mt-3")}>
-      <span className={cn("z-10 mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full shadow-[0_0_0_3px_var(--v3-card)]", styles.dot)}>{icon}</span>
-      <div className="min-w-0 flex-1 border-b border-[var(--v3-line)]/60 pb-2.5 last:border-0">
+      <span className={cn("z-10 mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full shadow-[0_0_0_3px_var(--surface-ctnr-lowest)]", styles.dot)}>{icon}</span>
+      <div className="min-w-0 flex-1 border-b border-outline-variant/50/60 pb-2.5 last:border-0">
         <p className={cn("text-[12.5px] font-bold leading-5", styles.title)}>{title}</p>
         <p className={cn("text-[10.5px] leading-5", styles.sub)}>{sub}</p>
-        {note && <p className="mt-0.5 rounded-lg bg-[var(--v3-card-2)] px-2 py-1 text-[10.5px] leading-5 text-[var(--v3-ink-2)]">{note}</p>}
+        {note && <p className="mt-0.5 rounded-lg bg-surface-container-low px-2 py-1 text-[10.5px] leading-5 text-on-surface-variant">{note}</p>}
       </div>
     </div>
   )

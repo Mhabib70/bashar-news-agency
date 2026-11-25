@@ -221,7 +221,7 @@ export function SubmitFlow({
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && close()}>
-      <DialogContent className="flex max-h-[92dvh] flex-col gap-0 overflow-hidden rounded-[28px] border-[var(--v3-line)] bg-[var(--v3-card)] p-5">
+      <DialogContent className="flex max-h-[92dvh] flex-col gap-0 overflow-hidden rounded-[28px] border-outline-variant/50 bg-surface-container-lowest p-5">
         {done ? (
           <div className="stage-enter flex flex-col items-center py-4 text-center">
             {/* کارت جشن موفقیت */}
@@ -234,7 +234,7 @@ export function SubmitFlow({
               </h3>
               <p className="relative mt-2 text-[12.5px] leading-6 text-white/85">{done.message}</p>
               <div className="relative mt-4 flex flex-wrap items-center justify-center gap-2">
-                <span className="v3-num rounded-full bg-white/20 px-4 py-2 text-[16px] font-black backdrop-blur-sm">+{fa(done.points)} امتیاز</span>
+                <span className="font-black tracking-tight rounded-full bg-white/20 px-4 py-2 text-[16px] font-black backdrop-blur-sm">+{fa(done.points)} امتیاز</span>
                 <span className="rounded-full bg-black/25 px-4 py-2 text-[11.5px] font-bold text-white/90">مرحله ۱: مدیر حوزه</span>
               </div>
               {done.badges.length > 0 && (
@@ -255,8 +255,8 @@ export function SubmitFlow({
         ) : (
           <>
             <DialogHeader className="text-right">
-              <DialogTitle className="text-[15.5px] font-extrabold text-ink">ارسال و ثبت خبر جدید</DialogTitle>
-              <DialogDescription className="text-[11px] text-ink-muted">
+              <DialogTitle className="text-[15.5px] font-extrabold text-on-surface">ارسال و ثبت خبر جدید</DialogTitle>
+              <DialogDescription className="text-[11px] text-on-surface-variant">
                 سامانه تحریریه و مخابره رخداد — {CATEGORY_LABELS[category]}
               </DialogDescription>
             </DialogHeader>
@@ -268,9 +268,9 @@ export function SubmitFlow({
                   <Hash className="mr-1 inline h-3.5 w-3.5" />
                   {nextCode}
                 </span>
-                <span className="text-[11px] font-bold text-ink">شناسه پروتکل پیگیری:</span>
+                <span className="text-[11px] font-bold text-on-surface">شناسه پروتکل پیگیری:</span>
               </span>
-              <span className="flex items-center gap-1.5 text-[10px] font-medium text-ink-muted">
+              <span className="flex items-center gap-1.5 text-[10px] font-medium text-on-surface-variant">
                 <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary-fixed/60 text-primary">
                   <FolderOpen className="h-3 w-3" />
                 </span>
@@ -284,7 +284,7 @@ export function SubmitFlow({
                   <Sparkles className="ml-1 inline h-4 w-4" />
                   ثبت محتوا برای چالش: {activeChallenges.find((c) => c.id === challengeId)?.title ?? "چالش"}
                 </p>
-                <button onClick={() => setChallengeId(null)} className="text-[11px] font-bold text-ink-muted transition-colors hover:text-ink">
+                <button onClick={() => setChallengeId(null)} className="text-[11px] font-bold text-on-surface-variant transition-colors hover:text-on-surface">
                   برداشتن
                 </button>
               </div>
@@ -293,7 +293,7 @@ export function SubmitFlow({
             <div className="nice-scroll mt-3 min-h-0 flex-1 space-y-3 overflow-y-auto pl-0.5">
               {/* ===== دسته‌بندی موضوعی — چیپ‌های افقی ===== */}
               <div>
-                <p className="mb-2 text-[13px] font-extrabold text-ink">دسته‌بندی موضوعی:</p>
+                <p className="mb-2 text-[13px] font-extrabold text-on-surface">دسته‌بندی موضوعی:</p>
                 <div className="no-scrollbar flex gap-2 overflow-x-auto pb-1">
                   {NEWS_CATEGORIES.filter((c) => c.code !== "none").map((c) => (
                     <button
@@ -303,7 +303,7 @@ export function SubmitFlow({
                         "shrink-0 rounded-full px-4 py-2 text-[12px] font-bold transition-colors",
                         category === c.code
                           ? "bg-primary text-on-primary shadow-[0_6px_16px_-6px_rgba(157,66,58,0.6)]"
-                          : "border border-line bg-surface-2 text-ink-muted hover:text-ink",
+                          : "border border-outline-variant/40 bg-surface-container-low text-on-surface-variant hover:text-on-surface",
                       )}
                     >
                       {c.label}
@@ -313,20 +313,20 @@ export function SubmitFlow({
               </div>
 
               {/* ===== تیتر خبر (الزامی) ===== */}
-              <div className="rounded-2xl border border-line bg-surface p-4">
+              <div className="rounded-2xl border border-outline-variant/40 bg-surface p-4">
                 <div className="mb-2 flex items-center justify-between">
-                  <p className="text-[13px] font-extrabold text-ink">
+                  <p className="text-[13px] font-extrabold text-on-surface">
                     <span className="text-primary">۲</span> تیتر خبر
                     <span className="text-[10px] font-bold text-danger"> (الزامی)</span>
                   </p>
-                  <span className="font-mono text-[10px] text-ink-muted">{toFa(title.trim().length)}/{toFa(TITLE_MAX)}</span>
+                  <span className="font-mono text-[10px] text-on-surface-variant">{toFa(title.trim().length)}/{toFa(TITLE_MAX)}</span>
                 </div>
                 <textarea
                   value={title}
                   onChange={(e) => setTitle(e.target.value.slice(0, TITLE_MAX))}
                   rows={2}
                   placeholder="تیتر موجز، جذاب و متناسب بر واقعه اصلی بنویسید..."
-                  className="w-full resize-none rounded-xl border border-outline-variant/50 bg-surface-container-low px-3.5 py-2.5 text-[13.5px] leading-6 text-ink placeholder:text-ink-muted/50 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/15"
+                  className="w-full resize-none rounded-xl border border-outline-variant/50 bg-surface-container-low px-3.5 py-2.5 text-[13.5px] leading-6 text-on-surface placeholder:text-on-surface-variant/50 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/15"
                 />
                 {title.trim().length >= 8 && (
                   <p className="mt-1 text-[10px] font-bold text-tertiary">✓ تیتر مناسب است</p>
@@ -334,12 +334,12 @@ export function SubmitFlow({
               </div>
 
               {/* ===== لید خبر ===== */}
-              <div className="rounded-2xl border border-line bg-surface p-4">
+              <div className="rounded-2xl border border-outline-variant/40 bg-surface p-4">
                 <div className="mb-1.5 flex items-center justify-between">
-                  <p className="text-[13px] font-extrabold text-ink">لید خبر (خلاصهٔ کلیدی)</p>
-                  <span className="font-mono text-[10px] text-ink-muted">{toFa(lead.trim().length)}/{toFa(LEAD_MAX)}</span>
+                  <p className="text-[13px] font-extrabold text-on-surface">لید خبر (خلاصهٔ کلیدی)</p>
+                  <span className="font-mono text-[10px] text-on-surface-variant">{toFa(lead.trim().length)}/{toFa(LEAD_MAX)}</span>
                 </div>
-                <p className="mb-2.5 text-[10.5px] leading-5 text-ink-muted">
+                <p className="mb-2.5 text-[10.5px] leading-5 text-on-surface-variant">
                   عناصر بنیادین خبر شامل چه کس، چه چیزی، کجا، کجا و چرا را با دقت ترسیم کنید.
                 </p>
                 <textarea
@@ -347,20 +347,20 @@ export function SubmitFlow({
                   onChange={(e) => setLead(e.target.value.slice(0, LEAD_MAX))}
                   rows={2}
                   placeholder="بیان فشردهٔ اصل ماجرا جهت جذب سریع مخاطب..."
-                  className="w-full resize-none rounded-xl border border-outline-variant/50 bg-surface-container-low px-3.5 py-2.5 text-[13px] leading-6 text-ink placeholder:text-ink-muted/50 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/15"
+                  className="w-full resize-none rounded-xl border border-outline-variant/50 bg-surface-container-low px-3.5 py-2.5 text-[13px] leading-6 text-on-surface placeholder:text-on-surface-variant/50 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/15"
                 />
               </div>
 
               {/* ===== متن مشروح خبر + ذخیره خودکار ===== */}
-              <div className="rounded-2xl border border-line bg-surface p-4">
+              <div className="rounded-2xl border border-outline-variant/40 bg-surface p-4">
                 <div className="mb-2.5 flex items-center justify-between">
-                  <p className="flex items-center gap-1.5 text-[13px] font-extrabold text-ink">
+                  <p className="flex items-center gap-1.5 text-[13px] font-extrabold text-on-surface">
                     <EditNoteIcon />
                     متن مشروح خبر
                   </p>
                   <span className={cn(
                     "rounded-full px-2.5 py-1 text-[10px] font-bold",
-                    autoSaved ? "bg-success-soft text-success" : "bg-surface-container text-ink-muted",
+                    autoSaved ? "bg-success-soft text-success" : "bg-surface-container text-on-surface-variant",
                   )}>
                     {autoSaved ? "ذخیرهٔ خودکار پیش‌نویس ✓" : "ذخیرهٔ خودکار فعال"}
                   </span>
@@ -370,7 +370,7 @@ export function SubmitFlow({
                   <ToolBtn onClick={() => insertAtCursor("**", "**")} label="بولد"><Bold className="h-4 w-4" /></ToolBtn>
                   <ToolBtn onClick={() => insertAtCursor("\n• ", "")} label="فهرست"><List className="h-4 w-4" /></ToolBtn>
                   <ToolBtn onClick={() => insertAtCursor("\n«", "»")} label="نقل قول"><Quote className="h-4 w-4" /></ToolBtn>
-                  <span className="mr-auto font-mono text-[10px] text-ink-muted">{toFa(content.trim().length)} کاراکتر</span>
+                  <span className="mr-auto font-mono text-[10px] text-on-surface-variant">{toFa(content.trim().length)} کاراکتر</span>
                 </div>
                 <textarea
                   ref={contentRef}
@@ -378,23 +378,23 @@ export function SubmitFlow({
                   onChange={(e) => setContent(e.target.value)}
                   rows={7}
                   placeholder="متن کامل رویداد، جزئیات، نقل‌قول‌های دقیق و شرح زوایای موضوعی..."
-                  className="w-full resize-none rounded-xl border border-outline-variant/50 bg-surface-container-low px-3.5 py-2.5 text-[13px] leading-7 text-ink placeholder:text-ink-muted/50 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/15"
+                  className="w-full resize-none rounded-xl border border-outline-variant/50 bg-surface-container-low px-3.5 py-2.5 text-[13px] leading-7 text-on-surface placeholder:text-on-surface-variant/50 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/15"
                 />
                 {content.trim().length >= 30 ? (
                   <p className="mt-1 text-[10px] font-bold text-tertiary">✓ {fa(content.trim().length)} کاراکتر</p>
                 ) : (
-                  <p className="mt-1 text-[10px] text-ink-muted">حداقل ۳۰ کاراکتر</p>
+                  <p className="mt-1 text-[10px] text-on-surface-variant">حداقل ۳۰ کاراکتر</p>
                 )}
               </div>
 
               {/* ===== پیوست چندرسانه‌ای ===== */}
-              <div className="rounded-2xl border border-line bg-surface p-4">
+              <div className="rounded-2xl border border-outline-variant/40 bg-surface p-4">
                 <div className="flex items-center justify-between">
-                  <p className="flex items-center gap-1.5 text-[13px] font-extrabold text-ink">
+                  <p className="flex items-center gap-1.5 text-[13px] font-extrabold text-on-surface">
                     <ImageIcon className="h-4 w-4 text-primary" />
                     پیوست چندرسانه‌ای
                   </p>
-                  <button onClick={() => setMediaOpen(!mediaOpen)} className="flex items-center gap-1 text-[10.5px] font-bold text-ink-muted">
+                  <button onClick={() => setMediaOpen(!mediaOpen)} className="flex items-center gap-1 text-[10.5px] font-bold text-on-surface-variant">
                     {mediaType === "none" && !mediaUrl ? "بدون پیوست" : mediaType === "photo" ? "عکس" : "ویدیو"}
                     <ChevronDown className={cn("h-3.5 w-3.5 transition-transform", mediaOpen && "rotate-180")} />
                   </button>
@@ -427,8 +427,8 @@ export function SubmitFlow({
                         className="flex w-full flex-col items-center gap-2 rounded-xl border border-dashed border-primary/40 bg-primary-fixed/25 px-4 py-5 text-center transition-colors hover:bg-primary-fixed/45 disabled:opacity-60"
                       >
                         {uploading ? <Loader2 className="h-6 w-6 animate-spin text-primary" /> : <UploadCloud className="h-6 w-6 text-primary" />}
-                        <span className="text-[13px] font-bold text-ink">{uploading ? "در حال بارگذاری..." : "افزودن تصویر/ویدیو"}</span>
-                        <span className="text-[10px] text-ink-muted">JPG, PNG ≤ ۱۵MB (خودکار فشرده می‌شود) · ویدیو تا ۳۰MB</span>
+                        <span className="text-[13px] font-bold text-on-surface">{uploading ? "در حال بارگذاری..." : "افزودن تصویر/ویدیو"}</span>
+                        <span className="text-[10px] text-on-surface-variant">JPG, PNG ≤ ۱۵MB (خودکار فشرده می‌شود) · ویدیو تا ۳۰MB</span>
                       </button>
                     )}
                     <input ref={fileRef} type="file" accept="image/*,video/mp4,video/webm,video/quicktime,.heic,.heif" className="hidden" onChange={(e) => onPickFile(e.target.files?.[0])} />
@@ -445,7 +445,7 @@ export function SubmitFlow({
                             "flex flex-1 items-center justify-center gap-1.5 rounded-full border px-2 py-2 text-[10.5px] font-bold transition-colors",
                             mediaType === m.key
                               ? "border-primary bg-primary-fixed/50 text-on-primary-fixed"
-                              : "border-line bg-surface-2 text-ink-muted",
+                              : "border-outline-variant/40 bg-surface-container-low text-on-surface-variant",
                           )}
                         >
                           {m.icon}
@@ -458,19 +458,19 @@ export function SubmitFlow({
               </div>
 
               {/* ===== زمان‌بندی و تقویم رسمی رخداد ===== */}
-              <div className="rounded-2xl border border-line bg-surface p-4">
+              <div className="rounded-2xl border border-outline-variant/40 bg-surface p-4">
                 <div className="mb-2.5 flex items-center justify-between">
-                  <p className="flex items-center gap-1.5 text-[13px] font-extrabold text-ink">
+                  <p className="flex items-center gap-1.5 text-[13px] font-extrabold text-on-surface">
                     <CalendarClock className="h-4 w-4 text-primary" />
                     زمان‌بندی و تقویم رسمی رخداد
                   </p>
-                  <span className="rounded-full border border-outline-variant/60 bg-surface-container-low px-2.5 py-1 text-[10px] font-bold text-ink-muted">
+                  <span className="rounded-full border border-outline-variant/60 bg-surface-container-low px-2.5 py-1 text-[10px] font-bold text-on-surface-variant">
                     هجری شمسی
                   </span>
                 </div>
                 <JalaliPicker label="تاریخ و ساعت تهیه خبر" value={preparedAt} onChange={setPreparedAt} />
                 <div className="mt-3 rounded-xl bg-surface-container-low p-3">
-                  <label className="mb-2 block text-[11.5px] font-bold text-ink-muted">زمان صرف‌شده برای تهیه: {fa(duration)} دقیقه</label>
+                  <label className="mb-2 block text-[11.5px] font-bold text-on-surface-variant">زمان صرف‌شده برای تهیه: {fa(duration)} دقیقه</label>
                   <input
                     type="range"
                     min={5}
@@ -485,12 +485,12 @@ export function SubmitFlow({
             </div>
 
             {/* ===== دکمه‌های نهایی ===== */}
-            <div className="mt-3 flex flex-col gap-2 border-t border-line pt-3">
+            <div className="mt-3 flex flex-col gap-2 border-t border-outline-variant/40 pt-3">
               <button onClick={submit} disabled={busy || !canSubmit} className="v3-btn flex w-full items-center justify-center gap-2 py-3.5 text-[14px] disabled:opacity-50">
                 {busy ? "در حال ارسال..." : "ارسال برای تایید حوزه"}
                 <ArrowLeft className="h-4.5 w-4.5" />
               </button>
-              <button onClick={saveDraftNow} className="flex w-full items-center justify-center gap-2 rounded-full border border-line bg-surface py-3.5 text-[13px] font-bold text-ink transition-colors hover:bg-surface-2">
+              <button onClick={saveDraftNow} className="flex w-full items-center justify-center gap-2 rounded-full border border-outline-variant/40 bg-surface py-3.5 text-[13px] font-bold text-on-surface transition-colors hover:bg-surface-container-low">
                 <Save className="h-4 w-4" />
                 ذخیره در پیش‌نویس‌ها
               </button>
@@ -508,7 +508,7 @@ function ToolBtn({ onClick, label, children }: { onClick: () => void; label: str
       onClick={onClick}
       title={label}
       aria-label={label}
-      className="flex h-8 w-8 items-center justify-center rounded-lg text-ink-muted transition-colors hover:bg-surface-container hover:text-ink"
+      className="flex h-8 w-8 items-center justify-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container hover:text-on-surface"
     >
       {children}
     </button>

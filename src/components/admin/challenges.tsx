@@ -76,34 +76,34 @@ export function AdminChallengesSection() {
     <div className="space-y-5">
       {/* ایجاد چالش */}
       <div className="rounded-[24px] border border-neon/30 bg-neon/5 p-4">
-        <p className="mb-3 flex items-center gap-2 text-[14px] font-black text-ink">
+        <p className="mb-3 flex items-center gap-2 text-[14px] font-black text-on-surface">
           <Flag className="h-4.5 w-4.5 text-neon" />
           ایجاد چالش جدید
         </p>
         <div className="space-y-2.5">
-          <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="عنوان چالش (مثلاً پوشش مراسم ۱۳ آبان)" className="rounded-2xl border-line bg-surface text-ink placeholder:text-ink-muted/50" />
-          <Textarea value={desc} onChange={(e) => setDesc(e.target.value)} rows={2} placeholder="توضیحات چالش (حداقل ۱۰ کاراکتر)..." className="rounded-2xl border-line bg-surface text-ink leading-6 placeholder:text-ink-muted/50" />
-          <Input value={reward} onChange={(e) => setReward(e.target.value)} placeholder="جایزه (مثلاً ۳۰ امتیاز + تقدیر ویژه)" className="rounded-2xl border-line bg-surface text-ink placeholder:text-ink-muted/50" />
+          <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="عنوان چالش (مثلاً پوشش مراسم ۱۳ آبان)" className="rounded-2xl border-outline-variant/40 bg-surface text-on-surface placeholder:text-on-surface-variant/50" />
+          <Textarea value={desc} onChange={(e) => setDesc(e.target.value)} rows={2} placeholder="توضیحات چالش (حداقل ۱۰ کاراکتر)..." className="rounded-2xl border-outline-variant/40 bg-surface text-on-surface leading-6 placeholder:text-on-surface-variant/50" />
+          <Input value={reward} onChange={(e) => setReward(e.target.value)} placeholder="جایزه (مثلاً ۳۰ امتیاز + تقدیر ویژه)" className="rounded-2xl border-outline-variant/40 bg-surface text-on-surface placeholder:text-on-surface-variant/50" />
           <div>
-            <label className="mb-1.5 block text-[12px] font-semibold text-ink-muted">مهلت چالش (تقویم جلالی) — تا ساعت ۲۳:۵۹</label>
+            <label className="mb-1.5 block text-[12px] font-semibold text-on-surface-variant">مهلت چالش (تقویم جلالی) — تا ساعت ۲۳:۵۹</label>
             <div className="grid grid-cols-3 gap-2">
-              <select value={jd} onChange={(e) => setJd(Number(e.target.value))} className="rounded-xl border border-line bg-surface px-2 py-2.5 text-[12px] font-bold text-ink" dir="ltr">
+              <select value={jd} onChange={(e) => setJd(Number(e.target.value))} className="rounded-xl border border-outline-variant/40 bg-surface px-2 py-2.5 text-[12px] font-bold text-on-surface" dir="ltr">
                 {days.map((d) => (
                   <option key={d} value={d}>{d}</option>
                 ))}
               </select>
-              <select value={jm} onChange={(e) => { const m = Number(e.target.value); setJm(m); if (jd > jalaliMonthLength(jy, m)) setJd(jalaliMonthLength(jy, m)) }} className="rounded-xl border border-line bg-surface px-2 py-2.5 text-[12px] font-bold text-ink">
+              <select value={jm} onChange={(e) => { const m = Number(e.target.value); setJm(m); if (jd > jalaliMonthLength(jy, m)) setJd(jalaliMonthLength(jy, m)) }} className="rounded-xl border border-outline-variant/40 bg-surface px-2 py-2.5 text-[12px] font-bold text-on-surface">
                 {JALALI_MONTHS.map((m, i) => (
                   <option key={m} value={i + 1}>{m}</option>
                 ))}
               </select>
-              <select value={jy} onChange={(e) => setJy(Number(e.target.value))} className="rounded-xl border border-line bg-surface px-2 py-2.5 text-[12px] font-bold text-ink" dir="ltr">
+              <select value={jy} onChange={(e) => setJy(Number(e.target.value))} className="rounded-xl border border-outline-variant/40 bg-surface px-2 py-2.5 text-[12px] font-bold text-on-surface" dir="ltr">
                 {years.map((y) => (
                   <option key={y} value={y}>{y}</option>
                 ))}
               </select>
             </div>
-            <p className="mt-1.5 text-[10px] text-ink-muted/70">مهلت انتخابی: {fa(jd)} {JALALI_MONTHS[jm - 1]} {fa(jy)} ({jalali(deadlineISO, true)})</p>
+            <p className="mt-1.5 text-[10px] text-on-surface-variant/70">مهلت انتخابی: {fa(jd)} {JALALI_MONTHS[jm - 1]} {fa(jy)} ({jalali(deadlineISO, true)})</p>
           </div>
           <button
             onClick={create}
@@ -118,14 +118,14 @@ export function AdminChallengesSection() {
       {/* چالش‌های فعال */}
       {active.length > 0 && (
         <div>
-          <p className="mb-3 text-[14px] font-black text-ink">چالش‌های فعال ({fa(active.length)})</p>
+          <p className="mb-3 text-[14px] font-black text-on-surface">چالش‌های فعال ({fa(active.length)})</p>
           <div className="space-y-3">
             {active.map((c) => (
-              <div key={c.id} className="rounded-[24px] border border-line bg-surface p-4">
+              <div key={c.id} className="rounded-[24px] border border-outline-variant/40 bg-surface p-4">
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <p className="text-[15px] font-black text-ink">{c.title}</p>
-                    <p className="mt-1 text-[11.5px] leading-5 text-ink-muted">{c.description}</p>
+                    <p className="text-[15px] font-black text-on-surface">{c.title}</p>
+                    <p className="mt-1 text-[11.5px] leading-5 text-on-surface-variant">{c.description}</p>
                     <p className="mt-1.5 text-[11px] font-bold text-warn">{c.reward}</p>
                   </div>
                   <span className="flex shrink-0 items-center gap-1 rounded-full bg-warn/12 px-2.5 py-1 text-[10px] font-bold text-warn">
@@ -135,19 +135,19 @@ export function AdminChallengesSection() {
                 </div>
 
                 {/* شرکت‌کنندگان زنده */}
-                <div className="mt-3 rounded-2xl border border-line bg-surface-2 p-3">
-                  <p className="mb-2 flex items-center gap-1.5 text-[11px] font-black text-ink-muted">
+                <div className="mt-3 rounded-2xl border border-outline-variant/40 bg-surface-container-low p-3">
+                  <p className="mb-2 flex items-center gap-1.5 text-[11px] font-black text-on-surface-variant">
                     <Users2 className="h-3.5 w-3.5" />
                     جدول شرکت‌کنندگان ({fa(c.totalParticipants)} نفر)
                   </p>
                   {c.roster.length === 0 ? (
-                    <p className="py-2 text-center text-[11px] text-ink-muted">هنوز کسی نمرده — شرکت‌کنندگان پس از عضویت اینجا دیده می‌شوند.</p>
+                    <p className="py-2 text-center text-[11px] text-on-surface-variant">هنوز کسی نمرده — شرکت‌کنندگان پس از عضویت اینجا دیده می‌شوند.</p>
                   ) : (
                     <div className="space-y-1">
                       {c.roster.map((p, i) => (
                         <div key={i} className="flex items-center justify-between rounded-xl px-2.5 py-1.5 odd:bg-surface">
-                          <span className="flex items-center gap-2 text-[11.5px] font-bold text-ink">
-                            <span className="w-5 text-center text-[10px] text-ink-muted">{fa(i + 1)}</span>
+                          <span className="flex items-center gap-2 text-[11.5px] font-bold text-on-surface">
+                            <span className="w-5 text-center text-[10px] text-on-surface-variant">{fa(i + 1)}</span>
                             {p.fullName}
                           </span>
                           <span className="text-[11px] font-black text-neon">{fa(p.count)} خبر</span>
@@ -173,25 +173,25 @@ export function AdminChallengesSection() {
       {/* نتایج گذشته */}
       {finished.length > 0 && (
         <div>
-          <p className="mb-3 text-[14px] font-black text-ink">نتایج چالش‌های گذشته</p>
+          <p className="mb-3 text-[14px] font-black text-on-surface">نتایج چالش‌های گذشته</p>
           <div className="space-y-2">
             {finished.map((c) => (
-              <div key={c.id} className="rounded-[24px] border border-line bg-surface p-4">
+              <div key={c.id} className="rounded-[24px] border border-outline-variant/40 bg-surface p-4">
                 <div className="flex items-start justify-between gap-2">
-                  <p className="text-[13.5px] font-bold text-ink">{c.title}</p>
-                  <span className="shrink-0 text-[10px] text-ink-muted">{c.finishedAt ? jalali(c.finishedAt) : jalali(c.endAt)}</span>
+                  <p className="text-[13.5px] font-bold text-on-surface">{c.title}</p>
+                  <span className="shrink-0 text-[10px] text-on-surface-variant">{c.finishedAt ? jalali(c.finishedAt) : jalali(c.endAt)}</span>
                 </div>
                 {c.winners.length > 0 ? (
                   <div className="mt-2.5 space-y-1.5">
                     {c.winners.map((w, i) => (
                       <div key={w.fullName + i} className="flex items-center justify-between rounded-xl bg-warn/8 px-3 py-2">
-                        <span className="text-[12px] font-bold text-ink">{["🥇", "🥈", "🥉"][i]} {w.fullName}</span>
+                        <span className="text-[12px] font-bold text-on-surface">{["🥇", "🥈", "🥉"][i]} {w.fullName}</span>
                         <span className="text-[11px] font-black text-warn">{fa(w.count)} خبر · +{fa(w.prize)} امتیاز</span>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="mt-2 text-[11px] text-ink-muted">بدون شرکت‌کننده فعال</p>
+                  <p className="mt-2 text-[11px] text-on-surface-variant">بدون شرکت‌کننده فعال</p>
                 )}
               </div>
             ))}
@@ -200,20 +200,20 @@ export function AdminChallengesSection() {
       )}
 
       {active.length === 0 && finished.length === 0 && (
-        <p className="rounded-[24px] border border-dashed border-line py-12 text-center text-[12.5px] text-ink-muted">
+        <p className="rounded-[24px] border border-dashed border-outline-variant/40 py-12 text-center text-[12.5px] text-on-surface-variant">
           هنوز چالشی ساخته نشده — اولین چالش را از فرم بالا بساز.
         </p>
       )}
 
       {/* تایید اعلام نتایج */}
       <Dialog open={confirmFin !== null} onOpenChange={(v) => !v && setConfirmFin(null)}>
-        <DialogContent className="rounded-[28px] border-line bg-popover p-5 sm:max-w-md">
+        <DialogContent className="rounded-[28px] border-outline-variant/40 bg-popover p-5 sm:max-w-md">
           <DialogHeader className="text-right">
-            <DialogTitle className="flex items-center gap-2 text-ink">
+            <DialogTitle className="flex items-center gap-2 text-on-surface">
               <Trophy className="h-5 w-5 text-warn" />
               اعلام نتایج چالش
             </DialogTitle>
-            <DialogDescription className="text-ink-muted">
+            <DialogDescription className="text-on-surface-variant">
               چالش پایان می‌یابد؛ مقام‌های اول تا سوم ۳۰/۲۰/۱۰ امتیاز جایزه می‌گیرند، قهرمان نشان می‌گیرد و نتایج به همه اعلام می‌شود. این عمل برگشت‌پذیر نیست.
             </DialogDescription>
           </DialogHeader>

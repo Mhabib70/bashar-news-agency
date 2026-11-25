@@ -286,28 +286,6 @@
   --grad-a: #9d423a;
   --grad-b: #5e1913;
   --grad-ink: #fff3ef;
-
-  /* ---------- توکن‌های v3 (صفحات موجود) با پالت Candy ---------- */
-  --v3-navy: #8e372f;
-  --v3-navy-2: #a84840;
-  --v3-navy-deep: #6b2620;
-  --v3-navy-ink: #fff3ef;
-  --v3-navy-muted: #eebeb4;
-  --v3-azure: #9d423a;
-  --v3-azure-2: #b5544b;
-  --v3-azure-deep: #7c2923;
-  --v3-amber: #d97706;
-  --v3-amber-2: #f59e0b;
-  --v3-page: #fff8f6;
-  --v3-card: #ffffff;
-  --v3-card-2: #fff1ed;
-  --v3-ink: #532517;
-  --v3-ink-2: #885140;
-  --v3-line: #f3ddd6;
-  --v3-azure-soft: #ffe9e4;
-  --v3-amber-soft: #fdf0d7;
-  --v3-shadow-sm: 0 12px 26px -18px rgba(83, 37, 23, 0.28);
-  --v3-shadow: 0 22px 48px -24px rgba(83, 37, 23, 0.3);
 }
 
 /* ---------- پالت تیره — قرمز عمیق سازگار با Candy ---------- */
@@ -398,25 +376,6 @@ html.dark {
   --grad-a: #7c2923;
   --grad-b: #3e0703;
   --grad-ink: #ffdad5;
-
-  --v3-navy: #7c2923;
-  --v3-navy-2: #9d423a;
-  --v3-navy-deep: #4f130e;
-  --v3-navy-ink: #ffdad5;
-  --v3-navy-muted: #eebeb4;
-  --v3-azure: #ff8e82;
-  --v3-azure-2: #b5544b;
-  --v3-azure-deep: #9d423a;
-  --v3-page: #1e0803;
-  --v3-card: #200d0a;
-  --v3-card-2: #2a1210;
-  --v3-ink: #ffdbd1;
-  --v3-ink-2: #e7bdb2;
-  --v3-line: #4d2621;
-  --v3-azure-soft: rgba(255, 142, 130, 0.14);
-  --v3-amber-soft: rgba(245, 158, 11, 0.14);
-  --v3-shadow-sm: 0 12px 26px -18px rgba(0, 0, 0, 0.9);
-  --v3-shadow: 0 20px 44px -22px rgba(0, 0, 0, 0.95);
 }
 
 * {
@@ -654,73 +613,42 @@ body {
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   UI v3 — کلاس‌های کمکی با پالت Candy
+   کلاس‌های کمکی اپ — فرم Candy یکدست
    ═══════════════════════════════════════════════════════════════════ */
 
-/* کارت سفید نرم با گوشه‌های خیلی گرد */
-.v3-card {
-  background: var(--v3-card);
-  border: 1px solid var(--v3-line);
-  border-radius: 24px;
-  box-shadow: var(--v3-shadow-sm);
-}
-.v3-card-flat {
-  background: var(--v3-card);
-  border: 1px solid var(--v3-line);
-  border-radius: 20px;
-}
-
-/* سربرگ قرمز آجری گرم — مطابق هیروی طراحی */
-.v3-hero {
+/* تایل گرادیانی قرمز آجری (تالار گفتگو، بازگشایی کارنامه و…) */
+.candy-tile-red {
   background:
-    radial-gradient(120% 90% at 85% -10%, rgba(255, 255, 255, 0.18) 0%, transparent 55%),
-    linear-gradient(165deg, var(--v3-navy-2) 0%, var(--v3-navy) 52%, var(--v3-navy-deep) 100%);
-  color: var(--v3-navy-ink);
-  border-radius: 0 0 30px 30px;
+    radial-gradient(120% 90% at 85% -10%, rgba(255, 255, 255, 0.2) 0%, transparent 55%),
+    linear-gradient(160deg, #bc594f 0%, #9d4139 48%, #7c2923 100%);
+  color: #fff7f6;
   position: relative;
   overflow: hidden;
 }
-
-/* تایل گرادیانی قرمز / کهربایی */
-.v3-tile-blue {
-  background: linear-gradient(155deg, #c9655c 0%, var(--v3-azure) 45%, var(--v3-azure-deep) 100%);
-  color: #ffffff;
-  position: relative;
-  overflow: hidden;
-}
-.v3-tile-amber {
-  background: linear-gradient(155deg, #fcc646 0%, var(--v3-amber) 55%, #b45309 100%);
-  color: #ffffff;
-  position: relative;
-  overflow: hidden;
-}
-.v3-tile-blue::before,
-.v3-tile-amber::before {
+.candy-tile-red::before {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(160deg, rgba(255, 255, 255, 0.32) 0%, transparent 45%);
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.3) 0%, transparent 45%);
   pointer-events: none;
 }
 
-/* چیپ نرم */
-.v3-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  border-radius: 999px;
-  padding: 3px 10px;
-  font-size: 10.5px;
-  font-weight: 700;
-  background: var(--v3-azure-soft);
-  color: var(--v3-azure-deep);
+/* تایل فیروزه‌ای Candy (آموزش) — هم‌خانوادهٔ secondary پالت */
+.candy-tile-amber {
+  background:
+    radial-gradient(120% 90% at 85% -10%, rgba(255, 255, 255, 0.2) 0%, transparent 55%),
+    linear-gradient(160deg, #4a8fa3 0%, #3e6472 48%, #274e5b 100%);
+  color: #f2faff;
+  position: relative;
+  overflow: hidden;
 }
-html.dark .v3-chip { color: #ffaca2; }
-.v3-chip-amber {
-  background: var(--v3-amber-soft);
-  color: #b45309;
+.candy-tile-amber::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.3) 0%, transparent 45%);
+  pointer-events: none;
 }
-html.dark .v3-chip-amber { color: #fcd34d; }
 
 /* نوار ناوبری پایین شناور — سفید شیشه‌ای قرصی مطابق طراحی */
 .v3-navpill {
@@ -730,15 +658,12 @@ html.dark .v3-chip-amber { color: #fcd34d; }
   box-shadow: 0 12px 32px -4px rgba(83, 37, 23, 0.14);
 }
 
-/* حلقه پیشرفت */
-.v3-ring circle { transition: stroke-dashoffset 0.9s cubic-bezier(0.22, 1, 0.36, 1); }
-
-/* ورودی‌های نسخه v3 (روی کامپوننت‌های ui با className اعمال می‌شود) */
+/* ورودی‌ها (روی کامپوننت‌های ui با className اعمال می‌شود) */
 .v3-input {
-  background: var(--v3-card-2);
-  border: 1.5px solid var(--v3-line);
+  background: var(--surface-ctnr-low);
+  border: 1.5px solid var(--outline-variant);
   border-radius: 16px;
-  color: var(--v3-ink);
+  color: var(--on-surface);
   font-weight: 500;
 }
 .v3-input:focus-visible {
@@ -747,32 +672,20 @@ html.dark .v3-chip-amber { color: #fcd34d; }
   outline: none;
 }
 
-/* دکمه اصلی v3 — قرمز آجری */
+/* دکمه اصلی — قرمز آجری تخت Candy */
 .v3-btn {
-  background: linear-gradient(140deg, var(--v3-azure-2) 0%, var(--v3-azure-deep) 100%);
-  color: #ffffff;
+  background: var(--primary);
+  color: var(--on-primary);
   border-radius: 999px;
   font-weight: 800;
-  box-shadow: 0 12px 26px -10px rgba(157, 66, 58, 0.55);
+  box-shadow: 0 10px 26px -8px rgba(157, 66, 58, 0.5);
   transition: transform 0.15s ease, box-shadow 0.2s ease;
 }
 .v3-btn:active { transform: scale(0.97); }
-.v3-btn-amber {
-  background: linear-gradient(140deg, var(--v3-amber-2) 0%, var(--v3-amber) 100%);
-  color: #42290a;
-  box-shadow: 0 12px 26px -10px rgba(217, 119, 6, 0.55);
-}
-.v3-btn-ghost {
-  background: var(--v3-azure-soft);
-  color: var(--v3-azure-deep);
+.candy-btn-ghost {
+  background: var(--primary-fixed);
+  color: var(--on-primary-fixed);
   border-radius: 999px;
   font-weight: 800;
 }
-html.dark .v3-btn-ghost { color: #ffaca2; }
-
-/* نمایشگر بزرگ آمار */
-.v3-num {
-  font-weight: 900;
-  letter-spacing: -0.02em;
-  font-variant-numeric: tabular-nums;
-}
+html.dark .candy-btn-ghost { background: rgba(255, 174, 166, 0.14); color: #ffaca2; }

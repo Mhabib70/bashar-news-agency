@@ -58,14 +58,14 @@ export function JalaliPicker({
       <button
         type="button"
         onClick={openDialog}
-        className="flex w-full items-center gap-3 rounded-2xl border border-line bg-surface px-4 py-3 text-right transition-colors hover:bg-surface-2"
+        className="flex w-full items-center gap-3 rounded-2xl border border-outline-variant/40 bg-surface px-4 py-3 text-right transition-colors hover:bg-surface-container-low"
       >
         <span className="flex h-9 w-9 items-center justify-center rounded-full bg-neon/12 text-neon">
           <CalendarClock className="h-4.5 w-4.5" />
         </span>
         <span className="flex-1">
-          <span className="block text-[11px] font-semibold text-ink-muted">{label}</span>
-          <span className="block text-[13.5px] font-bold text-ink">
+          <span className="block text-[11px] font-semibold text-on-surface-variant">{label}</span>
+          <span className="block text-[13.5px] font-bold text-on-surface">
             {value
               ? `${fa(toJalaali(value).jd)} ${JALALI_MONTHS[toJalaali(value).jm - 1]} ${fa(toJalaali(value).jy)} — ${fa2(value.getHours())}:${fa2(value.getMinutes())}`
               : "انتخاب کنید"}
@@ -74,10 +74,10 @@ export function JalaliPicker({
       </button>
 
       <Dialog open={open} onOpenChange={(v) => !v && setOpen(false)}>
-        <DialogContent className="max-h-[86dvh] overflow-y-auto nice-scroll rounded-[28px] border-line bg-popover p-5">
+        <DialogContent className="max-h-[86dvh] overflow-y-auto nice-scroll rounded-[28px] border-outline-variant/40 bg-popover p-5">
           <DialogHeader className="text-right">
-            <DialogTitle className="text-ink">{label}</DialogTitle>
-            <DialogDescription className="text-ink-muted">تاریخ شمسی و ساعت را انتخاب کنید</DialogDescription>
+            <DialogTitle className="text-on-surface">{label}</DialogTitle>
+            <DialogDescription className="text-on-surface-variant">تاریخ شمسی و ساعت را انتخاب کنید</DialogDescription>
           </DialogHeader>
 
           {/* ناوبری ماه */}
@@ -85,18 +85,18 @@ export function JalaliPicker({
             <button
               type="button"
               onClick={() => (vm === 12 ? (setVy(vy + 1), setVm(1)) : setVm(vm + 1))}
-              className="flex h-9 w-9 items-center justify-center rounded-full text-ink-muted transition-colors hover:bg-surface-2 hover:text-ink"
+              className="flex h-9 w-9 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-surface-container-low hover:text-on-surface"
               aria-label="ماه بعد"
             >
               <ChevronLeft className="h-5 w-5" />
             </button>
-            <span className="text-[14.5px] font-black text-ink">
+            <span className="text-[14.5px] font-black text-on-surface">
               {JALALI_MONTHS[vm - 1]} {fa(vy)}
             </span>
             <button
               type="button"
               onClick={() => (vm === 1 ? (setVy(vy - 1), setVm(12)) : setVm(vm - 1))}
-              className="flex h-9 w-9 items-center justify-center rounded-full text-ink-muted transition-colors hover:bg-surface-2 hover:text-ink"
+              className="flex h-9 w-9 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-surface-container-low hover:text-on-surface"
               aria-label="ماه قبل"
             >
               <ChevronRight className="h-5 w-5" />
@@ -106,7 +106,7 @@ export function JalaliPicker({
           {/* شبکه روزها */}
           <div className="mt-3 grid grid-cols-7 gap-1 text-center">
             {JALALI_WEEKDAYS.map((w) => (
-              <span key={w} className="py-1 text-[10.5px] font-bold text-ink-muted">
+              <span key={w} className="py-1 text-[10.5px] font-bold text-on-surface-variant">
                 {w}
               </span>
             ))}
@@ -125,7 +125,7 @@ export function JalaliPicker({
                       ? "bg-neon text-neon-foreground"
                       : isToday
                         ? "border border-neon/40 text-neon"
-                        : "text-ink hover:bg-surface-2",
+                        : "text-on-surface hover:bg-surface-container-low",
                   )}
                 >
                   {fa(d)}
@@ -136,29 +136,29 @@ export function JalaliPicker({
 
           {/* ساعت و دقیقه */}
           <div className="mt-3 grid grid-cols-2 gap-2">
-            <label className="rounded-2xl border border-line bg-surface p-2">
-              <span className="block px-1 text-[10.5px] font-semibold text-ink-muted">ساعت</span>
+            <label className="rounded-2xl border border-outline-variant/40 bg-surface p-2">
+              <span className="block px-1 text-[10.5px] font-semibold text-on-surface-variant">ساعت</span>
               <select
                 value={hh}
                 onChange={(e) => setHh(Number(e.target.value))}
-                className="w-full bg-transparent px-1 text-[14px] font-bold text-ink outline-none"
+                className="w-full bg-transparent px-1 text-[14px] font-bold text-on-surface outline-none"
               >
                 {Array.from({ length: 24 }, (_, h) => (
-                  <option key={h} value={h} className="bg-popover text-ink">
+                  <option key={h} value={h} className="bg-popover text-on-surface">
                     {fa2(h)}
                   </option>
                 ))}
               </select>
             </label>
-            <label className="rounded-2xl border border-line bg-surface p-2">
-              <span className="block px-1 text-[10.5px] font-semibold text-ink-muted">دقیقه</span>
+            <label className="rounded-2xl border border-outline-variant/40 bg-surface p-2">
+              <span className="block px-1 text-[10.5px] font-semibold text-on-surface-variant">دقیقه</span>
               <select
                 value={mm}
                 onChange={(e) => setMm(Number(e.target.value))}
-                className="w-full bg-transparent px-1 text-[14px] font-bold text-ink outline-none"
+                className="w-full bg-transparent px-1 text-[14px] font-bold text-on-surface outline-none"
               >
                 {[0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55].map((m) => (
-                  <option key={m} value={m} className="bg-popover text-ink">
+                  <option key={m} value={m} className="bg-popover text-on-surface">
                     {fa2(m)}
                   </option>
                 ))}

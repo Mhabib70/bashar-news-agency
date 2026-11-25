@@ -129,7 +129,7 @@ export function ReviewScreen() {
             onClick={() => selectTab(t.key)}
             className={cn(
               "flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2 text-[11.5px] font-bold transition-colors",
-              tab === t.key ? "bg-primary text-on-primary shadow-[0_4px_12px_-4px_rgba(157,66,58,0.5)]" : "text-ink-muted hover:text-ink",
+              tab === t.key ? "bg-primary text-on-primary shadow-[0_4px_12px_-4px_rgba(157,66,58,0.5)]" : "text-on-surface-variant hover:text-on-surface",
             )}
           >
             {t.label}
@@ -142,7 +142,7 @@ export function ReviewScreen() {
 
       {/* ===== نقشه چرخه ===== */}
       {tab === "waiting" && (
-        <div className="v3-card p-3.5">
+        <div className="rounded-3xl border border-outline-variant/40 bg-surface-container-lowest shadow-[0_8px_24px_-4px_rgba(83,37,23,0.05)] p-3.5">
           <div className="flex items-center justify-between gap-2">
             {REVIEW_STAGES.map((s, i) => {
               const count = queue.filter((n) => n.status === "pending" && n.reviewStage === s.key).length
@@ -153,13 +153,13 @@ export function ReviewScreen() {
                   <div
                     className={cn(
                       "flex-1 rounded-2xl border px-2.5 py-2.5 text-center transition-colors",
-                      isMine ? "border-primary/45 bg-primary-fixed/40" : "border-line bg-surface-2/60",
+                      isMine ? "border-primary/45 bg-primary-fixed/40" : "border-outline-variant/40 bg-surface-container-low/60",
                     )}
                   >
-                    <p className="text-[10.5px] font-bold text-ink-muted">
+                    <p className="text-[10.5px] font-bold text-on-surface-variant">
                       {fa(i + 1)}. {s.label}
                     </p>
-                    <p className={cn("v3-num mt-0.5 text-[16px] leading-6", count > 0 ? "text-warn" : "text-ink-muted/50")}>{fa(count)}</p>
+                    <p className={cn("font-black tracking-tight mt-0.5 text-[16px] leading-6", count > 0 ? "text-warn" : "text-on-surface-variant/50")}>{fa(count)}</p>
                     <p className={cn("text-[9px] font-bold", hasStaff ? "text-tertiary" : "text-danger")}>
                       {hasStaff ? `${fa(s.key === "district" ? staff.district : s.key === "specialist" ? staff.specialist : staff.admin)} نیرو` : "بدون نیرو!"}
                     </p>
@@ -187,17 +187,17 @@ export function ReviewScreen() {
 
       {/* ===== لیست اخبار تب فعال ===== */}
       {(allLoading || (tab !== "waiting" && !allNews)) ? (
-        <div className="flex flex-col items-center gap-2 py-14 text-[12px] text-ink-muted">
+        <div className="flex flex-col items-center gap-2 py-14 text-[12px] text-on-surface-variant">
           <Loader2 className="h-5 w-5 animate-spin" />
           در حال دریافت اخبار...
         </div>
       ) : tabList.length === 0 ? (
-        <div className="v3-card flex flex-col items-center gap-2 border-dashed py-14 text-center">
+        <div className="rounded-3xl border border-outline-variant/40 bg-surface-container-lowest shadow-[0_8px_24px_-4px_rgba(83,37,23,0.05)] flex flex-col items-center gap-2 border-dashed py-14 text-center">
           <Inbox className="h-9 w-9 text-primary/50" />
-          <p className="text-[14px] font-bold text-ink">
+          <p className="text-[14px] font-bold text-on-surface">
             {tab === "waiting" ? "صف بررسی خالی است" : tab === "corrections" ? "اصلاحیه‌ای وجود ندارد" : tab === "approved" ? "هنوز خبری منتشر نشده" : "بایگانی خالی است"}
           </p>
-          <p className="max-w-[240px] text-[11.5px] leading-5 text-ink-muted">
+          <p className="max-w-[240px] text-[11.5px] leading-5 text-on-surface-variant">
             {tab === "waiting" ? "همه خبرهای رسیده به مرحله شما رسیدگی شده‌اند. کارت عالی!" : "با انتخاب این بخش، اخبار مربوطه همین‌جا نمایش داده می‌شود."}
           </p>
         </div>
@@ -214,10 +214,10 @@ export function ReviewScreen() {
               <p className="mt-2 text-[14px] font-bold leading-6 text-on-surface">{n.title}</p>
               {n.lead && <p className="mt-1 line-clamp-2 text-[11.5px] font-medium leading-5 text-tertiary">{n.lead}</p>}
               {n.mediaUrl && n.mediaType === "photo" && (
-                <img src={n.mediaUrl} alt="رسانه خبر" className="mt-2.5 max-h-44 w-full rounded-2xl border border-line object-cover" />
+                <img src={n.mediaUrl} alt="رسانه خبر" className="mt-2.5 max-h-44 w-full rounded-2xl border border-outline-variant/40 object-cover" />
               )}
               {n.mediaUrl && n.mediaType === "video" && (
-                <video src={n.mediaUrl} controls className="mt-2.5 max-h-44 w-full rounded-2xl border border-line bg-black" />
+                <video src={n.mediaUrl} controls className="mt-2.5 max-h-44 w-full rounded-2xl border border-outline-variant/40 bg-black" />
               )}
               <p className="mt-1.5 line-clamp-3 text-[12px] leading-6 text-on-surface-variant">{n.content}</p>
 
@@ -233,9 +233,9 @@ export function ReviewScreen() {
                 </button>
               </div>
 
-              <div className="mt-3 flex items-center gap-2 border-t border-line pt-3">
+              <div className="mt-3 flex items-center gap-2 border-t border-outline-variant/40 pt-3">
                 <Avatar name={n.reporterName} src={n.reporterAvatar} size={32} />
-                <span className="flex-1 text-[11px] text-ink-muted">
+                <span className="flex-1 text-[11px] text-on-surface-variant">
                   {n.reporterName} · {DISTRICT_LABELS[n.district] ?? n.district}
                 </span>
               </div>
@@ -294,38 +294,38 @@ export function ReviewScreen() {
 
       {/* دیالوگ ردپای چرخه (پیش‌نمایش آنلاین برای مدیر) */}
       <Dialog open={detail !== null} onOpenChange={(v) => !v && setDetail(null)}>
-        <DialogContent className="nice-scroll max-h-[84dvh] overflow-y-auto rounded-[24px] border-[var(--v3-line)] bg-[var(--v3-card)] p-5">
+        <DialogContent className="nice-scroll max-h-[84dvh] overflow-y-auto rounded-[24px] border-outline-variant/50 bg-surface-container-lowest p-5">
           {detailNews && (
             <>
               <DialogHeader className="text-right">
-                <DialogTitle className="text-right text-[16px] leading-7 text-ink">{detailNews.title}</DialogTitle>
-                <DialogDescription className="text-[11px] text-ink-muted">
+                <DialogTitle className="text-right text-[16px] leading-7 text-on-surface">{detailNews.title}</DialogTitle>
+                <DialogDescription className="text-[11px] text-on-surface-variant">
                   {detailNews.code} · {detailNews.reporterName} · {DISTRICT_LABELS[detailNews.district] ?? detailNews.district}
                 </DialogDescription>
               </DialogHeader>
               {/* پیش‌نمایش خبر — همان شکلی که منتشر می‌شود */}
-              <div className="v3-card-flat mt-3 p-4">
-                <p className="mb-2.5 flex items-center gap-1.5 text-[11px] font-black text-ink-muted">
+              <div className="rounded-2xl border border-outline-variant/40 bg-surface-container-lowest mt-3 p-4">
+                <p className="mb-2.5 flex items-center gap-1.5 text-[11px] font-black text-on-surface-variant">
                   <Eye className="h-3.5 w-3.5 text-primary" />
                   پیش‌نمایش خبر (پیش از تصمیم)
                 </p>
                 {detailNews.mediaUrl && detailNews.mediaType === "photo" && (
-                  <img src={detailNews.mediaUrl} alt="رسانه خبر" className="mb-3 max-h-52 w-full rounded-2xl border border-line object-cover" />
+                  <img src={detailNews.mediaUrl} alt="رسانه خبر" className="mb-3 max-h-52 w-full rounded-2xl border border-outline-variant/40 object-cover" />
                 )}
                 {detailNews.mediaUrl && detailNews.mediaType === "video" && (
-                  <video src={detailNews.mediaUrl} controls className="mb-3 max-h-52 w-full rounded-2xl border border-line bg-black" />
+                  <video src={detailNews.mediaUrl} controls className="mb-3 max-h-52 w-full rounded-2xl border border-outline-variant/40 bg-black" />
                 )}
                 <div className="flex items-center justify-between">
                   <span className="rounded-full bg-surface-container px-2.5 py-0.5 text-[10px] font-bold text-on-surface-variant">{CATEGORY_LABELS[detailNews.category]}</span>
-                  <span className="text-[10px] text-ink-muted">
+                  <span className="text-[10px] text-on-surface-variant">
                     {detailNews.reporterName} · {DISTRICT_LABELS[detailNews.district] ?? detailNews.district} · {durFmt(detailNews.durationMin)}
                   </span>
                 </div>
                 {detailNews.lead && (
                   <p className="mt-2 rounded-xl bg-surface-container-low px-3 py-2 text-[12px] font-medium leading-6 text-tertiary">{detailNews.lead}</p>
                 )}
-                <p className="mt-2 text-[15px] font-black leading-7 text-ink">{detailNews.title}</p>
-                <p className="mt-1.5 whitespace-pre-line text-[13px] leading-7 text-ink/90">{detailNews.content}</p>
+                <p className="mt-2 text-[15px] font-black leading-7 text-on-surface">{detailNews.title}</p>
+                <p className="mt-1.5 whitespace-pre-line text-[13px] leading-7 text-on-surface/90">{detailNews.content}</p>
               </div>
               <div className="mt-3">
                 <StageTimeline news={detailNews} />
@@ -333,7 +333,7 @@ export function ReviewScreen() {
               {canEditNews && (
                 <button
                   onClick={() => setEditing(detailNews.id)}
-                  className="v3-btn-ghost mt-3 flex w-full items-center justify-center gap-1.5 py-3 text-[12px]"
+                  className="candy-btn-ghost mt-3 flex w-full items-center justify-center gap-1.5 py-3 text-[12px]"
                 >
                   <Pencil className="h-4 w-4" />
                   ویرایش متن خبر
@@ -364,10 +364,10 @@ export function ReviewScreen() {
 
       {/* رد با دلیل */}
       <Dialog open={rejecting !== null} onOpenChange={(v) => !v && setRejecting(null)}>
-        <DialogContent className="rounded-[24px] border-[var(--v3-line)] bg-[var(--v3-card)] p-5">
+        <DialogContent className="rounded-[24px] border-outline-variant/50 bg-surface-container-lowest p-5">
           <DialogHeader className="text-right">
-            <DialogTitle className="text-ink">رد خبر با دلیل</DialogTitle>
-            <DialogDescription className="text-ink-muted">
+            <DialogTitle className="text-on-surface">رد خبر با دلیل</DialogTitle>
+            <DialogDescription className="text-on-surface-variant">
               دلیل رد برای خبرنگار نمایش داده می‌شود؛ می‌تواند ویرایش و مجدداً ارسال کند.
             </DialogDescription>
           </DialogHeader>
@@ -378,22 +378,22 @@ export function ReviewScreen() {
                 onClick={() => setReason(r.key)}
                 className={cn(
                   "flex w-full items-start gap-3 rounded-2xl border px-4 py-3 text-right transition-colors",
-                  reason === r.key ? "border-danger/40 bg-error-container/20" : "border-line bg-surface-2/60 hover:bg-surface-2",
+                  reason === r.key ? "border-danger/40 bg-error-container/20" : "border-outline-variant/40 bg-surface-container-low/60 hover:bg-surface-container-low",
                 )}
               >
-                <span className={cn("mt-0.5 flex h-5 w-5 items-center justify-center rounded-full border", reason === r.key ? "border-danger bg-danger text-white" : "border-line")}>
+                <span className={cn("mt-0.5 flex h-5 w-5 items-center justify-center rounded-full border", reason === r.key ? "border-danger bg-danger text-white" : "border-outline-variant/40")}>
                   {reason === r.key && <Check className="h-3 w-3" />}
                 </span>
                 <span>
-                  <span className="flex items-center gap-1.5 block text-[13px] font-bold text-ink">
+                  <span className="flex items-center gap-1.5 block text-[13px] font-bold text-on-surface">
                     <FileWarning className="h-3.5 w-3.5 text-danger/70" />
                     {r.label}
                   </span>
-                  <span className="block text-[11px] text-ink-muted">{r.hint}</span>
+                  <span className="block text-[11px] text-on-surface-variant">{r.hint}</span>
                 </span>
               </button>
             ))}
-            <Textarea value={note} onChange={(e) => setNote(e.target.value)} rows={3} placeholder="توضیح تکمیلی برای خبرنگار (اختیاری)" className="v3-input rounded-2xl leading-6 placeholder:text-ink-muted/50" />
+            <Textarea value={note} onChange={(e) => setNote(e.target.value)} rows={3} placeholder="توضیح تکمیلی برای خبرنگار (اختیاری)" className="v3-input rounded-2xl leading-6 placeholder:text-on-surface-variant/50" />
           </div>
           <button
             onClick={() => rejecting !== null && act(rejecting, "reject", reason, note)}
@@ -420,16 +420,16 @@ function KpiCard({ icon, label, value, tone }: { icon: React.ReactNode; label: s
   return (
     <div className={cn(
       "flex flex-col gap-1 rounded-2xl border p-3 text-center",
-      tone === "warn" ? "border-warn/30 bg-warn/10" : tone === "tertiary" ? "border-tertiary/25 bg-tertiary-fixed/25" : "border-line bg-surface",
+      tone === "warn" ? "border-warn/30 bg-warn/10" : tone === "tertiary" ? "border-tertiary/25 bg-tertiary-fixed/25" : "border-outline-variant/40 bg-surface",
     )}>
       <span className={cn(
         "mx-auto flex h-8 w-8 items-center justify-center rounded-xl",
-        tone === "warn" ? "bg-warn/20 text-warn" : tone === "tertiary" ? "bg-tertiary text-on-tertiary" : "bg-surface-2 text-ink-muted",
+        tone === "warn" ? "bg-warn/20 text-warn" : tone === "tertiary" ? "bg-tertiary text-on-tertiary" : "bg-surface-container-low text-on-surface-variant",
       )}>
         {icon}
       </span>
-      <span className="text-[18px] font-black leading-none text-ink">{value}</span>
-      <span className="text-[9.5px] font-bold text-ink-muted">{label}</span>
+      <span className="text-[18px] font-black leading-none text-on-surface">{value}</span>
+      <span className="text-[9.5px] font-bold text-on-surface-variant">{label}</span>
     </div>
   )
 }

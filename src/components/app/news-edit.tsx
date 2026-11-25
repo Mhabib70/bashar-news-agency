@@ -61,21 +61,21 @@ export function NewsEditDialog({
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-h-[86dvh] overflow-y-auto nice-scroll rounded-[24px] border-[var(--v3-line)] bg-[var(--v3-card)] p-5 sm:max-w-lg">
+      <DialogContent className="max-h-[86dvh] overflow-y-auto nice-scroll rounded-[24px] border-outline-variant/50 bg-surface-container-lowest p-5 sm:max-w-lg">
         <DialogHeader className="text-right">
-          <DialogTitle className="flex items-center gap-2 text-[var(--v3-ink)]">
-            <Pencil className="h-4.5 w-4.5 text-[var(--v3-azure)]" />
+          <DialogTitle className="flex items-center gap-2 text-on-surface">
+            <Pencil className="h-4.5 w-4.5 text-primary" />
             ویرایش متن خبر
           </DialogTitle>
-          <DialogDescription className="text-[var(--v3-ink-2)]">
+          <DialogDescription className="text-on-surface-variant">
             تیتر و متن کامل خبر را اصلاح کنید. این ویرایش در ردپای چرخه ثبت و به خبرنگار اعلان می‌شود.
           </DialogDescription>
         </DialogHeader>
 
         <div className="mt-3 space-y-3">
           <div>
-            <label className="mb-1.5 block text-[12px] font-semibold text-[var(--v3-ink-2)]">
-              تیتر خبر <span className={titleOk ? "text-[var(--v3-azure)]" : "text-red-600 dark:text-red-400"}>({title.trim().length}/۸)</span>
+            <label className="mb-1.5 block text-[12px] font-semibold text-on-surface-variant">
+              تیتر خبر <span className={titleOk ? "text-primary" : "text-red-600 dark:text-red-400"}>({title.trim().length}/۸)</span>
             </label>
             <Input
               value={title}
@@ -85,8 +85,8 @@ export function NewsEditDialog({
             />
           </div>
           <div>
-            <label className="mb-1.5 block text-[12px] font-semibold text-[var(--v3-ink-2)]">
-              متن کامل خبر <span className={contentOk ? "text-[var(--v3-azure)]" : "text-red-600 dark:text-red-400"}>({content.trim().length}/۳۰)</span>
+            <label className="mb-1.5 block text-[12px] font-semibold text-on-surface-variant">
+              متن کامل خبر <span className={contentOk ? "text-primary" : "text-red-600 dark:text-red-400"}>({content.trim().length}/۳۰)</span>
             </label>
             <Textarea
               value={content}

@@ -33,25 +33,25 @@ export function AdminSheet({ open, onClose }: { open: boolean; onClose: () => vo
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="flex max-h-[90dvh] flex-col gap-0 overflow-hidden rounded-[28px] border-line bg-popover p-5">
+      <DialogContent className="flex max-h-[90dvh] flex-col gap-0 overflow-hidden rounded-[28px] border-outline-variant/40 bg-popover p-5">
         <DialogHeader className="text-right">
-          <DialogTitle className="flex items-center gap-2 text-ink">
+          <DialogTitle className="flex items-center gap-2 text-on-surface">
             <ShieldCheck className="h-5 w-5 text-neon" />
             پنل مدیریت
           </DialogTitle>
-          <DialogDescription className="text-ink-muted">
+          <DialogDescription className="text-on-surface-variant">
             {state.pendingUsersCount > 0 ? `${fa(state.pendingUsersCount)} درخواست عضویت در انتظار تایید` : "ابزارهای مدیریت خبرگزاری"}
           </DialogDescription>
         </DialogHeader>
 
-        <div className="mt-3 flex rounded-full border border-line bg-surface p-1">
+        <div className="mt-3 flex rounded-full border border-outline-variant/40 bg-surface p-1">
           {TABS.map((t) => (
             <button
               key={t.key}
               onClick={() => setTab(t.key)}
               className={cn(
                 "flex flex-1 items-center justify-center gap-1.5 rounded-full py-2 text-[11.5px] font-bold transition-all",
-                tab === t.key ? "bg-neon text-neon-foreground" : "text-ink-muted hover:text-ink",
+                tab === t.key ? "bg-neon text-neon-foreground" : "text-on-surface-variant hover:text-on-surface",
               )}
             >
               {t.icon}
@@ -112,9 +112,9 @@ function UsersTab() {
 
   return (
     <div className="space-y-3 pb-2">
-      <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="جستجوی نام یا شماره..." className="rounded-2xl border-line bg-surface text-ink placeholder:text-ink-muted/50" />
+      <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="جستجوی نام یا شماره..." className="rounded-2xl border-outline-variant/40 bg-surface text-on-surface placeholder:text-on-surface-variant/50" />
 
-      {users === null && <p className="py-6 text-center text-[12px] text-ink-muted">در حال بارگذاری...</p>}
+      {users === null && <p className="py-6 text-center text-[12px] text-on-surface-variant">در حال بارگذاری...</p>}
 
       {pending.length > 0 && (
         <div>
@@ -127,11 +127,11 @@ function UsersTab() {
               <div key={u.id} className="rounded-2xl border border-warn/30 bg-warn/5 p-3.5">
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <p className="text-[13.5px] font-bold text-ink">{u.fullName}</p>
-                    <p className="mt-0.5 text-[10.5px] leading-5 text-ink-muted">
+                    <p className="text-[13.5px] font-bold text-on-surface">{u.fullName}</p>
+                    <p className="mt-0.5 text-[10.5px] leading-5 text-on-surface-variant">
                       {u.phone} · {DISTRICT_LABELS[u.district] ?? u.district} · {u.base}
                     </p>
-                    <p className="text-[10px] text-ink-muted/70">درخواست: {relTime(u.createdAt)}</p>
+                    <p className="text-[10px] text-on-surface-variant/70">درخواست: {relTime(u.createdAt)}</p>
                   </div>
                 </div>
                 <div className="mt-2.5 flex gap-2">
@@ -162,34 +162,34 @@ function UsersTab() {
       )}
 
       <div>
-        <p className="mb-2 text-[12px] font-black text-ink-muted">اعضا ({fa(rest.length)})</p>
+        <p className="mb-2 text-[12px] font-black text-on-surface-variant">اعضا ({fa(rest.length)})</p>
         <div className="space-y-1.5">
           {rest.map((u) => (
-            <div key={u.id} className="flex items-center justify-between rounded-2xl border border-line bg-surface px-3.5 py-3">
+            <div key={u.id} className="flex items-center justify-between rounded-2xl border border-outline-variant/40 bg-surface px-3.5 py-3">
               <div className="min-w-0">
-                <p className="text-[13px] font-bold text-ink">
+                <p className="text-[13px] font-bold text-on-surface">
                   {u.fullName}
                   {u.status === "rejected" && <span className="mr-2 rounded-full bg-[#ff5c5c]/15 px-2 py-0.5 text-[9px] font-bold text-[#ff8484]">رد شده</span>}
                 </p>
-                <p className="text-[10.5px] text-ink-muted">
+                <p className="text-[10.5px] text-on-surface-variant">
                   {ROLE_LABELS[u.role]} · {DISTRICT_LABELS[u.district] ?? u.district} · {fa(u.points)} امتیاز
                 </p>
               </div>
-              <span className="shrink-0 rounded-full bg-surface-2 px-2.5 py-1 text-[9.5px] font-bold text-ink-muted">
+              <span className="shrink-0 rounded-full bg-surface-container-low px-2.5 py-1 text-[9.5px] font-bold text-on-surface-variant">
                 {u.status === "active" ? "فعال" : USER_REJECT_TITLES[u.rejectReason] ?? "—"}
               </span>
             </div>
           ))}
-          {rest.length === 0 && pending.length === 0 && <p className="py-6 text-center text-[12px] text-ink-muted">عضوی یافت نشد.</p>}
+          {rest.length === 0 && pending.length === 0 && <p className="py-6 text-center text-[12px] text-on-surface-variant">عضوی یافت نشد.</p>}
         </div>
       </div>
 
       {/* رد با دلیل */}
       <Dialog open={rejecting !== null} onOpenChange={(v) => !v && setRejecting(null)}>
-        <DialogContent className="rounded-[28px] border-line bg-popover p-5">
+        <DialogContent className="rounded-[28px] border-outline-variant/40 bg-popover p-5">
           <DialogHeader className="text-right">
-            <DialogTitle className="text-ink">رد درخواست عضویت</DialogTitle>
-            <DialogDescription className="text-ink-muted">
+            <DialogTitle className="text-on-surface">رد درخواست عضویت</DialogTitle>
+            <DialogDescription className="text-on-surface-variant">
               دلیل رد برای متقاضی اعلان می‌شود؛ می‌تواند مجدداً ثبت‌نام کند.
             </DialogDescription>
           </DialogHeader>
@@ -200,10 +200,10 @@ function UsersTab() {
                 onClick={() => setReason(k)}
                 className={cn(
                   "flex w-full items-center gap-3 rounded-2xl border px-4 py-3 text-right text-[13px] font-bold transition-colors",
-                  reason === k ? "border-[#ff5c5c]/50 bg-[#ff5c5c]/8 text-ink" : "border-line bg-surface text-ink-muted",
+                  reason === k ? "border-[#ff5c5c]/50 bg-[#ff5c5c]/8 text-on-surface" : "border-outline-variant/40 bg-surface text-on-surface-variant",
                 )}
               >
-                <span className={cn("flex h-5 w-5 items-center justify-center rounded-full border", reason === k ? "border-[#ff5c5c] bg-[#ff5c5c] text-white" : "border-line")}>
+                <span className={cn("flex h-5 w-5 items-center justify-center rounded-full border", reason === k ? "border-[#ff5c5c] bg-[#ff5c5c] text-white" : "border-outline-variant/40")}>
                   {reason === k && <Check className="h-3 w-3" />}
                 </span>
                 {label}
@@ -247,19 +247,19 @@ function BroadcastTab() {
 
   return (
     <div className="space-y-3 pb-2">
-      <div className="rounded-2xl border border-line bg-surface p-3.5">
-        <p className="text-[11.5px] leading-5 text-ink-muted">
+      <div className="rounded-2xl border border-outline-variant/40 bg-surface p-3.5">
+        <p className="text-[11.5px] leading-5 text-on-surface-variant">
           پیام در مرکز اعلان همه اعضای فعال ثبت می‌شود. اعضایی که «اطلاع‌رسانی گروهی» را خاموش کرده‌اند دریافت نمی‌کنند و
           اعلان‌های ساعت سکوت به پایان سکوت موکول می‌شوند (مطابق سناریوی ۵ ربات).
         </p>
       </div>
       <div>
-        <label className="mb-1.5 block text-[12px] font-semibold text-ink-muted">عنوان پیام</label>
-        <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="مثلاً: جلسه هم‌اندیشی هفتگی" className="rounded-2xl border-line bg-surface text-ink placeholder:text-ink-muted/50" />
+        <label className="mb-1.5 block text-[12px] font-semibold text-on-surface-variant">عنوان پیام</label>
+        <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="مثلاً: جلسه هم‌اندیشی هفتگی" className="rounded-2xl border-outline-variant/40 bg-surface text-on-surface placeholder:text-on-surface-variant/50" />
       </div>
       <div>
-        <label className="mb-1.5 block text-[12px] font-semibold text-ink-muted">متن پیام</label>
-        <Textarea value={text} onChange={(e) => setText(e.target.value)} rows={5} placeholder="متن کامل پیام همگانی..." className="rounded-2xl border-line bg-surface text-ink leading-6 placeholder:text-ink-muted/50" />
+        <label className="mb-1.5 block text-[12px] font-semibold text-on-surface-variant">متن پیام</label>
+        <Textarea value={text} onChange={(e) => setText(e.target.value)} rows={5} placeholder="متن کامل پیام همگانی..." className="rounded-2xl border-outline-variant/40 bg-surface text-on-surface leading-6 placeholder:text-on-surface-variant/50" />
       </div>
       <button
         onClick={send}
@@ -336,33 +336,33 @@ function ChallengesTab() {
   return (
     <div className="space-y-4 pb-2">
       {/* ایجاد چالش */}
-      <div className="rounded-[24px] border border-line bg-surface p-4">
-        <p className="mb-3 flex items-center gap-1.5 text-[13px] font-black text-ink">
+      <div className="rounded-[24px] border border-outline-variant/40 bg-surface p-4">
+        <p className="mb-3 flex items-center gap-1.5 text-[13px] font-black text-on-surface">
           <Flag className="h-4 w-4 text-neon" />
           ایجاد چالش جدید
         </p>
         <div className="space-y-2.5">
-          <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="عنوان چالش (مثلاً پوشش مراسم ۱۳ آبان)" className="rounded-2xl border-line bg-surface text-ink placeholder:text-ink-muted/50" />
-          <Textarea value={desc} onChange={(e) => setDesc(e.target.value)} rows={2} placeholder="توضیحات چالش (حداقل ۱۰ کاراکتر)..." className="rounded-2xl border-line bg-surface text-ink leading-6 placeholder:text-ink-muted/50" />
-          <Input value={reward} onChange={(e) => setReward(e.target.value)} placeholder="جایزه (مثلاً ۳۰ امتیاز + تقدیر ویژه)" className="rounded-2xl border-line bg-surface text-ink placeholder:text-ink-muted/50" />
+          <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="عنوان چالش (مثلاً پوشش مراسم ۱۳ آبان)" className="rounded-2xl border-outline-variant/40 bg-surface text-on-surface placeholder:text-on-surface-variant/50" />
+          <Textarea value={desc} onChange={(e) => setDesc(e.target.value)} rows={2} placeholder="توضیحات چالش (حداقل ۱۰ کاراکتر)..." className="rounded-2xl border-outline-variant/40 bg-surface text-on-surface leading-6 placeholder:text-on-surface-variant/50" />
+          <Input value={reward} onChange={(e) => setReward(e.target.value)} placeholder="جایزه (مثلاً ۳۰ امتیاز + تقدیر ویژه)" className="rounded-2xl border-outline-variant/40 bg-surface text-on-surface placeholder:text-on-surface-variant/50" />
           <div>
-            <label className="mb-1.5 block text-[12px] font-semibold text-ink-muted">مهلت چالش (تقویم جلالی) — تا ساعت ۲۳:۵۹</label>
+            <label className="mb-1.5 block text-[12px] font-semibold text-on-surface-variant">مهلت چالش (تقویم جلالی) — تا ساعت ۲۳:۵۹</label>
             <div className="grid grid-cols-3 gap-2">
-              <select value={jd} onChange={(e) => setJd(Number(e.target.value))} className="rounded-xl border border-line bg-surface px-2 py-2.5 text-[12px] font-bold text-ink" dir="ltr">
+              <select value={jd} onChange={(e) => setJd(Number(e.target.value))} className="rounded-xl border border-outline-variant/40 bg-surface px-2 py-2.5 text-[12px] font-bold text-on-surface" dir="ltr">
                 {days.map((d) => (
                   <option key={d} value={d}>
                     {d}
                   </option>
                 ))}
               </select>
-              <select value={jm} onChange={(e) => { const m = Number(e.target.value); setJm(m); if (jd > jalaliMonthLength(jy, m)) setJd(jalaliMonthLength(jy, m)) }} className="rounded-xl border border-line bg-surface px-2 py-2.5 text-[12px] font-bold text-ink">
+              <select value={jm} onChange={(e) => { const m = Number(e.target.value); setJm(m); if (jd > jalaliMonthLength(jy, m)) setJd(jalaliMonthLength(jy, m)) }} className="rounded-xl border border-outline-variant/40 bg-surface px-2 py-2.5 text-[12px] font-bold text-on-surface">
                 {JALALI_MONTHS.map((m, i) => (
                   <option key={m} value={i + 1}>
                     {m}
                   </option>
                 ))}
               </select>
-              <select value={jy} onChange={(e) => setJy(Number(e.target.value))} className="rounded-xl border border-line bg-surface px-2 py-2.5 text-[12px] font-bold text-ink" dir="ltr">
+              <select value={jy} onChange={(e) => setJy(Number(e.target.value))} className="rounded-xl border border-outline-variant/40 bg-surface px-2 py-2.5 text-[12px] font-bold text-on-surface" dir="ltr">
                 {years.map((y) => (
                   <option key={y} value={y}>
                     {y}
@@ -370,7 +370,7 @@ function ChallengesTab() {
                 ))}
               </select>
             </div>
-            <p className="mt-1.5 text-[10px] text-ink-muted/70">مهلت انتخابی: {fa(jd)} {JALALI_MONTHS[jm - 1]} {fa(jy)} ({jalali(deadlineISO, true)})</p>
+            <p className="mt-1.5 text-[10px] text-on-surface-variant/70">مهلت انتخابی: {fa(jd)} {JALALI_MONTHS[jm - 1]} {fa(jy)} ({jalali(deadlineISO, true)})</p>
           </div>
           <button
             onClick={create}
@@ -385,15 +385,15 @@ function ChallengesTab() {
       {/* چالش‌های فعال */}
       {active.length > 0 && (
         <div>
-          <p className="mb-2 text-[12px] font-black text-ink-muted">چالش‌های فعال</p>
+          <p className="mb-2 text-[12px] font-black text-on-surface-variant">چالش‌های فعال</p>
           <div className="space-y-2">
             {active.map((c) => (
               <div key={c.id} className="rounded-2xl border border-neon/30 bg-neon/5 p-3.5">
                 <div className="flex items-start justify-between gap-2">
-                  <p className="text-[13px] font-bold text-ink">{c.title}</p>
+                  <p className="text-[13px] font-bold text-on-surface">{c.title}</p>
                   <span className="shrink-0 rounded-full bg-neon/12 px-2.5 py-1 text-[9.5px] font-bold text-neon">{untilFmt(c.deadlineAt)}</span>
                 </div>
-                <p className="mt-1 text-[10.5px] text-ink-muted">{fa(c.totalParticipants)} شرکت‌کننده · {c.code}</p>
+                <p className="mt-1 text-[10.5px] text-on-surface-variant">{fa(c.totalParticipants)} شرکت‌کننده · {c.code}</p>
                 <button
                   onClick={() => setConfirmFin(c.id)}
                   disabled={busy !== null}
@@ -409,12 +409,12 @@ function ChallengesTab() {
 
       {finished.length > 0 && (
         <div>
-          <p className="mb-2 text-[12px] font-black text-ink-muted">آخرین نتایج</p>
+          <p className="mb-2 text-[12px] font-black text-on-surface-variant">آخرین نتایج</p>
           <div className="space-y-1.5">
             {finished.map((c) => (
-              <div key={c.id} className="rounded-2xl border border-line bg-surface px-3.5 py-3">
-                <p className="text-[12.5px] font-bold text-ink">{c.title}</p>
-                <p className="mt-0.5 text-[10.5px] text-ink-muted">
+              <div key={c.id} className="rounded-2xl border border-outline-variant/40 bg-surface px-3.5 py-3">
+                <p className="text-[12.5px] font-bold text-on-surface">{c.title}</p>
+                <p className="mt-0.5 text-[10.5px] text-on-surface-variant">
                   {c.winners.length > 0 ? c.winners.map((w, i) => `${["🥇", "🥈", "🥉"][i]} ${w.fullName} (${fa(w.count)})`).join(" · ") : "بدون شرکت‌کننده فعال"}
                 </p>
               </div>
@@ -424,15 +424,15 @@ function ChallengesTab() {
       )}
 
       {active.length === 0 && finished.length === 0 && (
-        <p className="py-4 text-center text-[12px] text-ink-muted">هنوز چالشی ساخته نشده — اولین چالش را بالای صفحه بساز.</p>
+        <p className="py-4 text-center text-[12px] text-on-surface-variant">هنوز چالشی ساخته نشده — اولین چالش را بالای صفحه بساز.</p>
       )}
 
       {/* تایید اعلام نتایج */}
       <Dialog open={confirmFin !== null} onOpenChange={(v) => !v && setConfirmFin(null)}>
-        <DialogContent className="rounded-[28px] border-line bg-popover p-5">
+        <DialogContent className="rounded-[28px] border-outline-variant/40 bg-popover p-5">
           <DialogHeader className="text-right">
-            <DialogTitle className="text-ink">اعلام نتایج چالش</DialogTitle>
-            <DialogDescription className="text-ink-muted">
+            <DialogTitle className="text-on-surface">اعلام نتایج چالش</DialogTitle>
+            <DialogDescription className="text-on-surface-variant">
               چالش پایان می‌یابد؛ مقام‌های اول تا سوم ۳۰/۲۰/۱۰ امتیاز جایزه می‌گیرند، قهرمان نشان می‌گیرد و نتایج به همه اعلام می‌شود. این عمل برگشت‌پذیر نیست.
             </DialogDescription>
           </DialogHeader>
@@ -460,18 +460,18 @@ function ExportTab() {
   ]
   return (
     <div className="space-y-2 pb-2">
-      <p className="rounded-2xl border border-line bg-surface p-3.5 text-[11.5px] leading-5 text-ink-muted">
+      <p className="rounded-2xl border border-outline-variant/40 bg-surface p-3.5 text-[11.5px] leading-5 text-on-surface-variant">
         فایل‌ها با کدگذاری UTF-8 (سازگار با اکسل فارسی) دانلود می‌شوند.
       </p>
       {items.map((it) => (
         <a
           key={it.type}
           href={`/api/export?type=${it.type}&userId=${encodeURIComponent(userId ?? "")}`}
-          className="flex items-center justify-between rounded-2xl border border-line bg-surface px-4 py-3.5 transition-colors hover:border-neon/40 hover:bg-surface-2"
+          className="flex items-center justify-between rounded-2xl border border-outline-variant/40 bg-surface px-4 py-3.5 transition-colors hover:border-neon/40 hover:bg-surface-container-low"
         >
           <span>
-            <span className="block text-[13.5px] font-bold text-ink">{it.label}</span>
-            <span className="block text-[10.5px] text-ink-muted">{it.desc}</span>
+            <span className="block text-[13.5px] font-bold text-on-surface">{it.label}</span>
+            <span className="block text-[10.5px] text-on-surface-variant">{it.desc}</span>
           </span>
           <span className="flex h-9 w-9 items-center justify-center rounded-full bg-neon/12 text-neon">
             <FileDown className="h-4.5 w-4.5" />

@@ -205,15 +205,15 @@ export function NewsScreen({
   return (
     <div className="stage-enter flex flex-col gap-4 px-5 pb-4 pt-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-[22px] font-black text-[var(--v3-ink)]">اخبار خبرگزاری</h1>
+        <h1 className="text-[22px] font-black text-on-surface">اخبار خبرگزاری</h1>
         <div className="flex items-center gap-2">
           <button
             onClick={() => setViewMode(viewMode === "list" ? "calendar" : "list")}
             className={cn(
               "flex h-10 w-10 items-center justify-center rounded-full border transition-colors",
               viewMode === "calendar"
-                ? "border-transparent bg-gradient-to-l from-[var(--v3-azure-2)] to-[var(--v3-azure-deep)] text-white"
-                : "border-[var(--v3-line)] bg-[var(--v3-card)] text-[var(--v3-ink-2)] hover:text-[var(--v3-azure)]",
+                ? "border-transparent bg-gradient-to-l from-[var(--primary)] to-[var(--primary-deep, #7c2923)] text-white"
+                : "border-outline-variant/50 bg-surface-container-lowest text-on-surface-variant hover:text-primary",
             )}
             aria-label={viewMode === "list" ? "نمای تقویم محتوا" : "نمای فهرست"}
             title={viewMode === "list" ? "تقویم محتوا" : "فهرست اخبار"}
@@ -232,7 +232,7 @@ export function NewsScreen({
 
       {/* انتخاب دامنه: همه اخبار سازمان / اخبار من */}
       <div className="flex items-center gap-2">
-        <div className="flex flex-1 rounded-full border border-[var(--v3-line)] bg-[var(--v3-card-2)] p-1">
+        <div className="flex flex-1 rounded-full border border-outline-variant/50 bg-surface-container-low p-1">
           {([
             { key: "all", label: "همه اخبار", icon: <Globe2 className="h-3.5 w-3.5" /> },
             { key: "mine", label: "اخبار من", icon: <UserRound className="h-3.5 w-3.5" /> },
@@ -243,8 +243,8 @@ export function NewsScreen({
               className={cn(
                 "flex flex-1 items-center justify-center gap-1.5 rounded-full py-2 text-[12px] font-bold transition-colors",
                 scope === s.key
-                  ? "bg-gradient-to-l from-[var(--v3-azure-2)] to-[var(--v3-azure-deep)] text-white shadow-[0_8px_18px_-8px_rgba(180,26,34,0.6)]"
-                  : "text-[var(--v3-ink-2)]",
+                  ? "bg-gradient-to-l from-[var(--primary)] to-[var(--primary-deep, #7c2923)] text-white shadow-[0_8px_18px_-8px_rgba(180,26,34,0.6)]"
+                  : "text-on-surface-variant",
               )}
             >
               {s.icon}
@@ -256,7 +256,7 @@ export function NewsScreen({
           <button
             onClick={loadAll}
             disabled={loadingAll}
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[var(--v3-line)] bg-[var(--v3-card)] text-[var(--v3-ink-2)] transition-colors hover:text-[var(--v3-azure)] disabled:opacity-50"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-outline-variant/50 bg-surface-container-lowest text-on-surface-variant transition-colors hover:text-primary disabled:opacity-50"
             aria-label="بارگذاری مجدد"
           >
             <RefreshCw className={cn("h-4 w-4", loadingAll && "animate-spin")} />
@@ -267,15 +267,15 @@ export function NewsScreen({
       {/* جستجوی اخبار (در نمای تقویم مخفی) */}
       {viewMode === "list" && (
       <div className="relative">
-        <Search className="absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--v3-ink-2)]/60" />
+        <Search className="absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-on-surface-variant/60" />
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="جستجو در تیتر، متن یا کد پیگیری..."
-          className="v3-input w-full rounded-full py-3 pl-4 pr-11 text-[12.5px] outline-none transition-colors placeholder:text-[var(--v3-ink-2)]/50"
+          className="v3-input w-full rounded-full py-3 pl-4 pr-11 text-[12.5px] outline-none transition-colors placeholder:text-on-surface-variant/50"
         />
         {searched && (
-          <button onClick={() => setQ("")} className="absolute left-3 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full border border-[var(--v3-line)] bg-[var(--v3-card-2)] text-[var(--v3-ink-2)]">
+          <button onClick={() => setQ("")} className="absolute left-3 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full border border-outline-variant/50 bg-surface-container-low text-on-surface-variant">
             <X className="h-3.5 w-3.5" />
           </button>
         )}
@@ -292,14 +292,14 @@ export function NewsScreen({
               className={cn(
                 "shrink-0 rounded-full border px-3.5 py-1.5 text-[11.5px] font-bold transition-colors",
                 cat === c.key
-                  ? "border-transparent bg-[var(--v3-ink)] text-[var(--v3-card)]"
-                  : "border-[var(--v3-line)] bg-[var(--v3-card-2)] text-[var(--v3-ink-2)] hover:text-[var(--v3-ink)]",
+                  ? "border-transparent bg-on-surface text-surface-container-lowest"
+                  : "border-outline-variant/50 bg-surface-container-low text-on-surface-variant hover:text-on-surface",
               )}
             >
               {c.label}
             </button>
           ))}
-          <span className="mx-0.5 w-px shrink-0 bg-[var(--v3-line)]" />
+          <span className="mx-0.5 w-px shrink-0 bg-outline-variant" />
           {[{ key: "all", label: "هر زمان" }, { key: "week", label: "۷ روز" }, { key: "month", label: "۳۰ روز" }].map((p) => (
             <button
               key={p.key}
@@ -307,8 +307,8 @@ export function NewsScreen({
               className={cn(
                 "shrink-0 rounded-full border px-3.5 py-1.5 text-[11.5px] font-bold transition-colors",
                 period === p.key
-                  ? "border-[var(--v3-azure)] bg-[var(--v3-azure-soft)] text-[var(--v3-azure-deep)] dark:text-[#fca5a5]"
-                  : "border-[var(--v3-line)] bg-[var(--v3-card-2)] text-[var(--v3-ink-2)] hover:text-[var(--v3-ink)]",
+                  ? "border-primary/40 bg-primary-fixed/40 text-primary dark:text-[#fca5a5]"
+                  : "border-outline-variant/50 bg-surface-container-low text-on-surface-variant hover:text-on-surface",
               )}
             >
               {p.label}
@@ -329,11 +329,11 @@ export function NewsScreen({
               className={cn(
                 "shrink-0 rounded-full border px-4 py-2 text-[12.5px] font-bold transition-colors",
                 filter === f.key
-                  ? "border-transparent bg-gradient-to-l from-[var(--v3-azure-2)] to-[var(--v3-azure-deep)] text-white shadow-[0_8px_18px_-8px_rgba(180,26,34,0.6)]"
-                  : "border-[var(--v3-line)] bg-[var(--v3-card-2)] text-[var(--v3-ink-2)] hover:text-[var(--v3-ink)]",
+                  ? "border-transparent bg-gradient-to-l from-[var(--primary)] to-[var(--primary-deep, #7c2923)] text-white shadow-[0_8px_18px_-8px_rgba(180,26,34,0.6)]"
+                  : "border-outline-variant/50 bg-surface-container-low text-on-surface-variant hover:text-on-surface",
               )}
             >
-              {f.label} {count > 0 && <span className={cn("mr-1", filter === f.key ? "opacity-70" : "text-[var(--v3-ink-2)]/70")}>{fa(count)}</span>}
+              {f.label} {count > 0 && <span className={cn("mr-1", filter === f.key ? "opacity-70" : "text-on-surface-variant/70")}>{fa(count)}</span>}
             </button>
           )
         })}
@@ -346,7 +346,7 @@ export function NewsScreen({
           <SectionHeader title="پیش‌نویس‌ها" />
           <div className="space-y-2">
             {state.drafts.map((d) => (
-              <div key={d.id} className="flex w-full items-center gap-1 rounded-3xl border border-dashed border-[var(--v3-line)] bg-[var(--v3-card-2)]/60 p-2.5 transition-colors hover:border-[var(--v3-azure)]/40">
+              <div key={d.id} className="flex w-full items-center gap-1 rounded-3xl border border-dashed border-outline-variant/50 bg-surface-container-low/60 p-2.5 transition-colors hover:border-primary/40">
                 <button
                   onClick={() =>
                     onQuickSubmit({
@@ -362,18 +362,18 @@ export function NewsScreen({
                   }
                   className="flex min-w-0 flex-1 items-center gap-3 rounded-full p-1 text-right"
                 >
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[var(--v3-line)] bg-[var(--v3-card)] text-[var(--v3-ink-2)]">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-outline-variant/50 bg-surface-container-lowest text-on-surface-variant">
                     <FileText className="h-5 w-5" />
                   </span>
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate text-[13.5px] font-bold text-[var(--v3-ink)]">{d.title || "بدون عنوان"}</span>
-                    <span className="block text-[11px] text-[var(--v3-ink-2)]">{CATEGORY_LABELS[d.category]} · ذخیره {relTime(d.savedAt)}{d.mediaUrl ? " · با رسانه" : ""}</span>
+                    <span className="block truncate text-[13.5px] font-bold text-on-surface">{d.title || "بدون عنوان"}</span>
+                    <span className="block text-[11px] text-on-surface-variant">{CATEGORY_LABELS[d.category]} · ذخیره {relTime(d.savedAt)}{d.mediaUrl ? " · با رسانه" : ""}</span>
                   </span>
-                  <PencilLine className="h-4 w-4 shrink-0 text-[var(--v3-ink-2)]" />
+                  <PencilLine className="h-4 w-4 shrink-0 text-on-surface-variant" />
                 </button>
                 <button
                   onClick={() => doDeleteDraft(d.id)}
-                  className="mr-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[var(--v3-ink-2)]/70 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-500/12 dark:hover:text-red-400"
+                  className="mr-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-on-surface-variant/70 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-500/12 dark:hover:text-red-400"
                   aria-label="حذف پیش‌نویس"
                 >
                   <Trash2 className="h-4 w-4" />
@@ -391,18 +391,18 @@ export function NewsScreen({
       {viewMode === "list" && (
       <div className="space-y-2.5">
         {list.length === 0 && (
-          <div className="v3-card flex flex-col items-center gap-2 border-dashed py-12 text-center">
-            <FileText className="h-8 w-8 text-[var(--v3-ink-2)]/50" />
-            <p className="text-[13.5px] font-bold text-[var(--v3-ink-2)]">
+          <div className="rounded-3xl border border-outline-variant/40 bg-surface-container-lowest shadow-[0_8px_24px_-4px_rgba(83,37,23,0.05)] flex flex-col items-center gap-2 border-dashed py-12 text-center">
+            <FileText className="h-8 w-8 text-on-surface-variant/50" />
+            <p className="text-[13.5px] font-bold text-on-surface-variant">
               {loadingAll ? "در حال دریافت اخبار..." : searched ? "نتیجه‌ای برای جستجو پیدا نشد" : "خبری در این دسته نیست"}
             </p>
-            {!searched && !loadingAll && <p className="text-[11.5px] text-[var(--v3-ink-2)]/70">با دکمه «ارسال خبر» اولین خبر را بفرستید</p>}
+            {!searched && !loadingAll && <p className="text-[11.5px] text-on-surface-variant/70">با دکمه «ارسال خبر» اولین خبر را بفرستید</p>}
           </div>
         )}
         {list.map((n) => (
           <button key={n.id} onClick={() => openDetail(n.id)} className="w-full rounded-3xl border border-outline-variant/50 bg-surface-container-lowest p-4 text-right shadow-[0_8px_24px_-4px_rgba(83,37,23,0.05)] transition-transform hover:scale-[1.01]">
             <div className="flex items-start gap-3">
-              <span className="relative h-16 w-16 shrink-0 overflow-hidden rounded-2xl border border-line">
+              <span className="relative h-16 w-16 shrink-0 overflow-hidden rounded-2xl border border-outline-variant/40">
                 <Image src={`/img/cat-${n.category === "none" ? "local" : n.category}.png`} alt="" fill sizes="64px" className="object-cover" />
               </span>
               <div className="min-w-0 flex-1">
@@ -429,7 +429,7 @@ export function NewsScreen({
                 </p>
               </div>
             </div>
-            <div className="mt-3 flex items-center justify-between border-t border-line pt-3">
+            <div className="mt-3 flex items-center justify-between border-t border-outline-variant/40 pt-3">
               <StageDots status={n.status} stage={n.reviewStage} />
               <StageChip status={n.status} stage={n.reviewStage} />
             </div>
@@ -440,40 +440,40 @@ export function NewsScreen({
 
       {/* جزئیات خبر */}
       <Dialog open={detail !== null} onOpenChange={(v) => !v && setDetail(null)}>
-        <DialogContent className="max-h-[84dvh] overflow-y-auto nice-scroll rounded-[24px] border-[var(--v3-line)] bg-[var(--v3-card)] p-5">
+        <DialogContent className="max-h-[84dvh] overflow-y-auto nice-scroll rounded-[24px] border-outline-variant/50 bg-surface-container-lowest p-5">
           {detailNews && (
             <>
               <DialogHeader className="text-right">
                 <div className="mb-1 flex items-center gap-2">
-                  <span className="rounded-full bg-[var(--v3-card-2)] px-2.5 py-0.5 text-[10px] font-bold text-[var(--v3-ink-2)]">{CATEGORY_LABELS[detailNews.category]}</span>
+                  <span className="rounded-full bg-surface-container-low px-2.5 py-0.5 text-[10px] font-bold text-on-surface-variant">{CATEGORY_LABELS[detailNews.category]}</span>
                   <StatusChip status={detailNews.status} small />
                 </div>
-                <DialogTitle className="text-right text-[16px] leading-7 text-[var(--v3-ink)]">{detailNews.title}</DialogTitle>
-                <DialogDescription className="text-[11px] text-[var(--v3-ink-2)]">
+                <DialogTitle className="text-right text-[16px] leading-7 text-on-surface">{detailNews.title}</DialogTitle>
+                <DialogDescription className="text-[11px] text-on-surface-variant">
                   {detailNews.reporterId === me.id ? "شما" : detailNews.reporterName} · {detailNews.code} · {jalali(detailNews.createdAt, true)} · {DISTRICT_LABELS[detailNews.district] ?? detailNews.district}
                 </DialogDescription>
               </DialogHeader>
 
               {detailNews.mediaUrl && detailNews.mediaType === "photo" && (
-                <img src={detailNews.mediaUrl} alt="رسانه خبر" className="mt-3 max-h-64 w-full rounded-2xl border border-[var(--v3-line)] object-cover" />
+                <img src={detailNews.mediaUrl} alt="رسانه خبر" className="mt-3 max-h-64 w-full rounded-2xl border border-outline-variant/50 object-cover" />
               )}
               {detailNews.mediaUrl && detailNews.mediaType === "video" && (
-                <video src={detailNews.mediaUrl} controls className="mt-3 max-h-64 w-full rounded-2xl border border-[var(--v3-line)] bg-black" />
+                <video src={detailNews.mediaUrl} controls className="mt-3 max-h-64 w-full rounded-2xl border border-outline-variant/50 bg-black" />
               )}
 
-              <p className="mt-1 whitespace-pre-line text-[13.5px] leading-7 text-[var(--v3-ink)]/90">{detailNews.content}</p>
+              <p className="mt-1 whitespace-pre-line text-[13.5px] leading-7 text-on-surface/90">{detailNews.content}</p>
 
               {detailNews.status === "rejected" && (
                 <div className="mt-3 rounded-2xl border border-red-500/25 bg-red-50 p-4 dark:bg-red-500/12">
                   <p className="text-[12.5px] font-bold text-red-600 dark:text-red-400">
                     دلیل رد: {REJECT_REASONS.find((r) => r.key === detailNews.rejectReason)?.label ?? "—"}
                   </p>
-                  {detailNews.rejectNote && <p className="mt-1 text-[12px] leading-6 text-[var(--v3-ink-2)]">{detailNews.rejectNote}</p>}
+                  {detailNews.rejectNote && <p className="mt-1 text-[12px] leading-6 text-on-surface-variant">{detailNews.rejectNote}</p>}
                 </div>
               )}
 
               <div className="mt-4">
-                <p className="mb-2 text-[12.5px] font-black text-[var(--v3-ink)]">چرخه بررسی خبر</p>
+                <p className="mb-2 text-[12.5px] font-black text-on-surface">چرخه بررسی خبر</p>
                 <StageTimeline news={detailNews} />
               </div>
 
@@ -482,7 +482,7 @@ export function NewsScreen({
                   {canEditNews(detailNews) && (
                     <button
                       onClick={() => setEditing(detailNews.id)}
-                      className="v3-btn-ghost flex flex-1 items-center justify-center gap-1.5 py-3 text-[12px]"
+                      className="candy-btn-ghost flex flex-1 items-center justify-center gap-1.5 py-3 text-[12px]"
                     >
                       <PencilLine className="h-4 w-4" />
                       ویرایش متن
@@ -511,11 +511,11 @@ export function NewsScreen({
                     {eitaaBusy ? "در حال ارسال به ایتا..." : "📨 ارسال به کانال ایتا"}
                   </button>
                   {/* آمار ایتا + تقدیر خبرنگار — بستن حلقه اثرگذاری */}
-                  <div className="mt-3 rounded-[16px] border border-[var(--v3-line)] bg-[var(--v3-card-2)]/60 p-3">
-                    <p className="flex items-center gap-1.5 text-[11.5px] font-black text-[var(--v3-ink)]">
+                  <div className="mt-3 rounded-[16px] border border-outline-variant/50 bg-surface-container-low/60 p-3">
+                    <p className="flex items-center gap-1.5 text-[11.5px] font-black text-on-surface">
                       <Heart className="h-3.5 w-3.5 text-red-500" />
                       واکنش‌های کانال ایتا
-                      <span className="mr-auto text-[11px] font-bold text-[var(--v3-ink-2)]">ثبت‌شده: {faNum(detailNews.eitaaReactions)}</span>
+                      <span className="mr-auto text-[11px] font-bold text-on-surface-variant">ثبت‌شده: {faNum(detailNews.eitaaReactions)}</span>
                     </p>
                     <div className="mt-2 flex items-center gap-2">
                       <Input
@@ -534,7 +534,7 @@ export function NewsScreen({
                       <button
                         onClick={() => doPraise(detailNews.id)}
                         disabled={eitaaBusy}
-                        className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-full border border-[var(--v3-amber)]/40 bg-[var(--v3-amber-soft)] py-2.5 text-[12px] font-bold text-amber-600 transition-colors hover:bg-[var(--v3-amber)]/25 dark:text-amber-400 disabled:opacity-50"
+                        className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-full border border-warn/40 bg-warn/15 py-2.5 text-[12px] font-bold text-amber-600 transition-colors hover:hover:bg-warn/25 dark:text-amber-400 disabled:opacity-50"
                       >
                         <Trophy className="h-3.5 w-3.5" />
                         تقدیر خبرنگار در کانال ایتا
@@ -566,15 +566,15 @@ export function NewsScreen({
 
       {/* تایید حذف */}
       <Dialog open={deleting !== null} onOpenChange={(v) => !v && setDeleting(null)}>
-        <DialogContent className="rounded-[24px] border-[var(--v3-line)] bg-[var(--v3-card)] p-5">
+        <DialogContent className="rounded-[24px] border-outline-variant/50 bg-surface-container-lowest p-5">
           <DialogHeader className="text-right">
-            <DialogTitle className="text-[var(--v3-ink)]">حذف خبر</DialogTitle>
-            <DialogDescription className="text-[var(--v3-ink-2)]">
+            <DialogTitle className="text-on-surface">حذف خبر</DialogTitle>
+            <DialogDescription className="text-on-surface-variant">
               مطمئنید؟ خبر و تمام سوابق چرخه‌اش برای همیشه حذف می‌شود.
             </DialogDescription>
           </DialogHeader>
           <div className="mt-4 flex gap-2">
-            <button onClick={() => setDeleting(null)} className="flex-1 rounded-[14px] border border-[var(--v3-line)] py-3 text-[13px] font-bold text-[var(--v3-ink-2)] transition-colors hover:bg-[var(--v3-card-2)]">
+            <button onClick={() => setDeleting(null)} className="flex-1 rounded-[14px] border border-outline-variant/50 py-3 text-[13px] font-bold text-on-surface-variant transition-colors hover:bg-surface-container">
               انصراف
             </button>
             <button

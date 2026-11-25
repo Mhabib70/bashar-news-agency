@@ -56,12 +56,12 @@ export default function AdminPage() {
 
   if (!booted || !state || state.user.role !== "admin") {
     return (
-      <main className="flex min-h-dvh items-center justify-center bg-[var(--page)]">
+      <main className="flex min-h-dvh items-center justify-center bg-surface">
         <div className="flex flex-col items-center gap-4 text-center">
-          <span className="flex h-16 w-16 items-center justify-center rounded-full border border-line bg-surface">
+          <span className="flex h-16 w-16 items-center justify-center rounded-full border border-outline-variant/40 bg-surface">
             {booted ? <ShieldCheck className="h-7 w-7 text-danger" /> : <Loader2 className="h-7 w-7 animate-spin text-neon" />}
           </span>
-          <p className="text-[13px] font-bold text-ink-muted">
+          <p className="text-[13px] font-bold text-on-surface-variant">
             {booted ? "دسترسی فقط برای ادمین کل مجاز است — بازگشت به اپ..." : "در حال ورود به پنل مدیریت..."}
           </p>
         </div>
@@ -74,14 +74,14 @@ export default function AdminPage() {
   const current = NAV.find((n) => n.key === section)!
 
   return (
-    <main className="min-h-dvh bg-[var(--page)]">
+    <main className="min-h-dvh bg-surface">
       <div className="mx-auto flex max-w-[1200px] flex-col lg:flex-row lg:gap-6 lg:px-6 lg:py-6">
         {/* سایدبار دسکتاپ */}
-        <aside className="hidden w-60 shrink-0 flex-col rounded-[28px] border border-line bg-surface p-4 lg:sticky lg:top-6 lg:flex lg:h-[calc(100dvh-3rem)]">
-          <div className="flex items-center gap-3 border-b border-line pb-4">
+        <aside className="hidden w-60 shrink-0 flex-col rounded-[28px] border border-outline-variant/40 bg-surface p-4 lg:sticky lg:top-6 lg:flex lg:h-[calc(100dvh-3rem)]">
+          <div className="flex items-center gap-3 border-b border-outline-variant/40 pb-4">
             <NeonAvatar name={user.fullName} src={user.avatar} size={46} />
             <div className="min-w-0">
-              <p className="truncate text-[13px] font-black text-ink">{user.fullName}</p>
+              <p className="truncate text-[13px] font-black text-on-surface">{user.fullName}</p>
               <p className="text-[10px] font-bold text-neon">ادمین کل خبرگزاری</p>
             </div>
           </div>
@@ -94,11 +94,11 @@ export default function AdminPage() {
                 className={cn(
                   "flex items-center gap-3 rounded-2xl border px-3.5 py-3 text-right transition-all",
                   section === n.key
-                    ? "border-neon/40 bg-neon/10 text-ink"
-                    : "border-transparent text-ink-muted hover:bg-surface-2 hover:text-ink",
+                    ? "border-neon/40 bg-neon/10 text-on-surface"
+                    : "border-transparent text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface",
                 )}
               >
-                <span className={cn("flex h-9 w-9 items-center justify-center rounded-xl", section === n.key ? "bg-neon text-neon-foreground" : "bg-surface-2")}>
+                <span className={cn("flex h-9 w-9 items-center justify-center rounded-xl", section === n.key ? "bg-neon text-neon-foreground" : "bg-surface-container-low")}>
                   {n.icon}
                 </span>
                 <span className="min-w-0 flex-1">
@@ -111,7 +111,7 @@ export default function AdminPage() {
                       <span className="flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-warn px-1 text-[9px] font-black text-black">{fa(state.reviewQueue.length)}</span>
                     )}
                   </span>
-                  <span className="block truncate text-[9.5px] text-ink-muted/70">{n.desc}</span>
+                  <span className="block truncate text-[9.5px] text-on-surface-variant/70">{n.desc}</span>
                 </span>
               </button>
             ))}
@@ -119,7 +119,7 @@ export default function AdminPage() {
 
           <button
             onClick={() => router.push("/")}
-            className="mt-4 flex items-center justify-center gap-2 rounded-full border border-line bg-surface-2 py-3 text-[12.5px] font-bold text-ink transition-colors hover:bg-surface"
+            className="mt-4 flex items-center justify-center gap-2 rounded-full border border-outline-variant/40 bg-surface-container-low py-3 text-[12.5px] font-bold text-on-surface transition-colors hover:bg-surface"
           >
             <ArrowRight className="h-4 w-4" />
             بازگشت به اپلیکیشن
@@ -129,15 +129,15 @@ export default function AdminPage() {
         {/* ستون اصلی */}
         <div className="flex min-w-0 flex-1 flex-col">
           {/* سربرگ */}
-          <header className="sticky top-0 z-30 border-b border-line bg-[var(--nav-bg)]/95 px-4 py-3 backdrop-blur-lg lg:rounded-[24px] lg:border lg:px-5">
+          <header className="sticky top-0 z-30 border-b border-outline-variant/40 bg-surface/95 px-4 py-3 backdrop-blur-lg lg:rounded-[24px] lg:border lg:px-5">
             <div className="mx-auto flex max-w-[1200px] items-center justify-between gap-3 lg:mx-0">
               <div className="min-w-0">
-                <p className="flex items-center gap-2 text-[15px] font-black text-ink">
+                <p className="flex items-center gap-2 text-[15px] font-black text-on-surface">
                   {current.icon}
                   {current.label}
-                  <span className="hidden text-[11px] font-medium text-ink-muted sm:inline">— {current.desc}</span>
+                  <span className="hidden text-[11px] font-medium text-on-surface-variant sm:inline">— {current.desc}</span>
                 </p>
-                <p className="mt-0.5 flex items-center gap-1.5 text-[10px] text-ink-muted lg:hidden">
+                <p className="mt-0.5 flex items-center gap-1.5 text-[10px] text-on-surface-variant lg:hidden">
                   <ShieldCheck className="h-3 w-3 text-neon" />
                   پنل مدیریت خبرگزاری بسیج شهر رشت
                 </p>
@@ -146,7 +146,7 @@ export default function AdminPage() {
                 <ThemeToggle compact />
                 <button
                   onClick={() => router.push("/")}
-                  className="flex h-10 items-center gap-1.5 rounded-full border border-line bg-surface px-3.5 text-[12px] font-bold text-ink transition-colors hover:bg-surface-2"
+                  className="flex h-10 items-center gap-1.5 rounded-full border border-outline-variant/40 bg-surface px-3.5 text-[12px] font-bold text-on-surface transition-colors hover:bg-surface-container-low"
                 >
                   <ArrowRight className="h-4 w-4" />
                   <span className="hidden sm:inline">بازگشت به اپ</span>
@@ -157,14 +157,14 @@ export default function AdminPage() {
           </header>
 
           {/* ناوبری موبایل */}
-          <nav className="no-scrollbar flex gap-2 overflow-x-auto border-b border-line px-4 py-3 lg:hidden" aria-label="ناوبری پنل مدیریت">
+          <nav className="no-scrollbar flex gap-2 overflow-x-auto border-b border-outline-variant/40 px-4 py-3 lg:hidden" aria-label="ناوبری پنل مدیریت">
             {NAV.map((n) => (
               <button
                 key={n.key}
                 onClick={() => (n.key === "organization" ? router.push("/organization") : setSection(n.key))}
                 className={cn(
                   "relative flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-2 text-[11.5px] font-bold transition-colors",
-                  section === n.key ? "border-neon bg-neon text-neon-foreground" : "border-line bg-surface text-ink-muted",
+                  section === n.key ? "border-neon bg-neon text-neon-foreground" : "border-outline-variant/40 bg-surface text-on-surface-variant",
                 )}
               >
                 {n.icon}

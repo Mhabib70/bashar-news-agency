@@ -100,7 +100,7 @@ export function ActivityScreen({
           </div>
         </div>
         <div className="flex shrink-0 flex-col items-center rounded-2xl bg-primary-fixed/50 px-3.5 py-2">
-          <span className="v3-num text-[20px] font-black leading-none text-on-primary-fixed-variant">{faNum(user.points)}</span>
+          <span className="font-black tracking-tight text-[20px] font-black leading-none text-on-primary-fixed-variant">{faNum(user.points)}</span>
           <span className="mt-1 text-[10px] font-bold text-primary">امتیاز کل XP</span>
         </div>
       </div>
@@ -162,13 +162,13 @@ export function ActivityScreen({
       <div className="grid grid-cols-2 gap-2.5">
         <div className={cn(CARD, "flex flex-col items-center gap-0.5 p-space-md text-center")}>
           <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-fixed/60 text-[18px]">🔥</span>
-          <span className="v3-num mt-1 text-[22px] font-black leading-none text-on-surface">{fa(user.currentStreak)}</span>
+          <span className="font-black tracking-tight mt-1 text-[22px] font-black leading-none text-on-surface">{fa(user.currentStreak)}</span>
           <span className="text-[10.5px] font-bold text-on-surface-variant">روز استریک فعال</span>
           <span className="mt-0.5 text-[9.5px] text-outline">رکورد: {fa(user.bestStreak)} روز</span>
         </div>
         <div className={cn(CARD, "flex flex-col items-center gap-0.5 p-space-md text-center")}>
           <span className="flex h-10 w-10 items-center justify-center rounded-full bg-tertiary-fixed/40 text-tertiary"><Medal className="h-5 w-5" /></span>
-          <span className="v3-num mt-1 text-[22px] font-black leading-none text-on-surface">{fa(stats.rank)}</span>
+          <span className="font-black tracking-tight mt-1 text-[22px] font-black leading-none text-on-surface">{fa(stats.rank)}</span>
           <span className="text-[10.5px] font-bold text-on-surface-variant">رتبه در تحریریه</span>
           <span className="mt-0.5 text-[9.5px] text-outline">نرخ تایید {fa(stats.approveRate)}٪</span>
         </div>
@@ -271,7 +271,7 @@ export function ActivityScreen({
         </div>
         <div className="mt-4 flex items-center gap-space-lg">
           <Ring value={stat.points} max={goal} size={130} stroke={11}>
-            <span className="v3-num text-[26px] font-black leading-none text-on-surface">
+            <span className="font-black tracking-tight text-[26px] font-black leading-none text-on-surface">
               <CountUp key={range} to={stat.points} fmt={faNum} />
             </span>
             <span className="mt-1 text-[10px] font-medium text-on-surface-variant">از {faNum(goal)} امتیاز</span>
@@ -393,7 +393,7 @@ export function ActivityScreen({
                 </p>
                 <p className="text-[10.5px] text-on-surface-variant">{LEVELS.find((l) => l.key === r.levelKey)?.title}</p>
               </div>
-              <span className="v3-num text-[13px] font-black text-primary">{faNum(r.points)}</span>
+              <span className="font-black tracking-tight text-[13px] font-black text-primary">{faNum(r.points)}</span>
             </div>
           ))}
         </div>

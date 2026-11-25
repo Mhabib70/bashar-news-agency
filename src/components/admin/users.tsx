@@ -122,39 +122,39 @@ export function AdminUsersSection() {
   return (
     <div className="space-y-5">
       {/* نوار ابزار */}
-      <div className="rounded-[24px] border border-line bg-surface p-4">
+      <div className="rounded-[24px] border border-outline-variant/40 bg-surface p-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <div className="relative flex-1">
-            <Search className="absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-muted" />
+            <Search className="absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-on-surface-variant" />
             <Input
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="جستجوی نام، شماره یا نام کاربری..."
-              className="rounded-2xl border-line bg-surface-2 pr-10 text-ink placeholder:text-ink-muted/60"
+              className="rounded-2xl border-outline-variant/40 bg-surface-container-low pr-10 text-on-surface placeholder:text-on-surface-variant/60"
             />
           </div>
           <button
             onClick={load}
-            className="flex h-10 w-10 shrink-0 items-center justify-center self-center rounded-full border border-line bg-surface-2 text-ink-muted transition-colors hover:text-neon"
+            className="flex h-10 w-10 shrink-0 items-center justify-center self-center rounded-full border border-outline-variant/40 bg-surface-container-low text-on-surface-variant transition-colors hover:text-neon"
             aria-label="بارگذاری مجدد"
           >
             <RefreshCw className={cn("h-4 w-4", users === null && "animate-spin")} />
           </button>
         </div>
         <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
-          <select value={district} onChange={(e) => setDistrict(e.target.value)} className="rounded-xl border border-line bg-surface-2 px-3 py-2.5 text-[12px] font-bold text-ink">
+          <select value={district} onChange={(e) => setDistrict(e.target.value)} className="rounded-xl border border-outline-variant/40 bg-surface-container-low px-3 py-2.5 text-[12px] font-bold text-on-surface">
             <option value="all">همه حوزه‌ها</option>
             {Object.entries(DISTRICT_LABELS).map(([k, v]) => (
               <option key={k} value={k}>{v}</option>
             ))}
           </select>
-          <select value={role} onChange={(e) => setRole(e.target.value)} className="rounded-xl border border-line bg-surface-2 px-3 py-2.5 text-[12px] font-bold text-ink">
+          <select value={role} onChange={(e) => setRole(e.target.value)} className="rounded-xl border border-outline-variant/40 bg-surface-container-low px-3 py-2.5 text-[12px] font-bold text-on-surface">
             <option value="all">همه نقش‌ها</option>
             {Object.entries(ROLE_LABELS).map(([k, v]) => (
               <option key={k} value={k}>{v}</option>
             ))}
           </select>
-          <select value={status} onChange={(e) => setStatus(e.target.value)} className="rounded-xl border border-line bg-surface-2 px-3 py-2.5 text-[12px] font-bold text-ink">
+          <select value={status} onChange={(e) => setStatus(e.target.value)} className="rounded-xl border border-outline-variant/40 bg-surface-container-low px-3 py-2.5 text-[12px] font-bold text-on-surface">
             <option value="all">همه وضعیت‌ها</option>
             <option value="active">فعال</option>
             <option value="pending">در انتظار تایید</option>
@@ -165,30 +165,30 @@ export function AdminUsersSection() {
 
       {/* دیالوگ ویرایش کاربر */}
       <Dialog open={editUser !== null} onOpenChange={(v) => !v && setEditUser(null)}>
-        <DialogContent className="rounded-[28px] border-line bg-popover p-5 sm:max-w-md">
+        <DialogContent className="rounded-[28px] border-outline-variant/40 bg-popover p-5 sm:max-w-md">
           <DialogHeader className="text-right">
-            <DialogTitle className="flex items-center gap-2 text-ink">
+            <DialogTitle className="flex items-center gap-2 text-on-surface">
               <Pencil className="h-4.5 w-4.5 text-neon" />
               ویرایش مشخصات کاربر
             </DialogTitle>
-            <DialogDescription className="text-ink-muted">{editUser?.fullName}</DialogDescription>
+            <DialogDescription className="text-on-surface-variant">{editUser?.fullName}</DialogDescription>
           </DialogHeader>
           <div className="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
             <div className="sm:col-span-2">
-              <label className="mb-1.5 block text-[11.5px] font-bold text-ink-muted">نام و نام خانوادگی</label>
-              <Input value={editForm.fullName} onChange={(e) => setEditForm({ ...editForm, fullName: e.target.value })} className="rounded-2xl border-line bg-surface-2 text-ink" />
+              <label className="mb-1.5 block text-[11.5px] font-bold text-on-surface-variant">نام و نام خانوادگی</label>
+              <Input value={editForm.fullName} onChange={(e) => setEditForm({ ...editForm, fullName: e.target.value })} className="rounded-2xl border-outline-variant/40 bg-surface-container-low text-on-surface" />
             </div>
             <div>
-              <label className="mb-1.5 block text-[11.5px] font-bold text-ink-muted">شماره موبایل</label>
-              <Input value={editForm.phone} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} dir="ltr" inputMode="tel" className="rounded-2xl border-line bg-surface-2 text-ink" />
+              <label className="mb-1.5 block text-[11.5px] font-bold text-on-surface-variant">شماره موبایل</label>
+              <Input value={editForm.phone} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} dir="ltr" inputMode="tel" className="rounded-2xl border-outline-variant/40 bg-surface-container-low text-on-surface" />
             </div>
             <div>
-              <label className="mb-1.5 block text-[11.5px] font-bold text-ink-muted">سن</label>
-              <Input value={editForm.age} onChange={(e) => setEditForm({ ...editForm, age: e.target.value })} dir="ltr" inputMode="numeric" className="rounded-2xl border-line bg-surface-2 text-ink" />
+              <label className="mb-1.5 block text-[11.5px] font-bold text-on-surface-variant">سن</label>
+              <Input value={editForm.age} onChange={(e) => setEditForm({ ...editForm, age: e.target.value })} dir="ltr" inputMode="numeric" className="rounded-2xl border-outline-variant/40 bg-surface-container-low text-on-surface" />
             </div>
             <div>
-              <label className="mb-1.5 block text-[11.5px] font-bold text-ink-muted">حوزه</label>
-              <select value={editForm.district} onChange={(e) => setEditForm({ ...editForm, district: e.target.value, base: "" })} className="w-full rounded-2xl border border-line bg-surface-2 px-3 py-2.5 text-[12.5px] text-ink outline-none">
+              <label className="mb-1.5 block text-[11.5px] font-bold text-on-surface-variant">حوزه</label>
+              <select value={editForm.district} onChange={(e) => setEditForm({ ...editForm, district: e.target.value, base: "" })} className="w-full rounded-2xl border border-outline-variant/40 bg-surface-container-low px-3 py-2.5 text-[12.5px] text-on-surface outline-none">
                 <option value="">— بدون حوزه —</option>
                 {Object.entries(DISTRICT_LABELS).map(([k, v]) => (
                   <option key={k} value={k}>{v}</option>
@@ -196,12 +196,12 @@ export function AdminUsersSection() {
               </select>
             </div>
             <div>
-              <label className="mb-1.5 block text-[11.5px] font-bold text-ink-muted">پایگاه</label>
-              <Input value={editForm.base} onChange={(e) => setEditForm({ ...editForm, base: e.target.value })} placeholder="مثلاً پایگاه امام رضا (ع)" className="rounded-2xl border-line bg-surface-2 text-ink placeholder:text-ink-muted/50" />
+              <label className="mb-1.5 block text-[11.5px] font-bold text-on-surface-variant">پایگاه</label>
+              <Input value={editForm.base} onChange={(e) => setEditForm({ ...editForm, base: e.target.value })} placeholder="مثلاً پایگاه امام رضا (ع)" className="rounded-2xl border-outline-variant/40 bg-surface-container-low text-on-surface placeholder:text-on-surface-variant/50" />
             </div>
             <div className="sm:col-span-2">
-              <label className="mb-1.5 block text-[11.5px] font-bold text-ink-muted">تحصیلات</label>
-              <select value={editForm.education} onChange={(e) => setEditForm({ ...editForm, education: e.target.value })} className="w-full rounded-2xl border border-line bg-surface-2 px-3 py-2.5 text-[12.5px] text-ink outline-none">
+              <label className="mb-1.5 block text-[11.5px] font-bold text-on-surface-variant">تحصیلات</label>
+              <select value={editForm.education} onChange={(e) => setEditForm({ ...editForm, education: e.target.value })} className="w-full rounded-2xl border border-outline-variant/40 bg-surface-container-low px-3 py-2.5 text-[12.5px] text-on-surface outline-none">
                 <option value="">— انتخاب نشده —</option>
                 {Object.entries(EDUCATION_LABELS).map(([k, v]) => (
                   <option key={k} value={k}>{v}</option>
@@ -221,18 +221,18 @@ export function AdminUsersSection() {
 
       {/* دیالوگ حذف کاربر */}
       <Dialog open={deleteUser !== null} onOpenChange={(v) => !v && setDeleteUser(null)}>
-        <DialogContent className="rounded-[28px] border-line bg-popover p-5 sm:max-w-md">
+        <DialogContent className="rounded-[28px] border-outline-variant/40 bg-popover p-5 sm:max-w-md">
           <DialogHeader className="text-right">
-            <DialogTitle className="flex items-center gap-2 text-ink">
+            <DialogTitle className="flex items-center gap-2 text-on-surface">
               <Trash2 className="h-4.5 w-4.5 text-danger" />
               حذف قطعی کاربر
             </DialogTitle>
-            <DialogDescription className="text-ink-muted">
+            <DialogDescription className="text-on-surface-variant">
               حساب و همهٔ ردپاهایش (اخبار، امتیازها، پیام‌های تالار، اعلان‌ها) برای همیشه پاک می‌شود و غیرقابل بازگشت است.
             </DialogDescription>
           </DialogHeader>
           {deleteUser && (
-            <p className="mt-3 rounded-2xl border border-danger/30 bg-danger/6 p-3.5 text-[12.5px] font-bold leading-6 text-ink">
+            <p className="mt-3 rounded-2xl border border-danger/30 bg-danger/6 p-3.5 text-[12.5px] font-bold leading-6 text-on-surface">
               «{deleteUser.fullName}» — {ROLE_LABELS[deleteUser.role]} · {DISTRICT_LABELS[deleteUser.district] ?? "—"}
             </p>
           )}
@@ -247,7 +247,7 @@ export function AdminUsersSection() {
       </Dialog>
 
       {users === null && (
-        <div className="flex items-center justify-center gap-2 py-10 text-[13px] text-ink-muted">
+        <div className="flex items-center justify-center gap-2 py-10 text-[13px] text-on-surface-variant">
           <Loader2 className="h-4 w-4 animate-spin" />
           در حال بارگذاری اعضا...
         </div>
@@ -266,11 +266,11 @@ export function AdminUsersSection() {
                 <button onClick={() => setDetailId(u.id)} className="flex w-full items-start gap-3 text-right">
                   <UserPhoto user={u} size={52} />
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate text-[14px] font-black text-ink">{u.fullName}</span>
-                    <span className="mt-0.5 block text-[11px] leading-5 text-ink-muted">
+                    <span className="block truncate text-[14px] font-black text-on-surface">{u.fullName}</span>
+                    <span className="mt-0.5 block text-[11px] leading-5 text-on-surface-variant">
                       {DISTRICT_LABELS[u.district] ?? "—"} · {u.base || "بدون پایگاه"}
                     </span>
-                    <span className="mt-0.5 block text-[10px] text-ink-muted/70">درخواست: {relTime(u.createdAt)}</span>
+                    <span className="mt-0.5 block text-[10px] text-on-surface-variant/70">درخواست: {relTime(u.createdAt)}</span>
                   </span>
                 </button>
                 <div className="mt-3 flex gap-2">
@@ -299,12 +299,12 @@ export function AdminUsersSection() {
 
       {/* اعضا — نفر به نفر */}
       <div>
-        <p className="mb-3 text-[14px] font-black text-ink">
+        <p className="mb-3 text-[14px] font-black text-on-surface">
           اعضا ({fa(rest.length)})
-          <span className="mr-2 text-[11px] font-medium text-ink-muted">— برای پرونده کامل روی کارت بزنید</span>
+          <span className="mr-2 text-[11px] font-medium text-on-surface-variant">— برای پرونده کامل روی کارت بزنید</span>
         </p>
         {rest.length === 0 && users !== null && (
-          <p className="rounded-[24px] border border-dashed border-line py-10 text-center text-[12.5px] text-ink-muted">
+          <p className="rounded-[24px] border border-dashed border-outline-variant/40 py-10 text-center text-[12.5px] text-on-surface-variant">
             {users.length === 0 ? "هنوز عضوی ثبت‌نام نکرده است." : "با این فیلترها عضوی یافت نشد."}
           </p>
         )}
@@ -316,38 +316,38 @@ export function AdminUsersSection() {
               <button
                 key={u.id}
                 onClick={() => setDetailId(u.id)}
-                className="group rounded-[24px] border border-line bg-surface p-4 text-right transition-all hover:border-neon/40 hover:shadow-[0_10px_34px_-14px_rgba(0,0,0,0.4)]"
+                className="group rounded-[24px] border border-outline-variant/40 bg-surface p-4 text-right transition-all hover:border-neon/40 hover:shadow-[0_10px_34px_-14px_rgba(0,0,0,0.4)]"
               >
                 <div className="flex items-start gap-3">
                   <UserPhoto user={u} size={52} />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <p className="truncate text-[14px] font-black text-ink">{u.fullName}</p>
+                      <p className="truncate text-[14px] font-black text-on-surface">{u.fullName}</p>
                       <span className={cn("shrink-0 rounded-full border px-2 py-0.5 text-[9px] font-bold", st.cls)}>{st.label}</span>
                     </div>
                     <p className="mt-1 text-[11px] font-semibold text-neon">{ROLE_LABELS[u.role]}</p>
-                    <p className="mt-1 truncate text-[10.5px] leading-4 text-ink-muted">
+                    <p className="mt-1 truncate text-[10.5px] leading-4 text-on-surface-variant">
                       {DISTRICT_LABELS[u.district] ?? "—"}
                       {u.base ? ` · ${u.base}` : ""}
                     </p>
                   </div>
-                  <ChevronLeft className="mt-1 h-4 w-4 shrink-0 text-ink-muted/40 transition-colors group-hover:text-neon" />
+                  <ChevronLeft className="mt-1 h-4 w-4 shrink-0 text-on-surface-variant/40 transition-colors group-hover:text-neon" />
                 </div>
-                <div className="mt-3 grid grid-cols-3 gap-2 border-t border-line pt-3 text-center">
+                <div className="mt-3 grid grid-cols-3 gap-2 border-t border-outline-variant/40 pt-3 text-center">
                   <div>
-                    <p className="text-[13px] font-black text-ink">{faNum(u.points)}</p>
-                    <p className="text-[9px] text-ink-muted">امتیاز</p>
+                    <p className="text-[13px] font-black text-on-surface">{faNum(u.points)}</p>
+                    <p className="text-[9px] text-on-surface-variant">امتیاز</p>
                   </div>
-                  <div className="border-x border-line">
-                    <p className="text-[13px] font-black text-ink">{lv ? `${lv.emoji} ${lv.title}` : "—"}</p>
-                    <p className="text-[9px] text-ink-muted">سطح</p>
+                  <div className="border-x border-outline-variant/40">
+                    <p className="text-[13px] font-black text-on-surface">{lv ? `${lv.emoji} ${lv.title}` : "—"}</p>
+                    <p className="text-[9px] text-on-surface-variant">سطح</p>
                   </div>
                   <div>
-                    <p className="flex items-center justify-center gap-1 text-[13px] font-black text-ink">
+                    <p className="flex items-center justify-center gap-1 text-[13px] font-black text-on-surface">
                       <Flame className="h-3 w-3 text-warn" />
                       {fa(u.currentStreak)}
                     </p>
-                    <p className="text-[9px] text-ink-muted">استریک</p>
+                    <p className="text-[9px] text-on-surface-variant">استریک</p>
                   </div>
                 </div>
               </button>
@@ -358,10 +358,10 @@ export function AdminUsersSection() {
 
       {/* دیالوگ رد با دلیل */}
       <Dialog open={rejecting !== null} onOpenChange={(v) => !v && setRejecting(null)}>
-        <DialogContent className="rounded-[28px] border-line bg-popover p-5 sm:max-w-md">
+        <DialogContent className="rounded-[28px] border-outline-variant/40 bg-popover p-5 sm:max-w-md">
           <DialogHeader className="text-right">
-            <DialogTitle className="text-ink">رد درخواست عضویت</DialogTitle>
-            <DialogDescription className="text-ink-muted">
+            <DialogTitle className="text-on-surface">رد درخواست عضویت</DialogTitle>
+            <DialogDescription className="text-on-surface-variant">
               {rejecting?.fullName} — دلیل رد برای متقاضی اعلان می‌شود و می‌تواند مجدداً ثبت‌نام کند.
             </DialogDescription>
           </DialogHeader>
@@ -372,10 +372,10 @@ export function AdminUsersSection() {
                 onClick={() => setReason(k)}
                 className={cn(
                   "flex w-full items-center gap-3 rounded-2xl border px-4 py-3 text-right text-[13px] font-bold transition-colors",
-                  reason === k ? "border-danger/50 bg-danger/8 text-ink" : "border-line bg-surface text-ink-muted",
+                  reason === k ? "border-danger/50 bg-danger/8 text-on-surface" : "border-outline-variant/40 bg-surface text-on-surface-variant",
                 )}
               >
-                <span className={cn("flex h-5 w-5 items-center justify-center rounded-full border", reason === k ? "border-danger bg-danger text-white" : "border-line")}>
+                <span className={cn("flex h-5 w-5 items-center justify-center rounded-full border", reason === k ? "border-danger bg-danger text-white" : "border-outline-variant/40")}>
                   {reason === k && <Check className="h-3 w-3" />}
                 </span>
                 {label}
@@ -538,37 +538,37 @@ function UserDetailDialog({
 
   return (
     <Dialog open={userId !== null} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-h-[88dvh] overflow-y-auto nice-scroll rounded-[28px] border-line bg-popover p-5 sm:max-w-2xl">
+      <DialogContent className="max-h-[88dvh] overflow-y-auto nice-scroll rounded-[28px] border-outline-variant/40 bg-popover p-5 sm:max-w-2xl">
         <DialogHeader className="text-right">
-          <DialogTitle className="text-ink">پرونده کاربر</DialogTitle>
-          <DialogDescription className="text-ink-muted">
+          <DialogTitle className="text-on-surface">پرونده کاربر</DialogTitle>
+          <DialogDescription className="text-on-surface-variant">
             {u ? `مشخصات کامل، کارنامه فعالیت و سوابق ${u.fullName}` : "در حال دریافت پرونده..."}
           </DialogDescription>
         </DialogHeader>
 
         {loading ? (
-          <div className="flex items-center justify-center gap-2 py-16 text-[13px] text-ink-muted">
+          <div className="flex items-center justify-center gap-2 py-16 text-[13px] text-on-surface-variant">
             <Loader2 className="h-5 w-5 animate-spin" />
             در حال بارگذاری پرونده...
           </div>
         ) : !detail || !u ? (
-          <p className="py-16 text-center text-[13px] text-ink-muted">پرونده کاربر یافت نشد — دوباره تلاش کنید.</p>
+          <p className="py-16 text-center text-[13px] text-on-surface-variant">پرونده کاربر یافت نشد — دوباره تلاش کنید.</p>
         ) : (
           <>
 
             {/* هویت */}
-            <div className="mt-2 flex flex-col items-center gap-3 rounded-[24px] border border-line bg-surface p-4 sm:flex-row sm:items-start">
+            <div className="mt-2 flex flex-col items-center gap-3 rounded-[24px] border border-outline-variant/40 bg-surface p-4 sm:flex-row sm:items-start">
               <NeonAvatar name={u.fullName} src={u.avatar || undefined} size={88} />
               <div className="min-w-0 flex-1 text-center sm:text-right">
                 <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
-                  <p className="text-[17px] font-black text-ink">{u.fullName}</p>
+                  <p className="text-[17px] font-black text-on-surface">{u.fullName}</p>
                   <span className={cn("rounded-full border px-2.5 py-0.5 text-[10px] font-bold", st?.cls)}>{st?.label}</span>
                   {u.status === "rejected" && u.rejectReason && (
-                    <span className="text-[10px] text-ink-muted">({USER_REJECT_TITLES[u.rejectReason] ?? u.rejectReason})</span>
+                    <span className="text-[10px] text-on-surface-variant">({USER_REJECT_TITLES[u.rejectReason] ?? u.rejectReason})</span>
                   )}
                 </div>
                 <p className="mt-1 text-[12px] font-bold text-neon">{ROLE_LABELS[u.role]}</p>
-                <p className="mt-1 text-[11.5px] text-ink-muted">
+                <p className="mt-1 text-[11.5px] text-on-surface-variant">
                   {DISTRICT_LABELS[u.district] ?? "—"} · {u.base || "بدون پایگاه"}
                 </p>
                 {!u.avatar && (
@@ -596,25 +596,25 @@ function UserDetailDialog({
             {u.status === "active" && u.isSuperAdmin && (
               <div className="flex items-center justify-between rounded-[24px] border border-warn/35 bg-warn/6 p-4">
                 <p className="text-[12px] font-black text-warn">👑 حساب ادمین کل سامانه</p>
-                <p className="text-[10.5px] text-ink-muted">این حساب محافظت‌شده است؛ نقش و وضعیت آن قابل تغییر نیست.</p>
+                <p className="text-[10.5px] text-on-surface-variant">این حساب محافظت‌شده است؛ نقش و وضعیت آن قابل تغییر نیست.</p>
               </div>
             )}
             {u.status === "active" && !u.isSuperAdmin && (
-              <div className="rounded-[24px] border border-line bg-surface p-4">
+              <div className="rounded-[24px] border border-outline-variant/40 bg-surface p-4">
                 <div className="mb-1 flex items-center justify-between">
-                  <p className="text-[13px] font-black text-ink">نقش در چرخه بررسی</p>
+                  <p className="text-[13px] font-black text-on-surface">نقش در چرخه بررسی</p>
                   <span className="rounded-full bg-neon/12 px-2.5 py-0.5 text-[10px] font-bold text-neon">{ROLE_LABELS[u.role]}</span>
                 </div>
-                <p className="mb-3 text-[11px] leading-5 text-ink-muted">
+                <p className="mb-3 text-[11px] leading-5 text-on-surface-variant">
                   هر وقت اراده کردید نقش این کاربر را عوض کنید: مدیر حوزه، اخبار حوزه خودش را در مرحله ۱ بررسی می‌کند؛ کارشناس مرحله ۲ را؛ ادمین کل اختیار تام دارد.
                 </p>
                 {u.role === "district_manager" && (
                   <div className="mb-3">
-                    <p className="mb-1.5 text-[11px] font-bold text-ink-muted">حوزه مسئولیت مدیر حوزه:</p>
+                    <p className="mb-1.5 text-[11px] font-bold text-on-surface-variant">حوزه مسئولیت مدیر حوزه:</p>
                     <select
                       value={roleDistrict || u.district}
                       onChange={(e) => setRoleDistrict(e.target.value)}
-                      className="w-full rounded-2xl border border-line bg-surface px-3 py-2.5 text-[12.5px] text-ink outline-none focus:border-neon/50"
+                      className="w-full rounded-2xl border border-outline-variant/40 bg-surface px-3 py-2.5 text-[12.5px] text-on-surface outline-none focus:border-neon/50"
                     >
                       {Object.entries(DISTRICT_LABELS).map(([k, v]) => (
                         <option key={k} value={k}>{v}</option>
@@ -641,7 +641,7 @@ function UserDetailDialog({
                           ? "border-neon bg-neon/10 text-neon"
                           : r.key === "admin"
                             ? "border-warn/40 bg-warn/6 text-warn hover:bg-warn/12"
-                            : "border-line bg-surface text-ink hover:border-neon/40",
+                            : "border-outline-variant/40 bg-surface text-on-surface hover:border-neon/40",
                       )}
                     >
                       <span className="block text-[15px]">{r.emoji}</span>
@@ -651,10 +651,10 @@ function UserDetailDialog({
                 </div>
 
                 {u.role === "specialist" && (
-                  <div className="mt-3 flex items-center justify-between rounded-2xl border border-line bg-surface-2/60 px-4 py-3">
+                  <div className="mt-3 flex items-center justify-between rounded-2xl border border-outline-variant/40 bg-surface-container-low/60 px-4 py-3">
                     <div className="min-w-0">
-                      <p className="text-[12px] font-black text-ink">🎓 مدیریت تالار گفتگو و آموزش</p>
-                      <p className="mt-0.5 text-[10.5px] leading-4 text-ink-muted">
+                      <p className="text-[12px] font-black text-on-surface">🎓 مدیریت تالار گفتگو و آموزش</p>
+                      <p className="mt-0.5 text-[10.5px] leading-4 text-on-surface-variant">
                         با فعال بودن این مجوز، این کارشناس می‌تواند در تالار موضوع درج کند و درس آموزشی منتشر یا حذف کند (فقط با ارادهٔ ادمین کل).
                       </p>
                     </div>
@@ -663,7 +663,7 @@ function UserDetailDialog({
                       disabled={busy}
                       className={cn(
                         "ml-3 flex h-8 shrink-0 items-center rounded-full px-4 text-[11px] font-black transition-colors disabled:opacity-50",
-                        u.canManageContent ? "bg-neon text-neon-foreground" : "border border-line bg-surface text-ink-muted",
+                        u.canManageContent ? "bg-neon text-neon-foreground" : "border border-outline-variant/40 bg-surface text-on-surface-variant",
                       )}
                     >
                       {busy ? "..." : u.canManageContent ? "فعال ✓" : "غیرفعال"}
@@ -672,10 +672,10 @@ function UserDetailDialog({
                 )}
 
                 {u.role === "specialist" && (
-                  <div className="mt-3 flex items-center justify-between rounded-2xl border border-line bg-surface-2/60 px-4 py-3">
+                  <div className="mt-3 flex items-center justify-between rounded-2xl border border-outline-variant/40 bg-surface-container-low/60 px-4 py-3">
                     <div className="min-w-0">
-                      <p className="text-[12px] font-black text-ink">📨 ارسال خبر به کانال ایتا</p>
-                      <p className="mt-0.5 text-[10.5px] leading-4 text-ink-muted">
+                      <p className="text-[12px] font-black text-on-surface">📨 ارسال خبر به کانال ایتا</p>
+                      <p className="mt-0.5 text-[10.5px] leading-4 text-on-surface-variant">
                         با فعال بودن این مجوز، این کارشناس می‌تواند خبرها را مستقیم به کانال ایتا ارسال کند.
                       </p>
                     </div>
@@ -684,7 +684,7 @@ function UserDetailDialog({
                       disabled={busy}
                       className={cn(
                         "ml-3 flex h-8 shrink-0 items-center rounded-full px-4 text-[11px] font-black transition-colors disabled:opacity-50",
-                        u.canSendEitaa ? "bg-neon text-neon-foreground" : "border border-line bg-surface text-ink-muted",
+                        u.canSendEitaa ? "bg-neon text-neon-foreground" : "border border-outline-variant/40 bg-surface text-on-surface-variant",
                       )}
                     >
                       {busy ? "..." : u.canSendEitaa ? "فعال ✓" : "غیرفعال"}
@@ -728,8 +728,8 @@ function UserDetailDialog({
 
             {/* کارنامه */}
             <div>
-              <p className="mb-2 text-[13px] font-black text-ink">کارنامه خبری</p>
-              <div className="grid grid-cols-3 gap-2 rounded-[24px] border border-line bg-surface p-3.5 sm:grid-cols-6">
+              <p className="mb-2 text-[13px] font-black text-on-surface">کارنامه خبری</p>
+              <div className="grid grid-cols-3 gap-2 rounded-[24px] border border-outline-variant/40 bg-surface p-3.5 sm:grid-cols-6">
                 <Kpi value={faNum(u.points)} label="امتیاز" tone="neon" />
                 <Kpi value={fa(detail.stats.newsTotal)} label="کل اخبار" />
                 <Kpi value={fa(detail.stats.approved)} label="تاییدشده" tone="neon" />
@@ -741,16 +741,16 @@ function UserDetailDialog({
 
             {/* نشان‌ها */}
             <div>
-              <p className="mb-2 flex items-center gap-1.5 text-[13px] font-black text-ink">
+              <p className="mb-2 flex items-center gap-1.5 text-[13px] font-black text-on-surface">
                 <Award className="h-4 w-4 text-neon" />
                 نشان‌ها ({fa(detail.badges.length)})
               </p>
               {detail.badges.length === 0 ? (
-                <p className="rounded-2xl border border-dashed border-line py-4 text-center text-[11.5px] text-ink-muted">هنوز نشانی کسب نکرده است.</p>
+                <p className="rounded-2xl border border-dashed border-outline-variant/40 py-4 text-center text-[11.5px] text-on-surface-variant">هنوز نشانی کسب نکرده است.</p>
               ) : (
                 <div className="flex flex-wrap gap-2">
                   {detail.badges.map((b) => (
-                    <span key={b.key} className="flex items-center gap-1.5 rounded-full border border-neon/30 bg-neon/8 px-3 py-1.5 text-[11px] font-bold text-ink">
+                    <span key={b.key} className="flex items-center gap-1.5 rounded-full border border-neon/30 bg-neon/8 px-3 py-1.5 text-[11px] font-bold text-on-surface">
                       <span>{BADGES[b.key]?.emoji ?? "🎖"}</span>
                       {BADGES[b.key]?.title ?? b.key}
                     </span>
@@ -761,19 +761,19 @@ function UserDetailDialog({
 
             {/* آخرین اخبار */}
             <div>
-              <p className="mb-2 flex items-center gap-1.5 text-[13px] font-black text-ink">
+              <p className="mb-2 flex items-center gap-1.5 text-[13px] font-black text-on-surface">
                 <Newspaper className="h-4 w-4 text-neon" />
                 آخرین اخبار
               </p>
               {detail.news.length === 0 ? (
-                <p className="rounded-2xl border border-dashed border-line py-4 text-center text-[11.5px] text-ink-muted">هنوز خبری ارسال نکرده است.</p>
+                <p className="rounded-2xl border border-dashed border-outline-variant/40 py-4 text-center text-[11.5px] text-on-surface-variant">هنوز خبری ارسال نکرده است.</p>
               ) : (
                 <div className="space-y-1.5">
                   {detail.news.map((n) => (
-                    <div key={n.id} className="flex items-center justify-between gap-2 rounded-2xl border border-line bg-surface px-3.5 py-2.5">
+                    <div key={n.id} className="flex items-center justify-between gap-2 rounded-2xl border border-outline-variant/40 bg-surface px-3.5 py-2.5">
                       <div className="min-w-0">
-                        <p className="truncate text-[12px] font-bold text-ink">{n.title}</p>
-                        <p className="text-[9.5px] text-ink-muted" dir="ltr">{n.code} · {jalali(n.createdAt)}</p>
+                        <p className="truncate text-[12px] font-bold text-on-surface">{n.title}</p>
+                        <p className="text-[9.5px] text-on-surface-variant" dir="ltr">{n.code} · {jalali(n.createdAt)}</p>
                       </div>
                       <NewsStatusChip status={n.status} />
                     </div>
@@ -785,14 +785,14 @@ function UserDetailDialog({
             {/* چالش‌ها */}
             {detail.participations.length > 0 && (
               <div>
-                <p className="mb-2 flex items-center gap-1.5 text-[13px] font-black text-ink">
+                <p className="mb-2 flex items-center gap-1.5 text-[13px] font-black text-on-surface">
                   <Trophy className="h-4 w-4 text-neon" />
                   مشارکت در چالش‌ها
                 </p>
                 <div className="space-y-1.5">
                   {detail.participations.map((p) => (
-                    <div key={p.challengeId} className="flex items-center justify-between rounded-2xl border border-line bg-surface px-3.5 py-2.5">
-                      <p className="truncate text-[12px] font-bold text-ink">{p.challengeTitle}</p>
+                    <div key={p.challengeId} className="flex items-center justify-between rounded-2xl border border-outline-variant/40 bg-surface px-3.5 py-2.5">
+                      <p className="truncate text-[12px] font-bold text-on-surface">{p.challengeTitle}</p>
                       <span className="shrink-0 text-[10.5px] font-bold text-neon">{fa(p.count)} خبر</span>
                     </div>
                   ))}
@@ -803,19 +803,19 @@ function UserDetailDialog({
             {/* دفتر امتیاز */}
             {detail.pointsLog.length > 0 && (
               <div>
-                <p className="mb-2 flex items-center gap-1.5 text-[13px] font-black text-ink">
+                <p className="mb-2 flex items-center gap-1.5 text-[13px] font-black text-on-surface">
                   <Flame className="h-4 w-4 text-warn" />
                   دفتر امتیاز (۱۲ مورد اخیر)
                 </p>
-                <div className="space-y-1 rounded-[20px] border border-line bg-surface p-2">
+                <div className="space-y-1 rounded-[20px] border border-outline-variant/40 bg-surface p-2">
                   {detail.pointsLog.map((l, i) => (
-                    <div key={i} className="flex items-center justify-between gap-2 rounded-xl px-2.5 py-2 odd:bg-surface-2">
-                      <span className="min-w-0 truncate text-[11.5px] text-ink-muted">{l.reason || "امتیاز"}</span>
+                    <div key={i} className="flex items-center justify-between gap-2 rounded-xl px-2.5 py-2 odd:bg-surface-container-low">
+                      <span className="min-w-0 truncate text-[11.5px] text-on-surface-variant">{l.reason || "امتیاز"}</span>
                       <span className="flex shrink-0 items-center gap-2">
                         <span className={cn("text-[12px] font-black", l.amount >= 0 ? "text-neon" : "text-danger-soft")} dir="ltr">
                           {l.amount >= 0 ? `+${faNum(l.amount)}` : faNum(l.amount)}
                         </span>
-                        <span className="text-[9px] text-ink-muted/60">{relTime(l.createdAt)}</span>
+                        <span className="text-[9px] text-on-surface-variant/60">{relTime(l.createdAt)}</span>
                       </span>
                     </div>
                   ))}
@@ -831,12 +831,12 @@ function UserDetailDialog({
 
 function InfoCell({ icon, label, value, ltr }: { icon: React.ReactNode; label: string; value: string; ltr?: boolean }) {
   return (
-    <div className="rounded-2xl border border-line bg-surface px-3.5 py-3">
-      <p className="flex items-center gap-1.5 text-[9.5px] font-semibold text-ink-muted">
+    <div className="rounded-2xl border border-outline-variant/40 bg-surface px-3.5 py-3">
+      <p className="flex items-center gap-1.5 text-[9.5px] font-semibold text-on-surface-variant">
         {icon}
         {label}
       </p>
-      <p className="mt-1 truncate text-[12.5px] font-bold text-ink" dir={ltr ? "ltr" : undefined} style={ltr ? { textAlign: "right" } : undefined}>
+      <p className="mt-1 truncate text-[12.5px] font-bold text-on-surface" dir={ltr ? "ltr" : undefined} style={ltr ? { textAlign: "right" } : undefined}>
         {value}
       </p>
     </div>
@@ -846,8 +846,8 @@ function InfoCell({ icon, label, value, ltr }: { icon: React.ReactNode; label: s
 function Kpi({ value, label, tone }: { value: string; label: string; tone?: "neon" | "danger" }) {
   return (
     <div className="text-center">
-      <p className={cn("text-[15px] font-black leading-none", tone === "neon" ? "text-neon" : tone === "danger" ? "text-danger-soft" : "text-ink")}>{value}</p>
-      <p className="mt-1 text-[9px] text-ink-muted">{label}</p>
+      <p className={cn("text-[15px] font-black leading-none", tone === "neon" ? "text-neon" : tone === "danger" ? "text-danger-soft" : "text-on-surface")}>{value}</p>
+      <p className="mt-1 text-[9px] text-on-surface-variant">{label}</p>
     </div>
   )
 }

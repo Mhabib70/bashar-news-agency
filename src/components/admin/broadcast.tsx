@@ -68,50 +68,50 @@ export function AdminBroadcastSection() {
   const chip = (active: boolean) =>
     cn(
       "rounded-full border px-3 py-1.5 text-[11px] font-bold transition-colors",
-      active ? "border-neon bg-neon text-neon-foreground" : "border-line bg-surface-2 text-ink-muted hover:text-ink",
+      active ? "border-neon bg-neon text-neon-foreground" : "border-outline-variant/40 bg-surface-container-low text-on-surface-variant hover:text-on-surface",
     )
 
   return (
     <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
       {/* فرم ارسال */}
       <div className="space-y-3">
-        <div className="rounded-[24px] border border-line bg-surface p-4">
-          <p className="mb-2 flex items-center gap-2 text-[14px] font-black text-ink">
+        <div className="rounded-[24px] border border-outline-variant/40 bg-surface p-4">
+          <p className="mb-2 flex items-center gap-2 text-[14px] font-black text-on-surface">
             <Megaphone className="h-4.5 w-4.5 text-neon" />
             پیام جدید همگانی
           </p>
           <div className="flex items-start gap-2 rounded-2xl border border-neon/25 bg-neon/6 p-3">
             <Info className="mt-0.5 h-4 w-4 shrink-0 text-neon" />
-            <p className="text-[11px] leading-5 text-ink-muted">
+            <p className="text-[11px] leading-5 text-on-surface-variant">
               می‌توانید پیام را به «همهٔ اعضا» بفرستید یا فقط به نقش‌ها، حوزه‌ها و پایگاه‌های انتخابی.
               اعضایی که «اطلاع‌رسانی گروهی» را خاموش کرده‌اند دریافت نمی‌کنند و اعلان‌های ساعت سکوت به پایان سکوت موکول می‌شوند.
             </p>
           </div>
           <div className="mt-3 space-y-2.5">
             <div>
-              <label className="mb-1.5 block text-[12px] font-semibold text-ink-muted">عنوان پیام</label>
-              <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="مثلاً: جلسه هم‌اندیشی هفتگی" className="rounded-2xl border-line bg-surface-2 text-ink placeholder:text-ink-muted/50" maxLength={80} />
+              <label className="mb-1.5 block text-[12px] font-semibold text-on-surface-variant">عنوان پیام</label>
+              <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="مثلاً: جلسه هم‌اندیشی هفتگی" className="rounded-2xl border-outline-variant/40 bg-surface-container-low text-on-surface placeholder:text-on-surface-variant/50" maxLength={80} />
             </div>
             <div>
-              <label className="mb-1.5 block text-[12px] font-semibold text-ink-muted">متن پیام</label>
-              <Textarea value={text} onChange={(e) => setText(e.target.value)} rows={5} placeholder="متن کامل پیام..." className="rounded-2xl border-line bg-surface-2 text-ink leading-6 placeholder:text-ink-muted/50" maxLength={800} />
-              <p className="mt-1 text-left text-[9.5px] text-ink-muted/60">{fa(text.length)} از ۸۰۰ کاراکتر</p>
+              <label className="mb-1.5 block text-[12px] font-semibold text-on-surface-variant">متن پیام</label>
+              <Textarea value={text} onChange={(e) => setText(e.target.value)} rows={5} placeholder="متن کامل پیام..." className="rounded-2xl border-outline-variant/40 bg-surface-container-low text-on-surface leading-6 placeholder:text-on-surface-variant/50" maxLength={800} />
+              <p className="mt-1 text-left text-[9.5px] text-on-surface-variant/60">{fa(text.length)} از ۸۰۰ کاراکتر</p>
             </div>
 
             {/* انتخاب مخاطبان */}
-            <div className="rounded-2xl border border-line bg-surface-2/50 p-3">
-              <p className="flex items-center gap-1.5 text-[12px] font-black text-ink">
+            <div className="rounded-2xl border border-outline-variant/40 bg-surface-container-low/50 p-3">
+              <p className="flex items-center gap-1.5 text-[12px] font-black text-on-surface">
                 <Users2 className="h-4 w-4 text-neon" />
                 مخاطبان
                 <button
                   onClick={() => { setRoles([]); setDistricts([]); setBases([]) }}
-                  className={cn("mr-auto text-[10.5px] font-bold", targeted ? "text-danger-soft" : "text-ink-muted")}
+                  className={cn("mr-auto text-[10.5px] font-bold", targeted ? "text-danger-soft" : "text-on-surface-variant")}
                 >
                   {targeted ? "پاک‌کردن انتخاب‌ها" : "همهٔ اعضا (پیش‌فرض)"}
                 </button>
               </p>
 
-              <p className="mt-2.5 flex items-center gap-1.5 text-[10.5px] font-bold text-ink-muted">
+              <p className="mt-2.5 flex items-center gap-1.5 text-[10.5px] font-bold text-on-surface-variant">
                 <Globe2 className="h-3 w-3" /> نقش‌ها
               </p>
               <div className="mt-1.5 flex flex-wrap gap-1.5">
@@ -122,7 +122,7 @@ export function AdminBroadcastSection() {
                 ))}
               </div>
 
-              <p className="mt-3 flex items-center gap-1.5 text-[10.5px] font-bold text-ink-muted">
+              <p className="mt-3 flex items-center gap-1.5 text-[10.5px] font-bold text-on-surface-variant">
                 <MapPin className="h-3 w-3" /> حوزه‌ها
               </p>
               <div className="mt-1.5 flex flex-wrap gap-1.5">
@@ -135,7 +135,7 @@ export function AdminBroadcastSection() {
 
               {allBases.length > 0 && (
                 <>
-                  <p className="mt-3 flex items-center gap-1.5 text-[10.5px] font-bold text-ink-muted">
+                  <p className="mt-3 flex items-center gap-1.5 text-[10.5px] font-bold text-on-surface-variant">
                     <Building2 className="h-3 w-3" /> پایگاه‌ها
                   </p>
                   <div className="mt-1.5 flex max-h-40 flex-wrap gap-1.5 overflow-y-auto">
@@ -172,24 +172,24 @@ export function AdminBroadcastSection() {
       </div>
 
       {/* تاریخچه */}
-      <div className="rounded-[24px] border border-line bg-surface p-4">
-        <p className="mb-3 flex items-center gap-2 text-[14px] font-black text-ink">
+      <div className="rounded-[24px] border border-outline-variant/40 bg-surface p-4">
+        <p className="mb-3 flex items-center gap-2 text-[14px] font-black text-on-surface">
           <History className="h-4.5 w-4.5 text-neon" />
           تاریخچه ارسال‌ها
         </p>
         {history.length === 0 ? (
-          <p className="rounded-2xl border border-dashed border-line py-12 text-center text-[12px] text-ink-muted">
+          <p className="rounded-2xl border border-dashed border-outline-variant/40 py-12 text-center text-[12px] text-on-surface-variant">
             هنوز پیام همگانی ارسال نشده است.
           </p>
         ) : (
           <div className="space-y-2.5">
             {history.map((b, i) => (
-              <div key={i} className="rounded-2xl border border-line bg-surface-2 p-3.5">
+              <div key={i} className="rounded-2xl border border-outline-variant/40 bg-surface-container-low p-3.5">
                 <div className="flex items-start justify-between gap-2">
-                  <p className="text-[12.5px] font-bold text-ink">{b.title}</p>
-                  <span className="shrink-0 text-[9.5px] text-ink-muted/70">{relTime(b.at)}</span>
+                  <p className="text-[12.5px] font-bold text-on-surface">{b.title}</p>
+                  <span className="shrink-0 text-[9.5px] text-on-surface-variant/70">{relTime(b.at)}</span>
                 </div>
-                <p className="mt-1 line-clamp-3 text-[11px] leading-5 text-ink-muted">{b.body}</p>
+                <p className="mt-1 line-clamp-3 text-[11px] leading-5 text-on-surface-variant">{b.body}</p>
                 <p className="mt-1.5 text-[9.5px] font-bold text-neon">دریافت توسط {faNum(b.recipients)} عضو</p>
               </div>
             ))}

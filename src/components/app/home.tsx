@@ -101,7 +101,7 @@ export function HomeScreen({
       <div className="grid grid-cols-2 gap-2.5">
         <button
           onClick={() => router.push("/forum")}
-          className="v3-tile-blue group relative overflow-hidden rounded-[22px] p-4 text-right shadow-[0_16px_34px_-16px_rgba(157,66,58,0.55)] transition-transform duration-200 active:scale-[0.98]"
+          className="candy-tile-red group relative overflow-hidden rounded-[22px] p-4 text-right shadow-[0_16px_34px_-16px_rgba(157,66,58,0.55)] transition-transform duration-200 active:scale-[0.98]"
         >
           <span className="relative flex h-10 w-10 items-center justify-center rounded-[14px] bg-white/18 shadow-[inset_0_1px_0_rgba(255,255,255,0.25)]">
             <MessagesSquare className="h-5 w-5" />
@@ -115,7 +115,7 @@ export function HomeScreen({
         </button>
         <button
           onClick={() => router.push("/training")}
-          className="v3-tile-amber group relative overflow-hidden rounded-[22px] p-4 text-right shadow-[0_16px_34px_-16px_rgba(217,119,6,0.5)] transition-transform duration-200 active:scale-[0.98]"
+          className="candy-tile-amber group relative overflow-hidden rounded-[22px] p-4 text-right shadow-[0_16px_34px_-16px_rgba(217,119,6,0.5)] transition-transform duration-200 active:scale-[0.98]"
         >
           <span className="relative flex h-10 w-10 items-center justify-center rounded-[14px] bg-white/22 shadow-[inset_0_1px_0_rgba(255,255,255,0.3)]">
             <GraduationCap className="h-5 w-5" />
@@ -322,14 +322,14 @@ export function HomeScreen({
       {user.role === "admin" && (
         <button
           onClick={onOpenAdmin}
-          className="v3-card flex w-full items-center justify-between px-4 py-3.5 text-right transition-transform hover:scale-[1.01]"
+          className="rounded-3xl border border-outline-variant/40 bg-surface-container-lowest shadow-[0_8px_24px_-4px_rgba(83,37,23,0.05)] flex w-full items-center justify-between px-4 py-3.5 text-right transition-transform hover:scale-[1.01]"
         >
           <span>
-            <span className="flex items-center gap-2 text-[13px] font-bold text-ink">
+            <span className="flex items-center gap-2 text-[13px] font-bold text-on-surface">
               <ShieldCheck className="h-4.5 w-4.5 text-primary" />
               پنل مدیریت و پایش راهبردی
             </span>
-            <span className="mt-0.5 block text-[10.5px] text-ink-muted">
+            <span className="mt-0.5 block text-[10.5px] text-on-surface-variant">
               {state.pendingUsersCount > 0
                 ? `${fa(state.pendingUsersCount)} درخواست عضویت در انتظار تایید`
                 : "کاربران · پیام همگانی · چالش · خروجی CSV"}
@@ -380,11 +380,11 @@ export function HomeScreen({
       {/* فعالیت سریع */}
       <div className="pt-1">
         <SectionHeader title="فعالیت من" action="کارنامه کامل" onAction={onGotoActivity} />
-        <div className="v3-card grid grid-cols-3 gap-2.5 p-3">
+        <div className="rounded-3xl border border-outline-variant/40 bg-surface-container-lowest shadow-[0_8px_24px_-4px_rgba(83,37,23,0.05)] grid grid-cols-3 gap-2.5 p-3">
           <MiniStat icon={<Newspaper className="h-4.5 w-4.5" />} value={stats.week.newsCount} label="خبرها" sub="این هفته" />
-          <div className="w-px bg-line" />
+          <div className="w-px bg-outline-variant/40" />
           <MiniStat icon={<TrendingUp className="h-4.5 w-4.5" />} value={user.points} label="امتیاز" sub="کل" plain />
-          <div className="w-px bg-line" />
+          <div className="w-px bg-outline-variant/40" />
           <MiniStat icon={<Timer className="h-4.5 w-4.5" />} label="زمان فعال" sub="این هفته" text={durFmt(stats.week.activeMin)} />
         </div>
       </div>
@@ -543,16 +543,16 @@ function FeedSection({ userId, trigger, onOpen }: { userId: string; trigger: num
     return (
       <div className="flex flex-col gap-3.5 pt-1">
         {Array.from({ length: 2 }).map((_, i) => (
-          <div key={i} className="v3-card h-64 animate-pulse" />
+          <div key={i} className="rounded-3xl border border-outline-variant/40 bg-surface-container-lowest shadow-[0_8px_24px_-4px_rgba(83,37,23,0.05)] h-64 animate-pulse" />
         ))}
       </div>
     )
   }
   if (feed.length === 0) {
     return (
-      <div className="v3-card border-dashed px-5 py-8 text-center">
-        <p className="text-[13px] font-bold text-ink">هنوز خبری منتشر نشده است</p>
-        <p className="mt-1 text-[11px] leading-5 text-ink-muted">اولین خبر تأییدشده، همین‌جا در جریان خبری خبرگزاری می‌درخشد.</p>
+      <div className="rounded-3xl border border-outline-variant/40 bg-surface-container-lowest shadow-[0_8px_24px_-4px_rgba(83,37,23,0.05)] border-dashed px-5 py-8 text-center">
+        <p className="text-[13px] font-bold text-on-surface">هنوز خبری منتشر نشده است</p>
+        <p className="mt-1 text-[11px] leading-5 text-on-surface-variant">اولین خبر تأییدشده، همین‌جا در جریان خبری خبرگزاری می‌درخشد.</p>
       </div>
     )
   }
@@ -583,11 +583,11 @@ function MiniStat({
   return (
     <div className="flex flex-col items-center gap-1 py-1.5">
       <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-fixed/50 text-primary">{icon}</span>
-      <span className="v3-num text-[16px] leading-none text-ink">
+      <span className="font-black tracking-tight text-[16px] leading-none text-on-surface">
         {text ?? (plain ? faNum(value ?? 0) : <CountUp to={value ?? 0} fmt={faNum} />)}
       </span>
-      <span className="text-[11px] font-semibold text-ink">{label}</span>
-      <span className="text-[9.5px] text-ink-muted">{sub}</span>
+      <span className="text-[11px] font-semibold text-on-surface">{label}</span>
+      <span className="text-[9.5px] text-on-surface-variant">{sub}</span>
     </div>
   )
 }

@@ -158,41 +158,41 @@ export function SideNav({
   return (
     <div className="flex flex-col gap-4">
       {/* کارت پروفایل */}
-      <div className="v3-card p-4">
+      <div className="rounded-3xl border border-outline-variant/40 bg-surface-container-lowest p-4 shadow-[0_8px_24px_-4px_rgba(83,37,23,0.05)]">
         <div className="flex items-center gap-3">
           <Avatar name={user.fullName} src={user.avatar} size={46} />
           <div className="min-w-0">
-            <div className="truncate text-[13.5px] font-black text-[var(--v3-ink)]">{user.fullName}</div>
-            <div className="mt-0.5 text-[10.5px] font-bold text-[var(--v3-azure)]">{user.levelEmoji} {user.levelTitle} · {fa(user.points)} امتیاز</div>
+            <div className="truncate text-[13.5px] font-black text-on-surface">{user.fullName}</div>
+            <div className="mt-0.5 text-[10.5px] font-bold text-primary">{user.levelEmoji} {user.levelTitle} · {fa(user.points)} امتیاز</div>
           </div>
         </div>
-        <div className="mt-3 grid grid-cols-3 border-t border-[var(--v3-line)] pt-3 text-center">
+        <div className="mt-3 grid grid-cols-3 border-t border-outline-variant/40 pt-3 text-center">
           <div>
-            <b className="v3-num block text-[15px] leading-5 text-[var(--v3-ink)]">{fa(stats.totalApproved)}</b>
-            <span className="text-[9.5px] text-[var(--v3-ink-2)]">خبر تاییدشده</span>
+            <b className="block text-[15px] font-black leading-5 text-on-surface">{fa(stats.totalApproved)}</b>
+            <span className="text-[9.5px] text-on-surface-variant">خبر تاییدشده</span>
           </div>
           <div>
-            <b className="v3-num block text-[15px] leading-5 text-[var(--v3-ink)]">{fa(stats.rank || stats.totalReporters)}</b>
-            <span className="text-[9.5px] text-[var(--v3-ink-2)]">رتبه در خبرگزاری</span>
+            <b className="block text-[15px] font-black leading-5 text-on-surface">{fa(stats.rank || stats.totalReporters)}</b>
+            <span className="text-[9.5px] text-on-surface-variant">رتبه در خبرگزاری</span>
           </div>
           <div>
-            <b className="v3-num block text-[15px] leading-5 text-[var(--v3-ink)]">{fa(stats.approveRate)}٪</b>
-            <span className="text-[9.5px] text-[var(--v3-ink-2)]">نرخ تایید</span>
+            <b className="block text-[15px] font-black leading-5 text-on-surface">{fa(stats.approveRate)}٪</b>
+            <span className="text-[9.5px] text-on-surface-variant">نرخ تایید</span>
           </div>
         </div>
       </div>
 
       {/* منو */}
-      <nav className="v3-card p-2" aria-label="منوی اصلی">
+      <nav className="rounded-3xl border border-outline-variant/40 bg-surface-container-lowest p-2 shadow-[0_8px_24px_-4px_rgba(83,37,23,0.05)]" aria-label="منوی اصلی">
         {menu.map((m) => (
           <button
             key={m.label}
             onClick={m.onClick}
             className={cn(
-              "flex w-full items-center gap-2.5 rounded-[14px] px-3 py-2.5 text-[12.5px] transition-colors",
+              "flex w-full items-center gap-2.5 rounded-2xl px-3 py-2.5 text-[12.5px] transition-colors",
               m.active
-                ? "bg-gradient-to-l from-[var(--v3-azure-2)] to-[var(--v3-azure-deep)] font-black text-white shadow-[0_10px_22px_-10px_rgba(180,26,34,0.6)]"
-                : "font-semibold text-[var(--v3-ink-2)] hover:bg-[var(--v3-card-2)] hover:text-[var(--v3-ink)]",
+                ? "bg-primary font-black text-on-primary shadow-[0_10px_22px_-10px_rgba(157,66,58,0.55)]"
+                : "font-semibold text-on-surface-variant hover:bg-surface-container hover:text-on-surface",
             )}
           >
             {m.icon}
@@ -200,8 +200,8 @@ export function SideNav({
             {m.badge ? (
               <span className={cn(
                 "mr-auto flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[10px] font-black",
-                m.badgeTone === "red" ? "bg-red-100 text-red-600 dark:bg-red-500/15 dark:text-red-400" : "bg-[var(--v3-azure-soft)] text-[var(--v3-azure-deep)] dark:text-[#fca5a5]",
-                m.active && "bg-white/25 text-white",
+                m.badgeTone === "red" ? "bg-error-container text-on-error-container" : "bg-secondary-fixed text-on-secondary-fixed",
+                m.active && "bg-white/25 text-on-primary",
               )}>
                 {fa(m.badge)}
               </span>
@@ -211,10 +211,10 @@ export function SideNav({
       </nav>
 
       {/* چالش‌های فعال */}
-      <div className="v3-card p-4">
-        <div className="mb-2 text-[10px] font-bold text-[var(--v3-ink-2)]">چالش‌های فعال</div>
+      <div className="rounded-3xl border border-outline-variant/40 bg-surface-container-lowest p-4 shadow-[0_8px_24px_-4px_rgba(83,37,23,0.05)]">
+        <div className="mb-2 text-[10px] font-bold text-on-surface-variant">چالش‌های فعال</div>
         {activeChallenges.length === 0 ? (
-          <p className="text-[11.5px] leading-5 text-[var(--v3-ink-2)]">فعلاً چالش فعالی نیست.</p>
+          <p className="text-[11.5px] leading-5 text-on-surface-variant">فعلاً چالش فعالی نیست.</p>
         ) : (
           activeChallenges.slice(0, 4).map((c, i) => {
             const tone = CHALLENGE_ICONS[i % CHALLENGE_ICONS.length]
@@ -223,15 +223,15 @@ export function SideNav({
                 <span className="flex h-7.5 w-7.5 shrink-0 items-center justify-center rounded-lg" style={{ background: tone.bg, color: tone.fg }}>
                   <Megaphone className="h-3.5 w-3.5" />
                 </span>
-                <span className="min-w-0 flex-1 truncate text-[11.5px] font-semibold text-[var(--v3-ink)]">{c.title}</span>
+                <span className="min-w-0 flex-1 truncate text-[11.5px] font-semibold text-on-surface">{c.title}</span>
               </button>
             )
           })
         )}
-        <button onClick={onOpenChallenges} className="mt-1.5 text-[11px] font-bold text-[var(--v3-azure)]">مشاهده همه</button>
+        <button onClick={onOpenChallenges} className="mt-1.5 text-[11px] font-bold text-primary">مشاهده همه</button>
       </div>
 
-      <div className="px-1 text-[9.5px] leading-5 text-[var(--v3-ink-2)]">
+      <div className="px-1 text-[9.5px] leading-5 text-on-surface-variant">
         قوانین خبرگزاری · حریم خصوصی · راهنما
         <br />
         © ۱۴۰۵ خبرگزاری بسیج شهر رشت · نسخه ۲.۱
@@ -257,54 +257,54 @@ export function RightRail({
   return (
     <div className="flex flex-col gap-4">
       {/* اعلان‌های اخیر */}
-      <div className="v3-card p-4">
+      <div className="rounded-3xl border border-outline-variant/40 bg-surface-container-lowest p-4 shadow-[0_8px_24px_-4px_rgba(83,37,23,0.05)]">
         <div className="mb-2 flex items-center justify-between">
-          <b className="text-[13px] font-black text-[var(--v3-ink)]">اعلان‌های اخیر</b>
-          <button onClick={onOpenNotifications} className="text-[10.5px] font-bold text-[var(--v3-azure)]">مشاهده همه</button>
+          <b className="text-[13px] font-black text-on-surface">اعلان‌های اخیر</b>
+          <button onClick={onOpenNotifications} className="text-[10.5px] font-bold text-primary">مشاهده همه</button>
         </div>
         {notifications.length === 0 ? (
-          <p className="text-[11.5px] leading-5 text-[var(--v3-ink-2)]">اعلان تازه‌ای ندارید.</p>
+          <p className="text-[11.5px] leading-5 text-on-surface-variant">اعلان تازه‌ای ندارید.</p>
         ) : (
           notifications.slice(0, 4).map((n) => (
-            <button key={n.id} onClick={onOpenNotifications} className="flex w-full items-start gap-2.5 rounded-xl py-2 text-right transition-colors hover:bg-[var(--v3-card-2)]">
-              <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-[var(--v3-azure)]" />
+            <button key={n.id} onClick={onOpenNotifications} className="flex w-full items-start gap-2.5 rounded-xl py-2 text-right transition-colors hover:bg-surface-container">
+              <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-primary" />
               <span className="min-w-0 flex-1">
-                <b className="block truncate text-[11.5px] font-bold text-[var(--v3-ink)]">{n.title}</b>
-                <small className="block truncate text-[10.5px] text-[var(--v3-ink-2)]">{n.body}</small>
+                <b className="block truncate text-[11.5px] font-bold text-on-surface">{n.title}</b>
+                <small className="block truncate text-[10.5px] text-on-surface-variant">{n.body}</small>
               </span>
-              <span className="shrink-0 text-[9px] text-[var(--v3-ink-2)]">{relTime(n.at)}</span>
+              <span className="shrink-0 text-[9px] text-on-surface-variant">{relTime(n.at)}</span>
             </button>
           ))
         )}
       </div>
 
       {/* برترین خبرنگاران */}
-      <div className="v3-card p-4">
+      <div className="rounded-3xl border border-outline-variant/40 bg-surface-container-lowest p-4 shadow-[0_8px_24px_-4px_rgba(83,37,23,0.05)]">
         <div className="mb-2 flex items-center gap-1.5">
-          <Trophy className="h-4 w-4 text-[var(--v3-amber)]" />
-          <b className="text-[13px] font-black text-[var(--v3-ink)]">برترین خبرنگاران</b>
+          <Trophy className="h-4 w-4 text-warn" />
+          <b className="text-[13px] font-black text-on-surface">برترین خبرنگاران</b>
         </div>
         {leaderboard.slice(0, 5).map((r) => (
-          <div key={r.id} className={cn("flex items-center gap-2.5 rounded-xl py-1.5", r.isMe && "rounded-xl bg-[var(--v3-azure-soft)] px-1.5")}>
+          <div key={r.id} className={cn("flex items-center gap-2.5 rounded-xl py-1.5", r.isMe && "rounded-xl bg-primary-fixed/40 px-1.5")}>
             <span
               className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-black"
               style={{
-                background: RANK_BG[r.rank - 1] ?? "var(--v3-card-2)",
-                color: r.rank <= 3 ? "#fff" : "var(--v3-ink-2)",
+                background: RANK_BG[r.rank - 1] ?? "var(--surface-ctnr)",
+                color: r.rank <= 3 ? "#fff" : "var(--on-surface-variant)",
               }}
             >
               {fa(r.rank)}
             </span>
             <Avatar name={r.fullName} src={r.avatar} size={28} />
-            <span className="min-w-0 flex-1 truncate text-[11.5px] font-bold text-[var(--v3-ink)]">{r.fullName}{r.isMe ? " (شما)" : ""}</span>
-            <span className="shrink-0 text-[10px] font-bold text-[var(--v3-ink-2)]">{faNum(r.points)}</span>
+            <span className="min-w-0 flex-1 truncate text-[11.5px] font-bold text-on-surface">{r.fullName}{r.isMe ? " (شما)" : ""}</span>
+            <span className="shrink-0 text-[10px] font-bold text-on-surface-variant">{faNum(r.points)}</span>
           </div>
         ))}
       </div>
 
       {/* چالش فعال */}
       {active && (
-        <button onClick={onOpenChallenges} className="v3-tile-blue rounded-2xl p-4 text-right shadow-[0_16px_36px_-16px_rgba(180,26,34,0.6)]">
+        <button onClick={onOpenChallenges} className="relative overflow-hidden rounded-3xl bg-gradient-to-l from-primary-container via-primary to-primary p-4 text-right text-on-primary shadow-[0_16px_36px_-16px_rgba(157,66,58,0.55)]">
           <div className="flex items-center justify-between">
             <span className="flex items-center gap-1.5 text-[10.5px] font-bold opacity-90">
               <Megaphone className="h-3.5 w-3.5" /> چالش فعال
@@ -336,13 +336,13 @@ export function ComposerCard({
   onGotoReview: () => void
 }) {
   return (
-    <div className="v3-card p-4">
+    <div className="rounded-3xl border border-outline-variant/40 bg-surface-container-lowest p-4 shadow-[0_8px_24px_-4px_rgba(83,37,23,0.05)]">
       <div className="flex items-center gap-2.5">
         <Avatar name={user.fullName} src={user.avatar} size={40} />
         {isReporter ? (
           <button
             onClick={onQuickSubmit}
-            className="flex h-11 flex-1 items-center justify-between rounded-2xl border border-[var(--v3-line)] bg-[var(--v3-card-2)] px-3.5 text-[12.5px] text-[var(--v3-ink-2)] transition-colors hover:border-[var(--v3-azure)]/40"
+            className="flex h-11 flex-1 items-center justify-between rounded-2xl border border-outline-variant/50 bg-surface-container-low px-3.5 text-[12.5px] text-on-surface-variant transition-colors hover:border-primary/40"
           >
             <span>چه خبری دیده‌اید؟</span>
             <Smile className="h-4.5 w-4.5" />
@@ -350,16 +350,16 @@ export function ComposerCard({
         ) : (
           <button
             onClick={onGotoReview}
-            className="flex h-11 flex-1 items-center justify-between rounded-2xl border border-[var(--v3-azure)]/35 bg-[var(--v3-azure-soft)] px-3.5 text-[12.5px] font-bold text-[var(--v3-ink)] transition-colors hover:bg-[var(--v3-azure)]/20"
+            className="flex h-11 flex-1 items-center justify-between rounded-2xl border border-primary/35 bg-primary-fixed/30 px-3.5 text-[12.5px] font-bold text-on-surface transition-colors hover:bg-primary-fixed/55"
           >
             <span>بررسی خبرهای در صف</span>
-            <span className="rounded-full bg-[var(--v3-azure)] px-2 py-0.5 text-[10px] font-black text-white">{fa(queueCount)}</span>
+            <span className="rounded-full bg-primary px-2 py-0.5 text-[10px] font-black text-on-primary">{fa(queueCount)}</span>
           </button>
         )}
         {isReporter && (
           <button
             onClick={onQuickSubmit}
-            className="v3-btn flex h-11 shrink-0 items-center gap-1.5 px-4 text-[12.5px]"
+            className="flex h-11 shrink-0 items-center gap-1.5 rounded-full bg-primary px-4 text-[12.5px] font-extrabold text-on-primary shadow-[0_10px_26px_-8px_rgba(157,66,58,0.5)] transition-transform active:scale-95"
           >
             <Rss className="h-4 w-4" />
             ثبت خبر
@@ -367,8 +367,8 @@ export function ComposerCard({
         )}
       </div>
       {isReporter && (
-        <div className="mt-3 flex items-center gap-2 rounded-2xl border border-dashed border-[var(--v3-azure)]/30 bg-[var(--v3-azure-soft)]/60 px-3 py-2 text-[10.5px] font-semibold leading-5 text-[var(--v3-ink-2)]">
-          <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-[var(--v3-azure)]" />
+        <div className="mt-3 flex items-center gap-2 rounded-2xl border border-dashed border-primary/30 bg-primary-fixed/25 px-3 py-2 text-[10.5px] font-semibold leading-5 text-on-surface-variant">
+          <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-primary" />
           پس از ثبت، خبر وارد چرخه سه‌مرحله‌ای تأیید می‌شود: مدیر حوزه، سپس کارشناس خبر، و در پایان ادمین کل
         </div>
       )}
@@ -432,15 +432,15 @@ export function FeedPost({ n, onOpen }: { n: FeedNews; onOpen?: (n: FeedNews) =>
 
       {hasPhoto && (
         <button onClick={() => onOpen?.(n)} className="block w-full cursor-zoom-in">
-          <img src={n.mediaUrl} alt={n.title} className="max-h-[340px] w-full border-y border-line object-cover" loading="lazy" />
+          <img src={n.mediaUrl} alt={n.title} className="max-h-[340px] w-full border-y border-outline-variant/40 object-cover" loading="lazy" />
         </button>
       )}
       {hasVideo && (
-        <video src={n.mediaUrl} controls preload="metadata" className="max-h-[340px] w-full border-y border-line bg-black" />
+        <video src={n.mediaUrl} controls preload="metadata" className="max-h-[340px] w-full border-y border-outline-variant/40 bg-black" />
       )}
       {!hasPhoto && !hasVideo && (
         <button onClick={() => onOpen?.(n)} className="block w-full cursor-zoom-in">
-          <Image src={catImg} alt={n.title} width={640} height={200} className="h-[170px] w-full border-y border-line object-cover" />
+          <Image src={catImg} alt={n.title} width={640} height={200} className="h-[170px] w-full border-y border-outline-variant/40 object-cover" />
         </button>
       )}
 

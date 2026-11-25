@@ -79,13 +79,13 @@ export default function Page() {
     <main className="flex min-h-dvh flex-col bg-surface">
       {!booted ? (
         <div className="mx-auto flex w-full max-w-[520px] flex-1 flex-col gap-6 p-6">
-          <Skeleton className="h-[54%] w-full rounded-[28px] bg-[var(--v3-card-2)]" />
-          <Skeleton className="h-10 w-2/3 rounded-full bg-[var(--v3-card-2)]" />
-          <Skeleton className="h-44 w-full rounded-[28px] bg-[var(--v3-card-2)]" />
+          <Skeleton className="h-[54%] w-full rounded-[28px] bg-surface-container-low" />
+          <Skeleton className="h-10 w-2/3 rounded-full bg-surface-container-low" />
+          <Skeleton className="h-44 w-full rounded-[28px] bg-surface-container-low" />
         </div>
       ) : !userId || !state ? (
         /* ورود: در موبایل تمام‌صفحه، در دسکتاپ قاب مرکزی */
-        <div className="mx-auto flex h-dvh w-full max-w-[460px] flex-col overflow-hidden sm:my-6 sm:h-[min(880px,94dvh)] sm:rounded-[36px] sm:border sm:border-[var(--v3-line)] sm:shadow-[0_40px_120px_-40px_rgba(74,8,14,0.4)]">
+        <div className="mx-auto flex h-dvh w-full max-w-[460px] flex-col overflow-hidden sm:my-6 sm:h-[min(880px,94dvh)] sm:rounded-[36px] sm:border sm:border-outline-variant/50 sm:shadow-[0_40px_120px_-40px_rgba(74,8,14,0.4)]">
           <Welcome />
         </div>
       ) : user?.status === "pending" ? (
@@ -195,9 +195,9 @@ export default function Page() {
 function GateScreen({ icon, title, body, action }: { icon: React.ReactNode; title: string; body: string; action?: React.ReactNode }) {
   return (
     <div className="mx-auto flex w-full max-w-[460px] flex-1 flex-col items-center justify-center gap-4 px-8 text-center stage-enter">
-      <span className="flex h-24 w-24 items-center justify-center rounded-[26px] border border-[var(--v3-line)] bg-[var(--v3-card)] shadow-[var(--v3-shadow-sm)]">{icon}</span>
-      <h2 className="text-[19px] font-black text-[var(--v3-ink)]">{title}</h2>
-      <p className="max-w-[280px] text-[12.5px] leading-6 text-[var(--v3-ink-2)]">{body}</p>
+      <span className="flex h-24 w-24 items-center justify-center rounded-[26px] border border-outline-variant/50 bg-surface-container-lowest shadow-[0 8px 24px -4px rgba(83, 37, 23, 0.08)]">{icon}</span>
+      <h2 className="text-[19px] font-black text-on-surface">{title}</h2>
+      <p className="max-w-[280px] text-[12.5px] leading-6 text-on-surface-variant">{body}</p>
       {action}
     </div>
   )

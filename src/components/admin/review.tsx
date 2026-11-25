@@ -106,18 +106,18 @@ export function AdminReviewSection() {
   return (
     <div className="space-y-5">
       {/* جستجو + فیلترها */}
-      <div className="rounded-[24px] border border-line bg-surface p-4">
+      <div className="rounded-[24px] border border-outline-variant/40 bg-surface p-4">
         <div className="relative">
-          <Search className="absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-muted" />
+          <Search className="absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-on-surface-variant" />
           <Input
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="جستجو در تیتر، متن، کد پیگیری یا خبرنگار..."
-            className="rounded-2xl border-line bg-surface-2 pr-10 text-ink placeholder:text-ink-muted/60"
+            className="rounded-2xl border-outline-variant/40 bg-surface-container-low pr-10 text-on-surface placeholder:text-on-surface-variant/60"
           />
         </div>
         <div className="mt-3 flex flex-wrap items-center gap-2">
-          <span className="flex items-center gap-1.5 text-[11.5px] font-bold text-ink-muted">
+          <span className="flex items-center gap-1.5 text-[11.5px] font-bold text-on-surface-variant">
             <Filter className="h-3.5 w-3.5" />
             وضعیت:
           </span>
@@ -129,7 +129,7 @@ export function AdminReviewSection() {
                 onClick={() => setStatus(s.key)}
                 className={cn(
                   "flex items-center gap-1.5 rounded-full border px-3.5 py-2 text-[11.5px] font-bold transition-colors",
-                  status === s.key ? "border-neon bg-neon text-neon-foreground" : "border-line bg-surface-2 text-ink-muted hover:text-ink",
+                  status === s.key ? "border-neon bg-neon text-neon-foreground" : "border-outline-variant/40 bg-surface-container-low text-on-surface-variant hover:text-on-surface",
                 )}
               >
                 {s.label}
@@ -140,7 +140,7 @@ export function AdminReviewSection() {
           <select
             value={district}
             onChange={(e) => setDistrict(e.target.value)}
-            className="mr-auto rounded-xl border border-line bg-surface-2 px-3 py-2 text-[11.5px] font-bold text-ink"
+            className="mr-auto rounded-xl border border-outline-variant/40 bg-surface-container-low px-3 py-2 text-[11.5px] font-bold text-on-surface"
           >
             <option value="all">همه حوزه‌ها</option>
             {Object.entries(DISTRICT_LABELS).map(([k, v]) => (
@@ -149,7 +149,7 @@ export function AdminReviewSection() {
           </select>
           <button
             onClick={load}
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-line bg-surface-2 text-ink-muted transition-colors hover:text-neon"
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-outline-variant/40 bg-surface-container-low text-on-surface-variant transition-colors hover:text-neon"
             aria-label="بارگذاری مجدد"
           >
             <RefreshCw className={cn("h-4 w-4", rows === null && "animate-spin")} />
@@ -158,15 +158,15 @@ export function AdminReviewSection() {
       </div>
 
       {rows === null ? (
-        <div className="flex items-center justify-center gap-2 py-14 text-[13px] text-ink-muted">
+        <div className="flex items-center justify-center gap-2 py-14 text-[13px] text-on-surface-variant">
           <RefreshCw className="h-4 w-4 animate-spin" />
           در حال دریافت اخبار...
         </div>
       ) : list.length === 0 ? (
-        <div className="flex flex-col items-center gap-2 rounded-[26px] border border-dashed border-line py-16 text-center">
+        <div className="flex flex-col items-center gap-2 rounded-[26px] border border-dashed border-outline-variant/40 py-16 text-center">
           <Inbox className="h-10 w-10 text-neon/60" />
-          <p className="text-[15px] font-bold text-ink">{serverQ || district !== "all" ? "با این جستجو/فیلترها خبری یافت نشد" : "هنوز خبری ثبت نشده است"}</p>
-          <p className="max-w-[280px] text-[12px] leading-5 text-ink-muted">
+          <p className="text-[15px] font-bold text-on-surface">{serverQ || district !== "all" ? "با این جستجو/فیلترها خبری یافت نشد" : "هنوز خبری ثبت نشده است"}</p>
+          <p className="max-w-[280px] text-[12px] leading-5 text-on-surface-variant">
             عبارت جستجو یا فیلتر وضعیت/حوزه را تغییر دهید.
           </p>
         </div>
@@ -176,11 +176,11 @@ export function AdminReviewSection() {
             const open = expanded === n.id
             const chip = STATUS_CHIP[n.status] ?? STATUS_CHIP.pending
             return (
-              <div key={n.id} className="rounded-[26px] border border-line bg-surface p-4">
+              <div key={n.id} className="rounded-[26px] border border-outline-variant/40 bg-surface p-4">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className={cn("rounded-full border px-2.5 py-1 text-[10px] font-bold", chip.cls)}>{chip.label}</span>
-                    <span className="rounded-full bg-surface-2 px-2.5 py-1 text-[10px] font-bold text-ink-muted">{CATEGORY_LABELS[n.category] ?? n.category}</span>
+                    <span className="rounded-full bg-surface-container-low px-2.5 py-1 text-[10px] font-bold text-on-surface-variant">{CATEGORY_LABELS[n.category] ?? n.category}</span>
                     {n.status === "pending" && (
                       <span className="flex items-center gap-1 rounded-full bg-warn/10 px-2.5 py-1 text-[10px] font-bold text-warn">
                         <Hourglass className="h-3 w-3" />
@@ -188,21 +188,21 @@ export function AdminReviewSection() {
                       </span>
                     )}
                   </div>
-                  <span className="text-[10px] text-ink-muted">
+                  <span className="text-[10px] text-on-surface-variant">
                     <span dir="ltr">{n.code}</span> · {relTime(n.createdAt)} · {durFmt(n.durationMin)}
                   </span>
                 </div>
 
-                <p className="mt-2.5 text-[15px] font-bold leading-7 text-ink">{n.title}</p>
+                <p className="mt-2.5 text-[15px] font-bold leading-7 text-on-surface">{n.title}</p>
 
                 {n.mediaUrl && n.mediaType === "photo" && (
-                  <img src={n.mediaUrl} alt="رسانه خبر" className="mt-3 max-h-56 w-full rounded-2xl border border-line object-cover" />
+                  <img src={n.mediaUrl} alt="رسانه خبر" className="mt-3 max-h-56 w-full rounded-2xl border border-outline-variant/40 object-cover" />
                 )}
                 {n.mediaUrl && n.mediaType === "video" && (
-                  <video src={n.mediaUrl} controls className="mt-3 max-h-56 w-full rounded-2xl border border-line bg-black" />
+                  <video src={n.mediaUrl} controls className="mt-3 max-h-56 w-full rounded-2xl border border-outline-variant/40 bg-black" />
                 )}
 
-                <p className={cn("mt-2 text-[12.5px] leading-6 text-ink-muted", !open && "line-clamp-2")}>{n.content}</p>
+                <p className={cn("mt-2 text-[12.5px] leading-6 text-on-surface-variant", !open && "line-clamp-2")}>{n.content}</p>
                 <button onClick={() => setExpanded(open ? null : n.id)} className="mt-1 flex items-center gap-1 text-[11px] font-bold text-neon">
                   <ChevronDown className={cn("h-3.5 w-3.5 transition-transform", open && "rotate-180")} />
                   {open ? "بستن متن کامل" : "متن کامل خبر"}
@@ -215,17 +215,17 @@ export function AdminReviewSection() {
                   </p>
                 )}
                 {(n.views > 0 || n.eitaaReactions > 0) && (
-                  <p className="mt-2 flex items-center gap-3 text-[10.5px] font-bold text-ink-muted">
+                  <p className="mt-2 flex items-center gap-3 text-[10.5px] font-bold text-on-surface-variant">
                     {n.views > 0 && <span className="flex items-center gap-1"><Eye className="h-3.5 w-3.5" /> {faNum(n.views)} بازدید</span>}
                     {n.eitaaReactions > 0 && <span className="flex items-center gap-1"><Heart className="h-3.5 w-3.5" /> {faNum(n.eitaaReactions)} واکنش ایتا</span>}
                   </p>
                 )}
 
-                <div className="mt-3 flex items-center gap-2 border-t border-line pt-3">
+                <div className="mt-3 flex items-center gap-2 border-t border-outline-variant/40 pt-3">
                   <span className="flex h-8 w-8 items-center justify-center rounded-full bg-neon/12 text-[11px] font-black text-neon">
                     {n.reporterName.slice(0, 1)}
                   </span>
-                  <span className="flex-1 text-[11px] text-ink-muted">
+                  <span className="flex-1 text-[11px] text-on-surface-variant">
                     {n.reporterName} · {DISTRICT_LABELS[n.district] ?? n.district} · {jalali(n.createdAt)}
                   </span>
                 </div>
@@ -251,12 +251,12 @@ export function AdminReviewSection() {
                       </button>
                     </>
                   ) : (
-                    <span className="flex-1 text-[11px] text-ink-muted/70">این خبر تصمیم نهایی گرفته است — فقط قابل ویرایش یا حذف.</span>
+                    <span className="flex-1 text-[11px] text-on-surface-variant/70">این خبر تصمیم نهایی گرفته است — فقط قابل ویرایش یا حذف.</span>
                   )}
                   <button
                     onClick={() => setEditing(n.id)}
                     disabled={busy !== null}
-                    className="flex items-center justify-center gap-1.5 rounded-full border border-line bg-surface px-4 py-3 text-[12.5px] font-bold text-ink transition-colors hover:border-neon/40 hover:text-neon disabled:opacity-50"
+                    className="flex items-center justify-center gap-1.5 rounded-full border border-outline-variant/40 bg-surface px-4 py-3 text-[12.5px] font-bold text-on-surface transition-colors hover:border-neon/40 hover:text-neon disabled:opacity-50"
                   >
                     <Pencil className="h-3.5 w-3.5" />
                     ویرایش
@@ -278,13 +278,13 @@ export function AdminReviewSection() {
 
       {/* دیالوگ رد */}
       <Dialog open={rejecting !== null} onOpenChange={(v) => !v && setRejecting(null)}>
-        <DialogContent className="rounded-[28px] border-line bg-popover p-5 sm:max-w-md">
+        <DialogContent className="rounded-[28px] border-outline-variant/40 bg-popover p-5 sm:max-w-md">
           <DialogHeader className="text-right">
-            <DialogTitle className="flex items-center gap-2 text-ink">
+            <DialogTitle className="flex items-center gap-2 text-on-surface">
               <ClipboardList className="h-5 w-5 text-danger" />
               رد خبر با دلیل
             </DialogTitle>
-            <DialogDescription className="text-ink-muted">
+            <DialogDescription className="text-on-surface-variant">
               دلیل رد برای خبرنگار اعلان می‌شود؛ می‌تواند ویرایش و مجدداً ارسال کند.
             </DialogDescription>
           </DialogHeader>
@@ -295,19 +295,19 @@ export function AdminReviewSection() {
                 onClick={() => setReason(r.key)}
                 className={cn(
                   "flex w-full items-start gap-3 rounded-2xl border px-4 py-3 text-right transition-colors",
-                  reason === r.key ? "border-danger/50 bg-danger/8" : "border-line bg-surface hover:bg-surface-2",
+                  reason === r.key ? "border-danger/50 bg-danger/8" : "border-outline-variant/40 bg-surface hover:bg-surface-container-low",
                 )}
               >
-                <span className={cn("mt-0.5 flex h-5 w-5 items-center justify-center rounded-full border", reason === r.key ? "border-danger bg-danger text-white" : "border-line")}>
+                <span className={cn("mt-0.5 flex h-5 w-5 items-center justify-center rounded-full border", reason === r.key ? "border-danger bg-danger text-white" : "border-outline-variant/40")}>
                   {reason === r.key && <Check className="h-3 w-3" />}
                 </span>
                 <span>
-                  <span className="block text-[13px] font-bold text-ink">{r.label}</span>
-                  <span className="block text-[11px] text-ink-muted">{r.hint}</span>
+                  <span className="block text-[13px] font-bold text-on-surface">{r.label}</span>
+                  <span className="block text-[11px] text-on-surface-variant">{r.hint}</span>
                 </span>
               </button>
             ))}
-            <Textarea value={note} onChange={(e) => setNote(e.target.value)} rows={3} placeholder="توضیح تکمیلی برای خبرنگار (اختیاری)" className="rounded-2xl border-line bg-surface text-ink leading-6 placeholder:text-ink-muted/50" />
+            <Textarea value={note} onChange={(e) => setNote(e.target.value)} rows={3} placeholder="توضیح تکمیلی برای خبرنگار (اختیاری)" className="rounded-2xl border-outline-variant/40 bg-surface text-on-surface leading-6 placeholder:text-on-surface-variant/50" />
           </div>
           <button
             onClick={() => rejecting !== null && act(rejecting.id, "reject", reason, note)}
@@ -321,19 +321,19 @@ export function AdminReviewSection() {
 
       {/* دیالوگ حذف خبر */}
       <Dialog open={deleting !== null} onOpenChange={(v) => !v && setDeleting(null)}>
-        <DialogContent className="rounded-[28px] border-line bg-popover p-5 sm:max-w-md">
+        <DialogContent className="rounded-[28px] border-outline-variant/40 bg-popover p-5 sm:max-w-md">
           <DialogHeader className="text-right">
-            <DialogTitle className="flex items-center gap-2 text-ink">
+            <DialogTitle className="flex items-center gap-2 text-on-surface">
               <Trash2 className="h-5 w-5 text-danger" />
               حذف قطعی خبر
             </DialogTitle>
-            <DialogDescription className="text-ink-muted">
+            <DialogDescription className="text-on-surface-variant">
               این عملیات غیرقابل بازگشت است و خبر از آرشیو سازمان پاک می‌شود.
             </DialogDescription>
           </DialogHeader>
           {deleting && (
-            <p className="mt-3 rounded-2xl border border-line bg-surface p-3.5 text-[12.5px] font-bold leading-6 text-ink">
-              «{deleting.title}» <span className="text-ink-muted" dir="ltr">({deleting.code})</span>
+            <p className="mt-3 rounded-2xl border border-outline-variant/40 bg-surface p-3.5 text-[12.5px] font-bold leading-6 text-on-surface">
+              «{deleting.title}» <span className="text-on-surface-variant" dir="ltr">({deleting.code})</span>
             </p>
           )}
           <button

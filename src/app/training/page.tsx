@@ -104,7 +104,7 @@ export default function TrainingPage() {
 
   if (!booted || !state) {
     return (
-      <main className="flex min-h-dvh items-center justify-center bg-[var(--page)]">
+      <main className="flex min-h-dvh items-center justify-center bg-surface">
         <Loader2 className="h-8 w-8 animate-spin text-neon" />
       </main>
     )
@@ -211,32 +211,32 @@ export default function TrainingPage() {
           "relative overflow-hidden rounded-[26px] border p-3.5 transition-all",
           t.completed
             ? "border-neon/45 bg-gradient-to-l from-neon/10 to-surface/85 shadow-[0_12px_30px_-16px_rgba(180,26,34,0.55)]"
-            : "border-line bg-surface/85 shadow-sm backdrop-blur",
+            : "border-outline-variant/40 bg-surface/85 shadow-sm backdrop-blur",
         )}>
           <div className="flex items-start gap-3">
             <button onClick={() => openLessonFn(t)} className="shrink-0" aria-label={`خواندن ${t.title}`}>
               <span className={cn("type-tile relative h-[54px] w-[54px] text-[25px]", meta.tile, meta.tileShadow)}>
                 {meta.emoji}
                 {t.completed && (
-                  <span className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full border border-neon/60 bg-[var(--page)] text-neon shadow">
+                  <span className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full border border-neon/60 bg-surface text-neon shadow">
                     <CheckCircle2 className="h-3.5 w-3.5" />
                   </span>
                 )}
               </span>
             </button>
             <button onClick={() => openLessonFn(t)} className="min-w-0 flex-1 text-right">
-              <p className="truncate text-[14.5px] font-black leading-6 text-ink">{t.title}</p>
-              <p className="mt-0.5 flex items-center gap-1.5 text-[10px] text-ink-muted">
-                <span className="font-bold text-ink/75">{t.authorName || "مدیریت"}</span>
+              <p className="truncate text-[14.5px] font-black leading-6 text-on-surface">{t.title}</p>
+              <p className="mt-0.5 flex items-center gap-1.5 text-[10px] text-on-surface-variant">
+                <span className="font-bold text-on-surface/75">{t.authorName || "مدیریت"}</span>
                 <span>· {relTime(t.createdAt)}</span>
               </p>
-              {t.body && <p className="mt-1.5 line-clamp-2 text-[11px] leading-5 text-ink-muted">{t.body}</p>}
+              {t.body && <p className="mt-1.5 line-clamp-2 text-[11px] leading-5 text-on-surface-variant">{t.body}</p>}
               <p className="mt-2 flex flex-wrap items-center gap-1.5 text-[9.5px]">
                 <span className={cn("rounded-full border px-2 py-0.5 font-bold", meta.chip)}>{meta.emoji} {meta.label}</span>
                 <span className={cn("rounded-full border px-2 py-0.5 font-bold", lv.chip)}>{lv.emoji} {lv.label}</span>
-                <span className="rounded-full border border-line bg-[var(--page)]/50 px-2 py-0.5 font-bold text-ink-muted"><Clock3 className="me-0.5 inline h-2.5 w-2.5" />{toFa(t.minutes)} دقیقه</span>
-                <span className="rounded-full border border-line bg-[var(--page)]/50 px-2 py-0.5 font-bold text-ink-muted"><Eye className="me-0.5 inline h-2.5 w-2.5" />{toFa(t.views)}</span>
-                {t.fileUrl && <span className="rounded-full border border-line bg-[var(--page)]/50 px-2 py-0.5 font-bold text-ink-muted">{KIND_META[t.kind]?.icon} {KIND_META[t.kind]?.label}</span>}
+                <span className="rounded-full border border-outline-variant/40 bg-surface/50 px-2 py-0.5 font-bold text-on-surface-variant"><Clock3 className="me-0.5 inline h-2.5 w-2.5" />{toFa(t.minutes)} دقیقه</span>
+                <span className="rounded-full border border-outline-variant/40 bg-surface/50 px-2 py-0.5 font-bold text-on-surface-variant"><Eye className="me-0.5 inline h-2.5 w-2.5" />{toFa(t.views)}</span>
+                {t.fileUrl && <span className="rounded-full border border-outline-variant/40 bg-surface/50 px-2 py-0.5 font-bold text-on-surface-variant">{KIND_META[t.kind]?.icon} {KIND_META[t.kind]?.label}</span>}
               </p>
             </button>
             {canManage && (
@@ -251,7 +251,7 @@ export default function TrainingPage() {
   }
 
   return (
-    <main className="relative min-h-dvh bg-[var(--page)]">
+    <main className="relative min-h-dvh bg-surface">
       {/* ── پس‌زمینه گرافیکی ثابت: هاله‌های نور + شبکه نقطه‌ای ── */}
       <div aria-hidden className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
         <span className="absolute -top-24 right-[-15%] h-[340px] w-[340px] rounded-full bg-neon/14 blur-[90px]" />
@@ -263,17 +263,17 @@ export default function TrainingPage() {
         />
       </div>
 
-      <header className="sticky top-0 z-40 border-b border-line bg-[var(--nav-bg)]/85 backdrop-blur-xl">
+      <header className="sticky top-0 z-40 border-b border-outline-variant/40 bg-surface/85 backdrop-blur-xl">
         <div className="relative z-10 mx-auto flex h-14 w-full max-w-[720px] items-center gap-3 px-4">
           <button
             onClick={() => router.push("/")}
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-line bg-surface/90 text-ink backdrop-blur"
+            className="flex h-10 w-10 items-center justify-center rounded-xl border border-outline-variant/40 bg-surface/90 text-on-surface backdrop-blur"
             aria-label="بازگشت"
           >
             <ArrowRight className="h-4.5 w-4.5" />
           </button>
           <div className="min-w-0 flex-1">
-            <p className="flex items-center gap-2 truncate text-[13.5px] font-black text-ink">
+            <p className="flex items-center gap-2 truncate text-[13.5px] font-black text-on-surface">
               <span className="type-tile h-7 w-7 rounded-[9px] bg-gradient-to-br from-[#e64852] to-[#b41a22] shadow-[0_6px_14px_-6px_rgba(180,26,34,0.6)]">
                 <GraduationCap className="h-3.5 w-3.5" />
               </span>
@@ -298,24 +298,24 @@ export default function TrainingPage() {
               <span className="me-1 inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-neon align-middle" />
               آکادمی فعال
             </span>
-            <span className="rounded-full border border-line bg-surface/70 px-2.5 py-0.5 text-[9.5px] font-bold text-ink-muted">
+            <span className="rounded-full border border-outline-variant/40 bg-surface/70 px-2.5 py-0.5 text-[9.5px] font-bold text-on-surface-variant">
               {toFa(stats.total)} درس · {toFa(stats.completed)} خوانده‌شده
             </span>
           </p>
-          <h1 className="relative mt-2.5 text-[21px] font-black leading-8 text-ink">
+          <h1 className="relative mt-2.5 text-[21px] font-black leading-8 text-on-surface">
             خبرنگار حرفه‌ای،
             <span className="bg-gradient-to-l from-neon to-[#e64852] bg-clip-text text-transparent"> اینجا ساخته می‌شود </span>
           </h1>
-          <p className="relative mt-1 text-[11.5px] leading-5 text-ink-muted">
+          <p className="relative mt-1 text-[11.5px] leading-5 text-on-surface-variant">
             درس‌های کوتاه و کاربردی در پنج دسته — هر درس را که خواندید علامت بزنید تا پیشرفت‌تان کامل شود.
           </p>
           {/* نوار پیشرفت من */}
           <div className="relative mt-4">
             <div className="mb-1.5 flex items-center justify-between text-[10px] font-bold">
-              <span className="flex items-center gap-1 text-ink"><BookOpenCheck className="h-3.5 w-3.5 text-neon" /> پیشرفت آموزشی من</span>
+              <span className="flex items-center gap-1 text-on-surface"><BookOpenCheck className="h-3.5 w-3.5 text-neon" /> پیشرفت آموزشی من</span>
               <span className="text-neon">{toFa(pct)}٪ · {toFa(stats.completed)} از {toFa(stats.total)} درس</span>
             </div>
-            <div className="h-3 w-full overflow-hidden rounded-full border border-line bg-[var(--page)]/70">
+            <div className="h-3 w-full overflow-hidden rounded-full border border-outline-variant/40 bg-surface/70">
               <div
                 className="relative h-full rounded-full bg-gradient-to-l from-neon to-[#e64852] shadow-[0_0_14px_rgba(180,26,34,0.55)] transition-all duration-700"
                 style={{ width: `${Math.max(pct, stats.total > 0 ? 4 : 0)}%` }}
@@ -323,7 +323,7 @@ export default function TrainingPage() {
                 <span className="absolute inset-0 rounded-full bg-white/25 mix-blend-overlay" />
               </div>
             </div>
-            <p className="mt-1.5 text-[9.5px] text-ink-muted">⏱ {toFa(stats.minutes)} دقیقه آموزش خوانده‌اید — ادامه دهید!</p>
+            <p className="mt-1.5 text-[9.5px] text-on-surface-variant">⏱ {toFa(stats.minutes)} دقیقه آموزش خوانده‌اید — ادامه دهید!</p>
           </div>
         </section>
 
@@ -345,10 +345,10 @@ export default function TrainingPage() {
             { icon: <CheckCircle2 className="h-4 w-4" />, label: "خوانده‌شده", value: toFa(stats.completed), tone: "text-[#38bdf8]", ring: "border-[#38bdf8]/30 bg-[#38bdf8]/10" },
             { icon: <Clock3 className="h-4 w-4" />, label: "دقیقه یادگیری", value: toFa(stats.minutes), tone: "text-[#fbbf24]", ring: "border-[#fbbf24]/30 bg-[#fbbf24]/10" },
           ].map((c) => (
-            <div key={c.label} className="fade-up rounded-2xl border border-line bg-surface/85 p-3 text-center backdrop-blur">
+            <div key={c.label} className="fade-up rounded-2xl border border-outline-variant/40 bg-surface/85 p-3 text-center backdrop-blur">
               <span className={cn("mx-auto flex h-8 w-8 items-center justify-center rounded-full border", c.ring, c.tone)}>{c.icon}</span>
               <p className={cn("mt-1.5 text-[16px] font-black leading-none", c.tone)}>{c.value}</p>
-              <p className="mt-1 text-[9.5px] font-bold text-ink-muted">{c.label}</p>
+              <p className="mt-1 text-[9.5px] font-bold text-on-surface-variant">{c.label}</p>
             </div>
           ))}
         </div>
@@ -364,7 +364,7 @@ export default function TrainingPage() {
             <p className="relative flex items-center gap-1.5 text-[11px] font-black text-[#38bdf8]">
               <Sparkles className="h-3.5 w-3.5" /> ادامه یادگیری — درس بعدی شما
             </p>
-            <p className="relative mt-1.5 text-[13.5px] font-black leading-6 text-ink">{nextLesson.title}</p>
+            <p className="relative mt-1.5 text-[13.5px] font-black leading-6 text-on-surface">{nextLesson.title}</p>
             <span className="relative mt-2.5 inline-flex items-center gap-1 rounded-full bg-gradient-to-l from-[#38bdf8] to-[#0284c7] px-3.5 py-1.5 text-[11px] font-black text-white shadow-[0_8px_18px_-8px_rgba(56,189,248,0.7)]">
               شروع درس ({toFa(nextLesson.minutes)} دقیقه) ←
             </span>
@@ -373,12 +373,12 @@ export default function TrainingPage() {
 
         {/* جستجو */}
         <div className="relative">
-          <Search className="absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-muted" />
+          <Search className="absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-on-surface-variant" />
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="جستجو در آموزش‌ها..."
-            className="rounded-full border-line bg-surface/85 py-3 pr-10 text-[12.5px] text-ink backdrop-blur"
+            className="rounded-full border-outline-variant/40 bg-surface/85 py-3 pr-10 text-[12.5px] text-on-surface backdrop-blur"
           />
         </div>
 
@@ -387,7 +387,7 @@ export default function TrainingPage() {
           <div className="no-scrollbar flex gap-2 overflow-x-auto pb-1">
             <button
               onClick={() => setFilter("all")}
-              className={cn("shrink-0 rounded-full border px-3.5 py-1.5 text-[11.5px] font-bold transition-all", filter === "all" ? "border-neon bg-neon text-neon-foreground shadow-[0_8px_18px_-8px_rgba(180,26,34,0.7)]" : "border-line bg-surface/85 text-ink-muted backdrop-blur")}
+              className={cn("shrink-0 rounded-full border px-3.5 py-1.5 text-[11.5px] font-bold transition-all", filter === "all" ? "border-neon bg-neon text-neon-foreground shadow-[0_8px_18px_-8px_rgba(180,26,34,0.7)]" : "border-outline-variant/40 bg-surface/85 text-on-surface-variant backdrop-blur")}
             >
               همه ({toFa(items.length)})
             </button>
@@ -399,12 +399,12 @@ export default function TrainingPage() {
                   onClick={() => setFilter(key)}
                   className={cn(
                     "flex shrink-0 items-center gap-1 rounded-full border px-3.5 py-1.5 text-[11.5px] font-bold transition-all",
-                    filter === key ? cn(meta.activeChip, "shadow-md") : "border-line bg-surface/85 text-ink-muted backdrop-blur",
+                    filter === key ? cn(meta.activeChip, "shadow-md") : "border-outline-variant/40 bg-surface/85 text-on-surface-variant backdrop-blur",
                   )}
                 >
                   <span>{meta.emoji}</span>
                   {meta.label}
-                  {n > 0 && <span className={cn("rounded-full px-1.5 text-[9px]", filter === key ? "bg-white/25" : "bg-surface-2")}>{toFa(n)}</span>}
+                  {n > 0 && <span className={cn("rounded-full px-1.5 text-[9px]", filter === key ? "bg-white/25" : "bg-surface-container-low")}>{toFa(n)}</span>}
                 </button>
               )
             })}
@@ -412,17 +412,17 @@ export default function TrainingPage() {
         )}
 
         {items === null ? (
-          <div className="flex items-center justify-center gap-2 py-16 text-[13px] text-ink-muted">
+          <div className="flex items-center justify-center gap-2 py-16 text-[13px] text-on-surface-variant">
             <Loader2 className="h-5 w-5 animate-spin" /> در حال بارگذاری...
           </div>
         ) : items.length === 0 ? (
           /* ── حالت خالی جذاب ── */
-          <div className="fade-up relative flex flex-col items-center gap-3 overflow-hidden rounded-[28px] border border-dashed border-line bg-surface/70 px-4 py-10 text-center backdrop-blur">
+          <div className="fade-up relative flex flex-col items-center gap-3 overflow-hidden rounded-[28px] border border-dashed border-outline-variant/40 bg-surface/70 px-4 py-10 text-center backdrop-blur">
             <span className="float-emoji absolute left-6 top-6 text-[22px] opacity-70" style={{ "--fr": "-10deg" } as CSSProperties}>🎓</span>
             <span className="float-emoji absolute right-8 top-10 text-[18px] opacity-60" style={{ "--fr": "8deg", "--fd": "0.8s" } as CSSProperties}>✨</span>
             <img src="/img/hero.png" alt="آکادمی خبرنگاران" className="w-44 rounded-[22px] opacity-90 shadow-[0_0_44px_rgba(180,26,34,0.25)]" />
-            <p className="mt-1 text-[15px] font-black text-ink">آکادمی هنوز درسی ندارد</p>
-            <p className="max-w-[320px] text-[11.5px] leading-5 text-ink-muted">
+            <p className="mt-1 text-[15px] font-black text-on-surface">آکادمی هنوز درسی ندارد</p>
+            <p className="max-w-[320px] text-[11.5px] leading-5 text-on-surface-variant">
               {canManage ? "اولین درس را منتشر کنید — خبرنگاران با اعلان از آن باخبر می‌شوند." : "مدیران خبرگزاری به‌زودی درس‌های آموزشی را اینجا منتشر می‌کنند."}
             </p>
             {canManage && (
@@ -435,11 +435,11 @@ export default function TrainingPage() {
                   <button
                     key={b.cat}
                     onClick={() => { setF((p) => ({ ...p, category: b.cat })); setAddOpen(true) }}
-                    className="flex items-center justify-between rounded-2xl border border-line bg-surface/90 px-4 py-3 text-right backdrop-blur transition-colors active:bg-surface-2"
+                    className="flex items-center justify-between rounded-2xl border border-outline-variant/40 bg-surface/90 px-4 py-3 text-right backdrop-blur transition-colors active:bg-surface-container-low"
                   >
                     <span className="min-w-0">
-                      <span className="block text-[12.5px] font-bold text-ink">{b.label}</span>
-                      <span className="block truncate text-[10px] text-ink-muted">{b.desc}</span>
+                      <span className="block text-[12.5px] font-bold text-on-surface">{b.label}</span>
+                      <span className="block truncate text-[10px] text-on-surface-variant">{b.desc}</span>
                     </span>
                     <ArrowRight className="h-4 w-4 shrink-0 rotate-180 text-neon" />
                   </button>
@@ -448,10 +448,10 @@ export default function TrainingPage() {
             )}
           </div>
         ) : filtered.length === 0 ? (
-          <div className="fade-up flex flex-col items-center gap-2 rounded-[28px] border border-dashed border-line bg-surface/70 py-12 text-center backdrop-blur">
-            <Search className="h-7 w-7 text-ink-muted" />
-            <p className="text-[13px] font-bold text-ink">چیزی یافت نشد</p>
-            <p className="text-[11px] text-ink-muted">عبارت جستجو یا فیلتر دسته را تغییر دهید</p>
+          <div className="fade-up flex flex-col items-center gap-2 rounded-[28px] border border-dashed border-outline-variant/40 bg-surface/70 py-12 text-center backdrop-blur">
+            <Search className="h-7 w-7 text-on-surface-variant" />
+            <p className="text-[13px] font-bold text-on-surface">چیزی یافت نشد</p>
+            <p className="text-[11px] text-on-surface-variant">عبارت جستجو یا فیلتر دسته را تغییر دهید</p>
           </div>
         ) : (
           /* ── کارت‌های درس ── */
@@ -459,7 +459,7 @@ export default function TrainingPage() {
         )}
 
         {items && items.length > 0 && (
-          <p className="flex items-center justify-center gap-1.5 pt-1 text-center text-[10px] text-ink-muted">
+          <p className="flex items-center justify-center gap-1.5 pt-1 text-center text-[10px] text-on-surface-variant">
             <Users className="h-3 w-3" /> آموزش‌ها توسط ادمین کل و مدیران حوزه منتشر می‌شود · هر درس با اعلان همگانی اعلام می‌شود
           </p>
         )}
@@ -467,7 +467,7 @@ export default function TrainingPage() {
 
       {/* ═══════════ خواننده درس — فضای شکیل مطالعه ═══════════ */}
       <Dialog open={!!openLesson} onOpenChange={(v) => !v && setOpenLesson(null)}>
-        <DialogContent className="max-h-[92dvh] overflow-y-auto nice-scroll rounded-[28px] border-line bg-popover p-0 sm:max-w-[640px]">
+        <DialogContent className="max-h-[92dvh] overflow-y-auto nice-scroll rounded-[28px] border-outline-variant/40 bg-popover p-0 sm:max-w-[640px]">
           <DialogTitle className="sr-only">خواننده درس آموزشی</DialogTitle>
           <DialogDescription className="sr-only">مطالعه درس و علامت‌زدن خوانده‌شدن</DialogDescription>
           {openLesson && (() => {
@@ -503,17 +503,17 @@ export default function TrainingPage() {
                 {/* بدنه درس */}
                 <div className="p-5">
                   {openLesson.body ? (
-                    <p className="whitespace-pre-line text-[13.5px] leading-8 text-ink/95">{openLesson.body}</p>
+                    <p className="whitespace-pre-line text-[13.5px] leading-8 text-on-surface/95">{openLesson.body}</p>
                   ) : (
-                    <p className="rounded-2xl border border-dashed border-line py-6 text-center text-[12px] text-ink-muted">متن این درس کوتاه است — محتوای اصلی در پیوست است.</p>
+                    <p className="rounded-2xl border border-dashed border-outline-variant/40 py-6 text-center text-[12px] text-on-surface-variant">متن این درس کوتاه است — محتوای اصلی در پیوست است.</p>
                   )}
 
                   {/* پیوست: ویدئو / عکس / فایل */}
                   {openLesson.fileUrl && IMG_RE.test(openLesson.fileUrl) && (
-                    <img src={openLesson.fileUrl} alt="تصویر درس" className="mt-4 w-full rounded-2xl border border-line" loading="lazy" />
+                    <img src={openLesson.fileUrl} alt="تصویر درس" className="mt-4 w-full rounded-2xl border border-outline-variant/40" loading="lazy" />
                   )}
                   {openLesson.fileUrl && /\.(mp4|webm|mov|m4v)(\?|$)/i.test(openLesson.fileUrl) && (
-                    <video src={openLesson.fileUrl} controls className="mt-4 w-full rounded-2xl border border-line" preload="metadata" />
+                    <video src={openLesson.fileUrl} controls className="mt-4 w-full rounded-2xl border border-outline-variant/40" preload="metadata" />
                   )}
                   {openLesson.fileUrl && !IMG_RE.test(openLesson.fileUrl) && !/\.(mp4|webm|mov|m4v)(\?|$)/i.test(openLesson.fileUrl) && (
                     <a
@@ -552,7 +552,7 @@ export default function TrainingPage() {
                       onClick={() => downloadLessonText(openLesson)}
                       disabled={!openLesson.body}
                       title={openLesson.body ? "دانلود متن درس (فایل txt)" : "متن متنی برای دانلود ندارد"}
-                      className="flex h-11 w-11 items-center justify-center rounded-full border border-line text-ink-muted transition-colors hover:border-neon/40 hover:text-neon disabled:opacity-40"
+                      className="flex h-11 w-11 items-center justify-center rounded-full border border-outline-variant/40 text-on-surface-variant transition-colors hover:border-neon/40 hover:text-neon disabled:opacity-40"
                       aria-label="دانلود متن درس"
                     >
                       <FileDown className="h-4.5 w-4.5" />
@@ -563,7 +563,7 @@ export default function TrainingPage() {
                       </button>
                     )}
                   </div>
-                  <p className="mt-2.5 flex items-center justify-center gap-1 text-[9.5px] text-ink-muted">
+                  <p className="mt-2.5 flex items-center justify-center gap-1 text-[9.5px] text-on-surface-variant">
                     <Sparkles className="h-3 w-3" /> با خواندن درس‌ها، دانش خبرنگاری‌تان سطح‌به‌سطح بالا می‌رود
                   </p>
                 </div>
@@ -575,20 +575,20 @@ export default function TrainingPage() {
 
       {/* ═══════════ دیالوگ افزودن آموزش (مدیران) ═══════════ */}
       <Dialog open={addOpen} onOpenChange={setAddOpen}>
-        <DialogContent className="max-h-[88dvh] overflow-y-auto nice-scroll rounded-[28px] border-line bg-popover p-5">
+        <DialogContent className="max-h-[88dvh] overflow-y-auto nice-scroll rounded-[28px] border-outline-variant/40 bg-popover p-5">
           <DialogHeader className="text-right">
-            <DialogTitle className="flex items-center gap-2 text-ink">
+            <DialogTitle className="flex items-center gap-2 text-on-surface">
               <span className="type-tile h-8 w-8 rounded-xl bg-gradient-to-br from-[#e64852] to-[#b41a22] text-[15px]">🎓</span>
               انتشار درس جدید
             </DialogTitle>
-            <DialogDescription className="text-ink-muted">برای همه خبرنگاران منتشر می‌شود و اعلان همگانی می‌رود.</DialogDescription>
+            <DialogDescription className="text-on-surface-variant">برای همه خبرنگاران منتشر می‌شود و اعلان همگانی می‌رود.</DialogDescription>
           </DialogHeader>
           <div className="mt-3 space-y-3">
-            <Input value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} placeholder="عنوان درس (مثلاً: اصول لیدنویسی)" className="rounded-2xl border-line bg-surface text-ink" />
+            <Input value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} placeholder="عنوان درس (مثلاً: اصول لیدنویسی)" className="rounded-2xl border-outline-variant/40 bg-surface text-on-surface" />
 
             {/* انتخاب دسته */}
             <div>
-              <p className="mb-1.5 text-[11px] font-bold text-ink-muted">دسته آموزش:</p>
+              <p className="mb-1.5 text-[11px] font-bold text-on-surface-variant">دسته آموزش:</p>
               <div className="flex flex-wrap gap-1.5">
                 {Object.entries(CATEGORY_META).map(([key, meta]) => (
                   <button
@@ -597,7 +597,7 @@ export default function TrainingPage() {
                     onClick={() => setF({ ...f, category: key })}
                     className={cn(
                       "flex items-center gap-1 rounded-full border px-3 py-1.5 text-[11px] font-bold transition-all",
-                      f.category === key ? cn(meta.activeChip, "shadow-md") : "border-line bg-surface text-ink-muted",
+                      f.category === key ? cn(meta.activeChip, "shadow-md") : "border-outline-variant/40 bg-surface text-on-surface-variant",
                     )}
                   >
                     {meta.emoji} {meta.label}
@@ -609,7 +609,7 @@ export default function TrainingPage() {
             {/* انتخاب سطح + مدت */}
             <div className="flex gap-2">
               <div className="flex-1">
-                <p className="mb-1.5 text-[11px] font-bold text-ink-muted">سطح:</p>
+                <p className="mb-1.5 text-[11px] font-bold text-on-surface-variant">سطح:</p>
                 <div className="flex gap-1.5">
                   {Object.entries(LEVEL_META).map(([key, meta]) => (
                     <button
@@ -618,7 +618,7 @@ export default function TrainingPage() {
                       onClick={() => setF({ ...f, level: key })}
                       className={cn(
                         "flex flex-1 items-center justify-center gap-1 rounded-xl border px-2 py-2 text-[10.5px] font-bold transition-all",
-                        f.level === key ? cn(meta.chip, "shadow-sm") : "border-line bg-surface text-ink-muted",
+                        f.level === key ? cn(meta.chip, "shadow-sm") : "border-outline-variant/40 bg-surface text-on-surface-variant",
                       )}
                     >
                       {meta.emoji} {meta.label}
@@ -627,26 +627,26 @@ export default function TrainingPage() {
                 </div>
               </div>
               <div className="w-[110px]">
-                <p className="mb-1.5 text-[11px] font-bold text-ink-muted">مدت (دقیقه):</p>
+                <p className="mb-1.5 text-[11px] font-bold text-on-surface-variant">مدت (دقیقه):</p>
                 <Input
                   type="number" min={1} max={180} value={f.minutes}
                   onChange={(e) => setF({ ...f, minutes: Math.min(180, Math.max(1, Number(e.target.value) || 5)) })}
-                  className="rounded-xl border-line bg-surface text-center text-ink"
+                  className="rounded-xl border-outline-variant/40 bg-surface text-center text-on-surface"
                 />
               </div>
             </div>
 
-            <Textarea value={f.body} onChange={(e) => setF({ ...f, body: e.target.value })} rows={5} placeholder="متن درس... (نکات آموزشی را مرحله‌به‌مرحله بنویسید)" className="rounded-2xl border-line bg-surface text-[13px] leading-7 text-ink" />
+            <Textarea value={f.body} onChange={(e) => setF({ ...f, body: e.target.value })} rows={5} placeholder="متن درس... (نکات آموزشی را مرحله‌به‌مرحله بنویسید)" className="rounded-2xl border-outline-variant/40 bg-surface text-[13px] leading-7 text-on-surface" />
 
             {f.fileUrl ? (
               <div className="flex items-center justify-between rounded-2xl border border-neon/35 bg-neon/8 px-4 py-3">
                 <span className="truncate text-[12px] font-bold text-neon" dir="ltr">{f.fileUrl}</span>
-                <button onClick={() => setF({ ...f, fileUrl: "", kind: "text" })} className="text-ink-muted"><X className="h-4 w-4" /></button>
+                <button onClick={() => setF({ ...f, fileUrl: "", kind: "text" })} className="text-on-surface-variant"><X className="h-4 w-4" /></button>
               </div>
             ) : (
               <label className="flex cursor-pointer flex-col items-center gap-2 rounded-2xl border border-dashed border-neon/40 bg-neon/5 px-4 py-5 text-center">
                 {uploading ? <Loader2 className="h-5 w-5 animate-spin text-neon" /> : <UploadCloud className="h-5 w-5 text-neon" />}
-                <span className="text-[12.5px] font-bold text-ink">{uploading ? "در حال بارگذاری..." : "پیوست ویدئو، PDF یا تصویر (اختیاری)"}</span>
+                <span className="text-[12.5px] font-bold text-on-surface">{uploading ? "در حال بارگذاری..." : "پیوست ویدئو، PDF یا تصویر (اختیاری)"}</span>
                 <input type="file" accept="application/pdf,video/*,image/*" className="hidden" onChange={(e) => onFile(e.target.files?.[0])} />
               </label>
             )}

@@ -132,13 +132,13 @@ export function ProfileScreen({ onOpenAdmin }: { onOpenAdmin?: () => void }) {
       {/* هدر پروفایل */}
       <div className="flex items-center gap-4">
         <div className="relative">
-          <span className="inline-flex rounded-full border-[3px] border-[var(--v3-azure)]/50 p-1 shadow-[0_12px_28px_-12px_rgba(180,26,34,0.55)]">
+          <span className="inline-flex rounded-full border-[3px] border-primary/40/50 p-1 shadow-[0_12px_28px_-12px_rgba(180,26,34,0.55)]">
             <Avatar name={user.fullName} src={user.avatar} size={72} />
           </span>
           <button
             onClick={() => fileRef.current?.click()}
             disabled={uploading}
-            className="absolute -bottom-1.5 -left-1.5 flex h-8 w-8 items-center justify-center rounded-full bg-[var(--v3-azure)] text-white shadow-[0_8px_18px_-6px_rgba(180,26,34,0.7)] ring-2 ring-[var(--v3-page)] transition-transform hover:scale-105 active:scale-95 disabled:opacity-60"
+            className="absolute -bottom-1.5 -left-1.5 flex h-8 w-8 items-center justify-center rounded-full bg-primary text-white shadow-[0_8px_18px_-6px_rgba(180,26,34,0.7)] ring-2 ring-[var(--surface)] transition-transform hover:scale-105 active:scale-95 disabled:opacity-60"
             aria-label="تغییر عکس پروفایل"
           >
             {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}
@@ -146,7 +146,7 @@ export function ProfileScreen({ onOpenAdmin }: { onOpenAdmin?: () => void }) {
           {user.avatar && !uploading && (
             <button
               onClick={removeAvatar}
-              className="absolute -top-1.5 -left-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-red-50 text-red-600 shadow-md ring-2 ring-[var(--v3-page)] dark:bg-red-500/15 dark:text-red-400"
+              className="absolute -top-1.5 -left-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-red-50 text-red-600 shadow-md ring-2 ring-[var(--surface)] dark:bg-red-500/15 dark:text-red-400"
               aria-label="حذف عکس پروفایل"
             >
               <Trash2 className="h-3 w-3" />
@@ -155,62 +155,62 @@ export function ProfileScreen({ onOpenAdmin }: { onOpenAdmin?: () => void }) {
           <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={pickAvatar} />
         </div>
         <div className="min-w-0 flex-1">
-          <h1 className="truncate text-[20px] font-black text-[var(--v3-ink)]">{user.fullName}</h1>
-          <p className="mt-0.5 text-[11.5px] text-[var(--v3-ink-2)]">
+          <h1 className="truncate text-[20px] font-black text-on-surface">{user.fullName}</h1>
+          <p className="mt-0.5 text-[11.5px] text-on-surface-variant">
             {ROLE_LABELS[user.role]}
             {user.district && ` · ${DISTRICT_LABELS[user.district]}`}
           </p>
-          {user.base && <p className="text-[11px] text-[var(--v3-ink-2)]/80">{user.base}</p>}
+          {user.base && <p className="text-[11px] text-on-surface-variant/80">{user.base}</p>}
         </div>
       </div>
 
       {/* کارت خبرنگاری */}
       <div>
         <SectionHeader title="کارت خبرنگاری دیجیتال" />
-        <div className="v3-card relative overflow-hidden p-5">
-          <div className="pointer-events-none absolute -left-8 -top-8 h-32 w-32 rounded-full bg-[var(--v3-azure)]/15 blur-2xl" />
+        <div className="rounded-3xl border border-outline-variant/40 bg-surface-container-lowest shadow-[0_8px_24px_-4px_rgba(83,37,23,0.05)] relative overflow-hidden p-5">
+          <div className="pointer-events-none absolute -left-8 -top-8 h-32 w-32 rounded-full bg-primary/15 blur-2xl" />
           <div className="relative flex items-center justify-between">
-            <span className="flex items-center gap-1.5 text-[10.5px] font-black text-[var(--v3-azure)]">
+            <span className="flex items-center gap-1.5 text-[10.5px] font-black text-primary">
               <BadgeCheck className="h-4 w-4" />
               خبرگزاری بسیج شهر رشت
             </span>
-            <span className="rounded-full bg-[var(--v3-azure-soft)] px-2.5 py-1 font-mono text-[9px] font-bold text-[var(--v3-azure-deep)] dark:text-[#fca5a5]" dir="ltr">
+            <span className="rounded-full bg-primary-fixed/40 px-2.5 py-1 font-mono text-[9px] font-bold text-primary dark:text-[#fca5a5]" dir="ltr">
               {user.username}
             </span>
           </div>
           <div className="relative mt-4 flex items-center gap-3.5">
             <Avatar name={user.fullName} src={user.avatar} size={54} />
             <div className="min-w-0 flex-1">
-              <p className="truncate text-[17px] font-black text-[var(--v3-ink)]">{user.fullName}</p>
-              <p className="mt-0.5 text-[11px] font-semibold text-[var(--v3-ink-2)]">
+              <p className="truncate text-[17px] font-black text-on-surface">{user.fullName}</p>
+              <p className="mt-0.5 text-[11px] font-semibold text-on-surface-variant">
                 {ROLE_LABELS[user.role]}
                 {user.district ? ` · ${DISTRICT_LABELS[user.district]}` : ""}
               </p>
             </div>
           </div>
-          <div className="relative mt-4 grid grid-cols-3 gap-2 rounded-[14px] border border-[var(--v3-line)] bg-[var(--v3-card-2)] p-3">
+          <div className="relative mt-4 grid grid-cols-3 gap-2 rounded-[14px] border border-outline-variant/50 bg-surface-container-low p-3">
             <div className="text-center">
-              <p className="text-[13px] font-black text-[var(--v3-azure)]">{user.levelEmoji} {user.levelTitle}</p>
-              <p className="mt-0.5 text-[9px] text-[var(--v3-ink-2)]">سطح</p>
+              <p className="text-[13px] font-black text-primary">{user.levelEmoji} {user.levelTitle}</p>
+              <p className="mt-0.5 text-[9px] text-on-surface-variant">سطح</p>
             </div>
-            <div className="border-x border-[var(--v3-line)] text-center">
-              <p className="v3-num text-[13px] font-black text-[var(--v3-ink)]">{faNum(user.points)}</p>
-              <p className="mt-0.5 text-[9px] text-[var(--v3-ink-2)]">امتیاز</p>
+            <div className="border-x border-outline-variant/50 text-center">
+              <p className="font-black tracking-tight text-[13px] font-black text-on-surface">{faNum(user.points)}</p>
+              <p className="mt-0.5 text-[9px] text-on-surface-variant">امتیاز</p>
             </div>
             <div className="text-center">
-              <p className="v3-num text-[13px] font-black text-[var(--v3-ink)]">{jalali(user.createdAt)}</p>
-              <p className="mt-0.5 text-[9px] text-[var(--v3-ink-2)]">عضویت</p>
+              <p className="font-black tracking-tight text-[13px] font-black text-on-surface">{jalali(user.createdAt)}</p>
+              <p className="mt-0.5 text-[9px] text-on-surface-variant">عضویت</p>
             </div>
           </div>
-          {user.base && <p className="relative mt-3 text-center text-[10px] text-[var(--v3-ink-2)]/80">پایگاه: {user.base}</p>}
+          {user.base && <p className="relative mt-3 text-center text-[10px] text-on-surface-variant/80">پایگاه: {user.base}</p>}
           <div className="relative mt-3 flex gap-2">
-            <button onClick={shareCard} className="flex flex-1 items-center justify-center gap-1.5 rounded-[14px] border border-[var(--v3-azure)]/40 bg-[var(--v3-azure-soft)] py-2.5 text-[11.5px] font-bold text-[var(--v3-azure-deep)] transition-opacity hover:opacity-85 dark:text-[#fca5a5]">
+            <button onClick={shareCard} className="flex flex-1 items-center justify-center gap-1.5 rounded-[14px] border border-primary/40/40 bg-primary-fixed/40 py-2.5 text-[11.5px] font-bold text-primary transition-opacity hover:opacity-85 dark:text-[#fca5a5]">
               <Share2 className="h-4 w-4" />
               اشتراک‌گذاری
             </button>
             <a
               href={`/api/export?type=presscard&userId=${encodeURIComponent(user.id)}`}
-              className="flex flex-1 items-center justify-center gap-1.5 rounded-[14px] border border-[var(--v3-line)] bg-[var(--v3-card-2)] py-2.5 text-[11.5px] font-bold text-[var(--v3-ink)] transition-colors hover:bg-[var(--v3-azure-soft)]/60"
+              className="flex flex-1 items-center justify-center gap-1.5 rounded-[14px] border border-outline-variant/50 bg-surface-container-low py-2.5 text-[11.5px] font-bold text-on-surface transition-colors hover:bg-primary-fixed/25"
             >
               <FileDown className="h-4 w-4" />
               خروجی CSV
@@ -220,29 +220,29 @@ export function ProfileScreen({ onOpenAdmin }: { onOpenAdmin?: () => void }) {
       </div>
 
       {/* کارت سطح */}
-      <div className="v3-card relative overflow-hidden p-5">
-        <div className="pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full bg-[var(--v3-azure)]/10 blur-2xl" />
+      <div className="rounded-3xl border border-outline-variant/40 bg-surface-container-lowest shadow-[0_8px_24px_-4px_rgba(83,37,23,0.05)] relative overflow-hidden p-5">
+        <div className="pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full bg-primary/10 blur-2xl" />
         <div className="relative flex items-center justify-between">
           <div>
-            <p className="text-[11.5px] font-bold text-[var(--v3-ink-2)]">سطح فعلی</p>
-            <h3 className="mt-1 text-[22px] font-black text-[var(--v3-ink)]">
+            <p className="text-[11.5px] font-bold text-on-surface-variant">سطح فعلی</p>
+            <h3 className="mt-1 text-[22px] font-black text-on-surface">
               {lv.emoji} {lv.title}
             </h3>
             {nx ? (
-              <p className="mt-1.5 text-[11.5px] font-semibold text-[var(--v3-azure)]">{faNum(Math.max(0, nx.min - user.points))} امتیاز تا سطح «{nx.title}»</p>
+              <p className="mt-1.5 text-[11.5px] font-semibold text-primary">{faNum(Math.max(0, nx.min - user.points))} امتیاز تا سطح «{nx.title}»</p>
             ) : (
-              <p className="mt-1.5 text-[11.5px] font-semibold text-[var(--v3-azure)]">به بالاترین سطح رسیده‌ای!</p>
+              <p className="mt-1.5 text-[11.5px] font-semibold text-primary">به بالاترین سطح رسیده‌ای!</p>
             )}
           </div>
           <Ring value={progressToNext} max={100} size={92} stroke={9}>
-            <span className="v3-num text-[17px] font-black text-[var(--v3-ink)]">{fa(progressToNext)}٪</span>
+            <span className="font-black tracking-tight text-[17px] font-black text-on-surface">{fa(progressToNext)}٪</span>
           </Ring>
         </div>
         {/* نوار پیشرفت تا سطح بعد */}
-        <div className="relative mt-4 h-2 overflow-hidden rounded-full bg-[var(--v3-card-2)]">
-          <div className="h-full rounded-full bg-gradient-to-l from-[var(--v3-azure-2)] to-[var(--v3-azure-deep)] transition-all duration-700" style={{ width: `${progressToNext}%` }} />
+        <div className="relative mt-4 h-2 overflow-hidden rounded-full bg-surface-container-low">
+          <div className="h-full rounded-full bg-gradient-to-l from-[var(--primary)] to-[var(--primary-deep, #7c2923)] transition-all duration-700" style={{ width: `${progressToNext}%` }} />
         </div>
-        <div className="relative mt-4 grid grid-cols-3 gap-2 border-t border-[var(--v3-line)] pt-4">
+        <div className="relative mt-4 grid grid-cols-3 gap-2 border-t border-outline-variant/50 pt-4">
           <MiniKpi icon={<Flame className="h-4 w-4" />} value={faNum(user.points)} label="امتیاز کل" />
           <MiniKpi icon={<Zap className="h-4 w-4" />} value={`${fa(user.currentStreak)} روز`} label="استریک فعلی" />
           <MiniKpi icon={<Trophy className="h-4 w-4" />} value={`${fa(user.bestStreak)} روز`} label="بهترین استریک" />
@@ -250,7 +250,7 @@ export function ProfileScreen({ onOpenAdmin }: { onOpenAdmin?: () => void }) {
       </div>
 
       {/* سالنامه */}
-      <button onClick={openRecap} className="v3-tile-blue relative w-full overflow-hidden rounded-[22px] p-5 text-right shadow-[0_18px_40px_-18px_rgba(180,26,34,0.7)] transition-transform hover:scale-[1.01] active:scale-[0.99]">
+      <button onClick={openRecap} className="candy-tile-red relative w-full overflow-hidden rounded-[22px] p-5 text-right shadow-[0_18px_40px_-18px_rgba(180,26,34,0.7)] transition-transform hover:scale-[1.01] active:scale-[0.99]">
         <div className="pointer-events-none absolute -left-10 -bottom-12 h-36 w-36 rounded-full bg-white/12 blur-2xl" />
         <div className="relative flex items-center gap-4">
           <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[18px] bg-white/18 shadow-[inset_0_1px_0_rgba(255,255,255,0.25)]">
@@ -269,27 +269,27 @@ export function ProfileScreen({ onOpenAdmin }: { onOpenAdmin?: () => void }) {
       {/* کارنامه */}
       <div>
         <SectionHeader title="کارنامه فردی" />
-        <div className="v3-card space-y-3.5 p-4">
+        <div className="rounded-3xl border border-outline-variant/40 bg-surface-container-lowest shadow-[0_8px_24px_-4px_rgba(83,37,23,0.05)] space-y-3.5 p-4">
           <div className="flex items-center justify-between">
-            <span className="text-[12.5px] font-semibold text-[var(--v3-ink-2)]">رتبه در سازمان</span>
-            <span className="v3-num text-[13.5px] font-black text-[var(--v3-azure)]">
+            <span className="text-[12.5px] font-semibold text-on-surface-variant">رتبه در سازمان</span>
+            <span className="font-black tracking-tight text-[13.5px] font-black text-primary">
               {fa(stats.rank)} از {fa(stats.totalReporters)}
             </span>
           </div>
-          <div className="flex items-center justify-between border-t border-[var(--v3-line)]/70 pt-3.5">
-            <span className="text-[12.5px] font-semibold text-[var(--v3-ink-2)]">نرخ تایید خبرها</span>
-            <span className="v3-num text-[13.5px] font-black text-[var(--v3-ink)]">{fa(stats.approveRate)}٪</span>
+          <div className="flex items-center justify-between border-t border-outline-variant/50/70 pt-3.5">
+            <span className="text-[12.5px] font-semibold text-on-surface-variant">نرخ تایید خبرها</span>
+            <span className="font-black tracking-tight text-[13.5px] font-black text-on-surface">{fa(stats.approveRate)}٪</span>
           </div>
-          <div className="flex items-center justify-between border-t border-[var(--v3-line)]/70 pt-3.5">
-            <span className="text-[12.5px] font-semibold text-[var(--v3-ink-2)]">خبر تاییدشده / ردشده</span>
-            <span className="v3-num text-[13.5px] font-black text-[var(--v3-ink)]">
-              <span className="text-[var(--v3-azure)]">{fa(stats.totalApproved)}</span> / <span className="text-red-600 dark:text-red-400">{fa(stats.totalRejected)}</span>
+          <div className="flex items-center justify-between border-t border-outline-variant/50/70 pt-3.5">
+            <span className="text-[12.5px] font-semibold text-on-surface-variant">خبر تاییدشده / ردشده</span>
+            <span className="font-black tracking-tight text-[13.5px] font-black text-on-surface">
+              <span className="text-primary">{fa(stats.totalApproved)}</span> / <span className="text-red-600 dark:text-red-400">{fa(stats.totalRejected)}</span>
             </span>
           </div>
           {user.education && (
-            <div className="flex items-center justify-between border-t border-[var(--v3-line)]/70 pt-3.5">
-              <span className="text-[12.5px] font-semibold text-[var(--v3-ink-2)]">تحصیلات</span>
-              <span className="text-[12.5px] font-bold text-[var(--v3-ink)]">{EDUCATION_LABELS[user.education] ?? "—"}</span>
+            <div className="flex items-center justify-between border-t border-outline-variant/50/70 pt-3.5">
+              <span className="text-[12.5px] font-semibold text-on-surface-variant">تحصیلات</span>
+              <span className="text-[12.5px] font-bold text-on-surface">{EDUCATION_LABELS[user.education] ?? "—"}</span>
             </div>
           )}
         </div>
@@ -304,12 +304,12 @@ export function ProfileScreen({ onOpenAdmin }: { onOpenAdmin?: () => void }) {
               key={b.key}
               className={cn(
                 "flex flex-col items-center gap-1 rounded-[18px] border p-3.5 text-center transition-colors",
-                b.unlocked ? "border-[var(--v3-azure)]/30 bg-[var(--v3-azure-soft)]/50" : "border-[var(--v3-line)] bg-[var(--v3-card)] opacity-45",
+                b.unlocked ? "border-primary/30 bg-primary-fixed/25" : "border-outline-variant/50 bg-surface-container-lowest opacity-45",
               )}
             >
               <span className="text-[26px] leading-none">{b.emoji}</span>
-              <span className="mt-1 text-[11.5px] font-bold text-[var(--v3-ink)]">{b.title}</span>
-              <span className="text-[9px] leading-3.5 text-[var(--v3-ink-2)]">{b.desc}</span>
+              <span className="mt-1 text-[11.5px] font-bold text-on-surface">{b.title}</span>
+              <span className="text-[9px] leading-3.5 text-on-surface-variant">{b.desc}</span>
             </div>
           ))}
         </div>
@@ -318,9 +318,9 @@ export function ProfileScreen({ onOpenAdmin }: { onOpenAdmin?: () => void }) {
       {/* حالت نمایش */}
       <div>
         <SectionHeader title="حالت نمایش" />
-        <div className="v3-card p-3">
+        <div className="rounded-3xl border border-outline-variant/40 bg-surface-container-lowest shadow-[0_8px_24px_-4px_rgba(83,37,23,0.05)] p-3">
           <ThemeToggle />
-          <p className="mt-2 px-1 text-[10px] leading-4 text-[var(--v3-ink-2)]/70">
+          <p className="mt-2 px-1 text-[10px] leading-4 text-on-surface-variant/70">
             حالت انتخابی روی این دستگاه ذخیره می‌شود.
           </p>
         </div>
@@ -329,14 +329,14 @@ export function ProfileScreen({ onOpenAdmin }: { onOpenAdmin?: () => void }) {
       {/* امنیت حساب — رمز دوم */}
       <div>
         <SectionHeader title="امنیت حساب" />
-        <div className="v3-card p-4">
+        <div className="rounded-3xl border border-outline-variant/40 bg-surface-container-lowest shadow-[0_8px_24px_-4px_rgba(83,37,23,0.05)] p-4">
           <div className="flex items-center gap-3">
-            <span className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-full", user.pinSet ? "bg-[var(--v3-azure-soft)] text-[var(--v3-azure)]" : "bg-[var(--v3-amber-soft)] text-[var(--v3-amber)]")}>
+            <span className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-full", user.pinSet ? "bg-primary-fixed/40 text-primary" : "bg-warn/15 text-warn")}>
               <KeyRound className="h-4.5 w-4.5" />
             </span>
             <div className="min-w-0 flex-1">
-              <p className="text-[13px] font-bold text-[var(--v3-ink)]">رمز دوم (PIN) {user.pinSet ? "فعال است" : "غیرفعال"}</p>
-              <p className="mt-0.5 text-[10.5px] leading-4 text-[var(--v3-ink-2)]">
+              <p className="text-[13px] font-bold text-on-surface">رمز دوم (PIN) {user.pinSet ? "فعال است" : "غیرفعال"}</p>
+              <p className="mt-0.5 text-[10.5px] leading-4 text-on-surface-variant">
                 {user.pinSet
                   ? "ورود فقط با شماره موبایل + PIN شما ممکن است."
                   : "فعلاً هر کس شماره موبایلتان را داشته باشد می‌تواند وارد شود. برای حساب‌های ارزیاب فعالاً توصیه می‌شود."}
@@ -352,7 +352,7 @@ export function ProfileScreen({ onOpenAdmin }: { onOpenAdmin?: () => void }) {
       {/* تنظیمات هوشمند اعلان‌ها — باز و همیشه در دسترس (طراحی _5) */}
       <div>
         <SectionHeader title="تنظیمات هوشمند اعلان‌ها" />
-        <div className="v3-card stage-enter space-y-1 p-4">
+        <div className="rounded-3xl border border-outline-variant/40 bg-surface-container-lowest shadow-[0_8px_24px_-4px_rgba(83,37,23,0.05)] stage-enter space-y-1 p-4">
           {[
             { key: "approvals", label: "تایید و رد صحت خبر", desc: "اطلاع فوری پس از تصمیم بازبین", icon: <ShieldCheck className="h-4.5 w-4.5" /> },
             { key: "rejections", label: "دریافت اصلاحیه و پیشنهادها", desc: "یادداشت بازبین‌ها برای بازنگری خبر", icon: <Award className="h-4.5 w-4.5" /> },
@@ -365,22 +365,22 @@ export function ProfileScreen({ onOpenAdmin }: { onOpenAdmin?: () => void }) {
               <span className="flex min-w-0 items-center gap-2.5">
                 <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-fixed/50 text-primary">{s.icon}</span>
                 <span className="min-w-0">
-                  <span className="block truncate text-[13px] font-semibold text-ink">{s.label}</span>
-                  <span className="block truncate text-[10px] text-ink-muted">{s.desc}</span>
+                  <span className="block truncate text-[13px] font-semibold text-on-surface">{s.label}</span>
+                  <span className="block truncate text-[10px] text-on-surface-variant">{s.desc}</span>
                 </span>
               </span>
               <Switch checked={state.notifSettings[s.key as keyof typeof state.notifSettings] as boolean} onCheckedChange={(v) => setNotif(s.key, v)} disabled={busy} className="data-[state=checked]:bg-primary" />
             </div>
           ))}
           {/* حالت Do Not Disturb — بازه سکوت با ویرایش زنده */}
-          <div className="mt-1 flex items-center justify-between gap-2 border-t border-line pt-3">
+          <div className="mt-1 flex items-center justify-between gap-2 border-t border-outline-variant/40 pt-3">
             <span className="flex min-w-0 items-center gap-2.5">
               <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-warn/15 text-warn">
                 <MoonStar className="h-4.5 w-4.5" />
               </span>
               <span className="min-w-0">
-                <span className="block text-[13px] font-semibold text-ink">حالت Do Not Disturb</span>
-                <span className="block text-[10px] text-ink-muted">خاموشی اعلان‌ها در بازه زمانی مشخص</span>
+                <span className="block text-[13px] font-semibold text-on-surface">حالت Do Not Disturb</span>
+                <span className="block text-[10px] text-on-surface-variant">خاموشی اعلان‌ها در بازه زمانی مشخص</span>
               </span>
             </span>
             <span className="flex shrink-0 items-center gap-1" dir="ltr">
@@ -388,20 +388,20 @@ export function ProfileScreen({ onOpenAdmin }: { onOpenAdmin?: () => void }) {
                 type="time"
                 value={state.notifSettings.quietStart}
                 onChange={(e) => void saveSettings({ quietStart: e.target.value })}
-                className="rounded-lg border border-line bg-surface-2 px-1.5 py-1 text-center text-[11px] font-bold text-ink"
+                className="rounded-lg border border-outline-variant/40 bg-surface-container-low px-1.5 py-1 text-center text-[11px] font-bold text-on-surface"
                 aria-label="شروع سکوت"
               />
-              <span className="text-[10px] text-ink-muted">تا</span>
+              <span className="text-[10px] text-on-surface-variant">تا</span>
               <input
                 type="time"
                 value={state.notifSettings.quietEnd}
                 onChange={(e) => void saveSettings({ quietEnd: e.target.value })}
-                className="rounded-lg border border-line bg-surface-2 px-1.5 py-1 text-center text-[11px] font-bold text-ink"
+                className="rounded-lg border border-outline-variant/40 bg-surface-container-low px-1.5 py-1 text-center text-[11px] font-bold text-on-surface"
                 aria-label="پایان سکوت"
               />
             </span>
           </div>
-          <p className="pt-1 text-[10px] leading-4 text-ink-muted/70">
+          <p className="pt-1 text-[10px] leading-4 text-on-surface-variant/70">
             در بازهٔ سکوت، اعلان‌های غیرضروری ارسال نمی‌شوند و به پایان سکوت موکول می‌گردند.
           </p>
         </div>
@@ -409,25 +409,25 @@ export function ProfileScreen({ onOpenAdmin }: { onOpenAdmin?: () => void }) {
 
       {/* شیت مدیریت رمز دوم */}
       <Dialog open={pinOpen} onOpenChange={(v) => !v && setPinOpen(false)}>
-        <DialogContent className="rounded-[24px] border-[var(--v3-line)] bg-[var(--v3-card)] p-5">
+        <DialogContent className="rounded-[24px] border-outline-variant/50 bg-surface-container-lowest p-5">
           <DialogHeader className="text-right">
-            <DialogTitle className="flex items-center gap-2 text-[var(--v3-ink)]">
-              <KeyRound className="h-4.5 w-4.5 text-[var(--v3-azure)]" />
+            <DialogTitle className="flex items-center gap-2 text-on-surface">
+              <KeyRound className="h-4.5 w-4.5 text-primary" />
               رمز دوم (PIN)
             </DialogTitle>
-            <DialogDescription className="text-[var(--v3-ink-2)]">
+            <DialogDescription className="text-on-surface-variant">
               {user.pinSet ? "برای تغییر یا حذف، رمز فعلی را وارد کنید." : "۴ تا ۶ رقم انتخاب کنید؛ از این پس هنگام ورود پرسیده می‌شود."}
             </DialogDescription>
           </DialogHeader>
           <div className="mt-3 space-y-3">
             {user.pinSet && (
               <div>
-                <label className="mb-1.5 block text-[12px] font-semibold text-[var(--v3-ink-2)]">رمز فعلی</label>
+                <label className="mb-1.5 block text-[12px] font-semibold text-on-surface-variant">رمز فعلی</label>
                 <Input value={pinCurrent} onChange={(e) => setPinCurrent(digits(e.target.value).slice(0, 6))} placeholder="••••" dir="ltr" inputMode="numeric" autoComplete="off" className="v3-input rounded-2xl text-center tracking-[0.4em]" />
               </div>
             )}
             <div>
-              <label className="mb-1.5 block text-[12px] font-semibold text-[var(--v3-ink-2)]">{user.pinSet ? "رمز جدید" : "رمز جدید (۴ تا ۶ رقم)"}</label>
+              <label className="mb-1.5 block text-[12px] font-semibold text-on-surface-variant">{user.pinSet ? "رمز جدید" : "رمز جدید (۴ تا ۶ رقم)"}</label>
               <Input value={pinNew} onChange={(e) => setPinNew(digits(e.target.value).slice(0, 6))} placeholder="••••" dir="ltr" inputMode="numeric" autoComplete="off" className="v3-input rounded-2xl text-center tracking-[0.4em]" />
             </div>
             <button onClick={() => submitPin("set")} disabled={pinBusy} className="v3-btn flex w-full items-center justify-center gap-2 py-3.5 text-[14px] disabled:opacity-50">
@@ -450,34 +450,34 @@ export function ProfileScreen({ onOpenAdmin }: { onOpenAdmin?: () => void }) {
 
       {/* شیت سالنامه */}
       <Dialog open={recapOpen} onOpenChange={(v) => !v && setRecapOpen(false)}>
-        <DialogContent className="max-h-[86dvh] overflow-y-auto nice-scroll rounded-[24px] border-[var(--v3-line)] bg-[var(--v3-card)] p-5">
+        <DialogContent className="max-h-[86dvh] overflow-y-auto nice-scroll rounded-[24px] border-outline-variant/50 bg-surface-container-lowest p-5">
           <DialogHeader className="text-right">
-            <DialogTitle className="flex items-center gap-2 text-[var(--v3-ink)]">
-              <Sparkles className="h-5 w-5 text-[var(--v3-azure)]" />
+            <DialogTitle className="flex items-center gap-2 text-on-surface">
+              <Sparkles className="h-5 w-5 text-primary" />
               سالنامهٔ {recap ? faNum(recap.jy) : ""} — {user.fullName}
             </DialogTitle>
-            <DialogDescription className="text-[var(--v3-ink-2)]">
+            <DialogDescription className="text-on-surface-variant">
               جمع‌بندی یک سال خبرنگاری شما در خبرگزاری بسیج شهر رشت
             </DialogDescription>
           </DialogHeader>
 
           {recapBusy && (
             <div className="flex flex-col items-center gap-3 py-12 text-center">
-              <Loader2 className="h-8 w-8 animate-spin text-[var(--v3-azure)]" />
-              <p className="text-[12.5px] text-[var(--v3-ink-2)]">در حال محاسبهٔ سالنامه…</p>
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <p className="text-[12.5px] text-on-surface-variant">در حال محاسبهٔ سالنامه…</p>
             </div>
           )}
 
           {!recapBusy && !recap && (
-            <p className="py-10 text-center text-[12.5px] text-[var(--v3-ink-2)]">سالنامه در دسترس نیست — دوباره تلاش کنید.</p>
+            <p className="py-10 text-center text-[12.5px] text-on-surface-variant">سالنامه در دسترس نیست — دوباره تلاش کنید.</p>
           )}
 
           {!recapBusy && recap && (
             <div className="mt-2 space-y-4">
               {/* کارت قهرمانی سال */}
-              <div className="v3-tile-blue rounded-[20px] p-4 text-center shadow-[0_18px_40px_-18px_rgba(180,26,34,0.7)]">
+              <div className="candy-tile-red rounded-[20px] p-4 text-center shadow-[0_18px_40px_-18px_rgba(180,26,34,0.7)]">
                 <p className="text-[11.5px] font-bold text-white/85">در سال {faNum(recap.jy)} شما</p>
-                <p className="v3-num mt-1 text-[34px] font-black leading-none">{fa(recap.totals.approved)}</p>
+                <p className="font-black tracking-tight mt-1 text-[34px] font-black leading-none">{fa(recap.totals.approved)}</p>
                 <p className="mt-1 text-[12.5px] font-bold text-white/90">خبر تاییدشده منتشر کردید</p>
                 {recap.bestMonth && recap.bestMonth.count > 0 && (
                   <p className="mt-2 text-[11px] text-white/80">
@@ -496,9 +496,9 @@ export function ProfileScreen({ onOpenAdmin }: { onOpenAdmin?: () => void }) {
 
               {/* نمودار ۱۲ ماه */}
               {recap.totals.all > 0 && (
-                <div className="v3-card-flat p-4">
-                  <p className="flex items-center gap-2 text-[12.5px] font-bold text-[var(--v3-ink)]">
-                    <Newspaper className="h-4 w-4 text-[var(--v3-azure)]" />
+                <div className="rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-4">
+                  <p className="flex items-center gap-2 text-[12.5px] font-bold text-on-surface">
+                    <Newspaper className="h-4 w-4 text-primary" />
                     خبرهای شما در طول سال
                   </p>
                   <div className="mt-3 flex h-24 items-end justify-between gap-1">
@@ -507,12 +507,12 @@ export function ProfileScreen({ onOpenAdmin }: { onOpenAdmin?: () => void }) {
                       const best = recap.bestMonth?.index === i && c > 0
                       return (
                         <div key={i} className="flex min-w-0 flex-1 flex-col items-center gap-1">
-                          <span className="v3-num text-[8.5px] font-bold text-[var(--v3-ink-2)]">{c > 0 ? fa(c) : ""}</span>
+                          <span className="font-black tracking-tight text-[8.5px] font-bold text-on-surface-variant">{c > 0 ? fa(c) : ""}</span>
                           <div
-                            className={cn("w-full rounded-t-md transition-all", best ? "bg-[var(--v3-amber)]" : "bg-[var(--v3-azure)]/75")}
+                            className={cn("w-full rounded-t-md transition-all", best ? "bg-warn" : "bg-primary/75")}
                             style={{ height: `${Math.max(4, Math.round((c / max) * 68))}px` }}
                           />
-                          <span className={cn("text-[8px]", best ? "font-black text-[var(--v3-amber)]" : "text-[var(--v3-ink-2)]")}>
+                          <span className={cn("text-[8px]", best ? "font-black text-warn" : "text-on-surface-variant")}>
                             {recap.monthNames[i]?.slice(0, 3)}
                           </span>
                         </div>
@@ -523,32 +523,32 @@ export function ProfileScreen({ onOpenAdmin }: { onOpenAdmin?: () => void }) {
               )}
 
               {/* جزئیات سال */}
-              <div className="v3-card-flat space-y-3 p-4">
+              <div className="rounded-2xl border border-outline-variant/40 bg-surface-container-lowest space-y-3 p-4">
                 <div className="flex items-center justify-between">
-                  <span className="flex items-center gap-2 text-[12px] font-semibold text-[var(--v3-ink-2)]">
-                    <CalendarCheck2 className="h-4 w-4 text-[var(--v3-azure)]" />
+                  <span className="flex items-center gap-2 text-[12px] font-semibold text-on-surface-variant">
+                    <CalendarCheck2 className="h-4 w-4 text-primary" />
                     روزهای فعال
                   </span>
-                  <span className="v3-num text-[12.5px] font-black text-[var(--v3-ink)]">{fa(recap.totals.activeDays)} روز</span>
+                  <span className="font-black tracking-tight text-[12.5px] font-black text-on-surface">{fa(recap.totals.activeDays)} روز</span>
                 </div>
                 {recap.firstNews && (
-                  <div className="border-t border-[var(--v3-line)]/70 pt-3">
-                    <span className="flex items-center gap-2 text-[12px] font-semibold text-[var(--v3-ink-2)]">
-                      <Newspaper className="h-4 w-4 text-[var(--v3-azure)]" />
+                  <div className="border-t border-outline-variant/50/70 pt-3">
+                    <span className="flex items-center gap-2 text-[12px] font-semibold text-on-surface-variant">
+                      <Newspaper className="h-4 w-4 text-primary" />
                       نخستین خبر سال
                     </span>
-                    <p className="mt-1 line-clamp-2 text-[12px] font-bold text-[var(--v3-ink)]">{recap.firstNews.title}</p>
-                    <p className="mt-0.5 text-[10px] text-[var(--v3-ink-2)]">{jalali(recap.firstNews.at)}</p>
+                    <p className="mt-1 line-clamp-2 text-[12px] font-bold text-on-surface">{recap.firstNews.title}</p>
+                    <p className="mt-0.5 text-[10px] text-on-surface-variant">{jalali(recap.firstNews.at)}</p>
                   </div>
                 )}
                 {recap.topNews && (
-                  <div className="border-t border-[var(--v3-line)]/70 pt-3">
-                    <span className="flex items-center gap-2 text-[12px] font-semibold text-[var(--v3-ink-2)]">
-                      <Star className="h-4 w-4 text-[var(--v3-amber)]" />
+                  <div className="border-t border-outline-variant/50/70 pt-3">
+                    <span className="flex items-center gap-2 text-[12px] font-semibold text-on-surface-variant">
+                      <Star className="h-4 w-4 text-warn" />
                       پربازدیدترین خبر سال
                     </span>
-                    <p className="mt-1 line-clamp-2 text-[12px] font-bold text-[var(--v3-ink)]">{recap.topNews.title}</p>
-                    <p className="mt-0.5 flex items-center gap-3 text-[10px] text-[var(--v3-ink-2)]">
+                    <p className="mt-1 line-clamp-2 text-[12px] font-bold text-on-surface">{recap.topNews.title}</p>
+                    <p className="mt-0.5 flex items-center gap-3 text-[10px] text-on-surface-variant">
                       <span dir="ltr">{recap.topNews.code}</span>
                       <span className="flex items-center gap-1"><Eye className="h-3 w-3" />{fa(recap.topNews.views)}</span>
                       <span className="flex items-center gap-1"><Heart className="h-3 w-3" />{fa(recap.topNews.reactions)}</span>
@@ -556,13 +556,13 @@ export function ProfileScreen({ onOpenAdmin }: { onOpenAdmin?: () => void }) {
                   </div>
                 )}
                 {recap.totals.rejected > 0 && (
-                  <div className="flex items-center justify-between border-t border-[var(--v3-line)]/70 pt-3">
-                    <span className="text-[12px] font-semibold text-[var(--v3-ink-2)]">بازگشتی برای اصلاح</span>
-                    <span className="v3-num text-[12.5px] font-black text-[var(--v3-ink)]">{fa(recap.totals.rejected)}</span>
+                  <div className="flex items-center justify-between border-t border-outline-variant/50/70 pt-3">
+                    <span className="text-[12px] font-semibold text-on-surface-variant">بازگشتی برای اصلاح</span>
+                    <span className="font-black tracking-tight text-[12.5px] font-black text-on-surface">{fa(recap.totals.rejected)}</span>
                   </div>
                 )}
                 {recap.totals.all === 0 && (
-                  <p className="pt-2 text-center text-[12px] text-[var(--v3-ink-2)]">
+                  <p className="pt-2 text-center text-[12px] text-on-surface-variant">
                     برای سال {faNum(recap.jy)} خبری ثبت نشده — سال جدید را با خبر شروع کن!
                   </p>
                 )}
@@ -577,7 +577,7 @@ export function ProfileScreen({ onOpenAdmin }: { onOpenAdmin?: () => void }) {
         {user.role === "admin" && (
           <button
             onClick={onOpenAdmin}
-            className="flex flex-1 items-center justify-center gap-2 rounded-[14px] border border-[var(--v3-azure)]/40 bg-[var(--v3-azure-soft)] py-3.5 text-[13.5px] font-bold text-[var(--v3-azure-deep)] transition-colors hover:bg-[var(--v3-azure)]/25 dark:text-[#fca5a5]"
+            className="flex flex-1 items-center justify-center gap-2 rounded-[14px] border border-primary/40/40 bg-primary-fixed/40 py-3.5 text-[13.5px] font-bold text-primary transition-colors hover:bg-primary/25 dark:text-[#fca5a5]"
           >
             <ShieldCheck className="h-4.5 w-4.5" />
             پنل مدیریت
@@ -586,9 +586,9 @@ export function ProfileScreen({ onOpenAdmin }: { onOpenAdmin?: () => void }) {
         {(user.role === "admin" || user.role === "district_manager") && (
           <button
             onClick={() => router.push("/organization")}
-            className="v3-card flex flex-1 items-center justify-center gap-2.5 py-3 text-[13.5px] font-bold text-[var(--v3-ink)] transition-transform hover:scale-[1.01]"
+            className="rounded-3xl border border-outline-variant/40 bg-surface-container-lowest shadow-[0_8px_24px_-4px_rgba(83,37,23,0.05)] flex flex-1 items-center justify-center gap-2.5 py-3 text-[13.5px] font-bold text-on-surface transition-transform hover:scale-[1.01]"
           >
-            <span className="flex h-9 w-9 items-center justify-center rounded-[12px] bg-[var(--v3-azure-soft)] text-[var(--v3-azure)]">
+            <span className="flex h-9 w-9 items-center justify-center rounded-[12px] bg-primary-fixed/40 text-primary">
               <Landmark className="h-4.5 w-4.5" />
             </span>
             حوزه‌ها و پایگاه‌ها
@@ -608,10 +608,10 @@ export function ProfileScreen({ onOpenAdmin }: { onOpenAdmin?: () => void }) {
 
 function MiniKpi({ icon, value, label }: { icon: React.ReactNode; value: string; label: string }) {
   return (
-    <div className="v3-card-flat flex flex-col items-center gap-1 px-1 py-3">
-      <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--v3-azure-soft)] text-[var(--v3-azure)]">{icon}</span>
-      <span className="v3-num text-[15px] leading-none text-[var(--v3-ink)]">{value}</span>
-      <span className="text-[10px] font-medium text-[var(--v3-ink-2)]">{label}</span>
+    <div className="rounded-2xl border border-outline-variant/40 bg-surface-container-lowest flex flex-col items-center gap-1 px-1 py-3">
+      <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-fixed/40 text-primary">{icon}</span>
+      <span className="font-black tracking-tight text-[15px] leading-none text-on-surface">{value}</span>
+      <span className="text-[10px] font-medium text-on-surface-variant">{label}</span>
     </div>
   )
 }
@@ -623,16 +623,16 @@ function toFaTime(t: string): string {
 // شاخص سالنامه — با رنگ متنوع
 function RecapKpi({ icon, value, label, tone }: { icon: React.ReactNode; value: string; label: string; tone: "azure" | "rose" | "amber" | "emerald" }) {
   const tones: Record<string, string> = {
-    azure: "bg-[var(--v3-azure-soft)] text-[var(--v3-azure)]",
+    azure: "bg-primary-fixed/40 text-primary",
     rose: "bg-rose-100 text-rose-600 dark:bg-rose-500/15 dark:text-rose-400",
-    amber: "bg-[var(--v3-amber-soft)] text-[var(--v3-amber)]",
+    amber: "bg-warn/15 text-warn",
     emerald: "bg-emerald-100 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-400",
   }
   return (
-    <div className="v3-card-flat p-3.5">
+    <div className="rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-3.5">
       <span className={cn("flex h-9 w-9 items-center justify-center rounded-[12px]", tones[tone])}>{icon}</span>
-      <p className="v3-num mt-2 text-[18px] font-black leading-none text-[var(--v3-ink)]">{value}</p>
-      <p className="mt-1 text-[10px] font-medium leading-4 text-[var(--v3-ink-2)]">{label}</p>
+      <p className="font-black tracking-tight mt-2 text-[18px] font-black leading-none text-on-surface">{value}</p>
+      <p className="mt-1 text-[10px] font-medium leading-4 text-on-surface-variant">{label}</p>
     </div>
   )
 }

@@ -13,7 +13,7 @@ export function ThemeToggle({ compact = false }: { compact?: boolean }) {
     return (
       <button
         onClick={() => setTheme(document.documentElement.classList.contains("light") ? "dark" : "light")}
-        className="flex h-10 w-10 items-center justify-center rounded-full border border-line bg-surface text-ink transition-colors hover:bg-surface-2"
+        className="flex h-10 w-10 items-center justify-center rounded-full border border-outline-variant/40 bg-surface text-on-surface transition-colors hover:bg-surface-container-low"
         aria-label="تغییر حالت روشن/تیره"
         title="تغییر حالت روشن/تیره"
       >
@@ -24,12 +24,12 @@ export function ThemeToggle({ compact = false }: { compact?: boolean }) {
   }
 
   return (
-    <div className="flex rounded-full border border-line bg-surface-2 p-1">
+    <div className="flex rounded-full border border-outline-variant/40 bg-surface-container-low p-1">
       <button
         onClick={() => setTheme("dark")}
         className={cn(
           "flex flex-1 items-center justify-center gap-1.5 rounded-full py-2 text-[12px] font-bold transition-all",
-          "bg-neon text-neon-foreground dark:bg-transparent dark:text-ink-muted dark:hover:text-ink",
+          "bg-neon text-neon-foreground dark:bg-transparent dark:text-on-surface-variant dark:hover:text-on-surface",
         )}
       >
         <Moon className="h-4 w-4" />
@@ -39,7 +39,7 @@ export function ThemeToggle({ compact = false }: { compact?: boolean }) {
         onClick={() => setTheme("light")}
         className={cn(
           "flex flex-1 items-center justify-center gap-1.5 rounded-full py-2 text-[12px] font-bold transition-all",
-          "bg-transparent text-ink-muted hover:text-ink dark:bg-neon dark:text-neon-foreground",
+          "bg-transparent text-on-surface-variant hover:text-on-surface dark:bg-neon dark:text-neon-foreground",
         )}
       >
         <Sun className="h-4 w-4" />

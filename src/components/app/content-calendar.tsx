@@ -22,9 +22,9 @@ type CalendarItem = {
 }
 
 const STATUS_DOT: Record<string, string> = {
-  approved: "bg-[var(--v3-azure)]",
+  approved: "bg-primary",
   rejected: "bg-red-500",
-  pending: "bg-[var(--v3-amber)]",
+  pending: "bg-warn",
 }
 
 const STATUS_LABEL: Record<string, string> = {
@@ -77,22 +77,22 @@ export function ContentCalendar({ mine, onOpenNews }: { mine?: boolean; onOpenNe
   return (
     <div className="space-y-3">
       {/* ناوبری ماه */}
-      <div className="flex items-center justify-between rounded-full border border-[var(--v3-line)] bg-[var(--v3-card)] px-2 py-1.5">
+      <div className="flex items-center justify-between rounded-full border border-outline-variant/50 bg-surface-container-lowest px-2 py-1.5">
         <button
           onClick={() => (jm === 12 ? (setJy(jy + 1), setJm(1)) : setJm(jm + 1))}
-          className="flex h-9 w-9 items-center justify-center rounded-full text-[var(--v3-ink-2)] transition-colors hover:bg-[var(--v3-card-2)] hover:text-[var(--v3-ink)]"
+          className="flex h-9 w-9 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-surface-container hover:text-on-surface"
           aria-label="ماه بعد"
         >
           <ChevronLeft className="h-5 w-5" />
         </button>
-        <span className="flex items-center gap-1.5 text-[14.5px] font-black text-[var(--v3-ink)]">
-          <CalendarDays className="h-4.5 w-4.5 text-[var(--v3-azure)]" />
+        <span className="flex items-center gap-1.5 text-[14.5px] font-black text-on-surface">
+          <CalendarDays className="h-4.5 w-4.5 text-primary" />
           {JALALI_MONTHS[jm - 1]} {fa(jy)}
-          <span className="text-[10.5px] font-bold text-[var(--v3-ink-2)]">· {fa(monthTotal)} خبر</span>
+          <span className="text-[10.5px] font-bold text-on-surface-variant">· {fa(monthTotal)} خبر</span>
         </span>
         <button
           onClick={() => (jm === 1 ? (setJy(jy - 1), setJm(12)) : setJm(jm - 1))}
-          className="flex h-9 w-9 items-center justify-center rounded-full text-[var(--v3-ink-2)] transition-colors hover:bg-[var(--v3-card-2)] hover:text-[var(--v3-ink)]"
+          className="flex h-9 w-9 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-surface-container hover:text-on-surface"
           aria-label="ماه قبل"
         >
           <ChevronRight className="h-5 w-5" />
@@ -100,10 +100,10 @@ export function ContentCalendar({ mine, onOpenNews }: { mine?: boolean; onOpenNe
       </div>
 
       {/* شبکه ماه */}
-      <div className="v3-card p-3">
+      <div className="rounded-3xl border border-outline-variant/40 bg-surface-container-lowest shadow-[0_8px_24px_-4px_rgba(83,37,23,0.05)] p-3">
         <div className="grid grid-cols-7 gap-1 text-center">
           {JALALI_WEEKDAYS.map((w) => (
-            <span key={w} className="py-1 text-[10.5px] font-bold text-[var(--v3-ink-2)]">
+            <span key={w} className="py-1 text-[10.5px] font-bold text-on-surface-variant">
               {w}
             </span>
           ))}
@@ -119,19 +119,19 @@ export function ContentCalendar({ mine, onOpenNews }: { mine?: boolean; onOpenNe
                 className={cn(
                   "relative flex h-11 flex-col items-center justify-center rounded-xl text-[12px] font-bold transition-colors",
                   isSel
-                    ? "bg-gradient-to-b from-[var(--v3-azure-2)] to-[var(--v3-azure-deep)] text-white shadow-[0_8px_18px_-8px_rgba(180,26,34,0.6)]"
+                    ? "bg-gradient-to-b from-[var(--primary)] to-[var(--primary-deep, #7c2923)] text-white shadow-[0_8px_18px_-8px_rgba(180,26,34,0.6)]"
                     : isToday
-                      ? "border border-[var(--v3-azure)]/45 text-[var(--v3-azure)]"
+                      ? "border border-primary/40/45 text-primary"
                       : dayItems.length
-                        ? "bg-[var(--v3-azure-soft)]/60 text-[var(--v3-ink)] hover:bg-[var(--v3-azure-soft)]"
-                        : "text-[var(--v3-ink-2)] hover:bg-[var(--v3-card-2)]",
+                        ? "bg-primary-fixed/25 text-on-surface hover:bg-primary-fixed/40"
+                        : "text-on-surface-variant hover:bg-surface-container",
                 )}
               >
                 {fa(d)}
                 {dayItems.length > 0 && (
                   <span className={cn("mt-0.5 flex items-center gap-0.5", isSel && "opacity-90")}>
                     {dayItems.slice(0, 3).map((it, k) => (
-                      <span key={k} className={cn("h-1.5 w-1.5 rounded-full", isSel ? "bg-white" : STATUS_DOT[it.status] ?? "bg-[var(--v3-azure)]")} />
+                      <span key={k} className={cn("h-1.5 w-1.5 rounded-full", isSel ? "bg-white" : STATUS_DOT[it.status] ?? "bg-primary")} />
                     ))}
                   </span>
                 )}
@@ -140,7 +140,7 @@ export function ContentCalendar({ mine, onOpenNews }: { mine?: boolean; onOpenNe
           })}
         </div>
         {loading && (
-          <p className="flex items-center justify-center gap-2 py-3 text-[11px] text-[var(--v3-ink-2)]">
+          <p className="flex items-center justify-center gap-2 py-3 text-[11px] text-on-surface-variant">
             <Loader2 className="h-3.5 w-3.5 animate-spin" />
             در حال دریافت تقویم...
           </p>
@@ -150,25 +150,25 @@ export function ContentCalendar({ mine, onOpenNews }: { mine?: boolean; onOpenNe
       {/* خبرهای روز انتخاب‌شده */}
       {selJd !== null && (
         <div className="space-y-2">
-          <p className="text-[12.5px] font-black text-[var(--v3-ink)]">
+          <p className="text-[12.5px] font-black text-on-surface">
             {fa(selJd)} {JALALI_MONTHS[jm - 1]} — {selItems.length > 0 ? `${fa(selItems.length)} خبر` : "بدون خبر"}
           </p>
           {selItems.map((it) => (
             <button
               key={it.id}
               onClick={() => onOpenNews(it.id)}
-              className="v3-card flex w-full items-center gap-3 p-3 text-right transition-transform hover:scale-[1.01]"
+              className="rounded-3xl border border-outline-variant/40 bg-surface-container-lowest shadow-[0_8px_24px_-4px_rgba(83,37,23,0.05)] flex w-full items-center gap-3 p-3 text-right transition-transform hover:scale-[1.01]"
             >
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--v3-card-2)] text-[10px] font-black text-[var(--v3-ink-2)]">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface-container-low text-[10px] font-black text-on-surface-variant">
                 {it.prepared ? "ساعت" : "ثبت"}
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block truncate text-[12.5px] font-bold text-[var(--v3-ink)]">{it.title}</span>
-                <span className="mt-0.5 block text-[10px] text-[var(--v3-ink-2)]">
+                <span className="block truncate text-[12.5px] font-bold text-on-surface">{it.title}</span>
+                <span className="mt-0.5 block text-[10px] text-on-surface-variant">
                   {it.code} · {it.time} · {it.reporterName} · {CATEGORY_LABELS[it.category] ?? "بدون دسته"}
                 </span>
               </span>
-              <span className={cn("shrink-0 rounded-full px-2 py-0.5 text-[9.5px] font-black", it.status === "approved" ? "bg-[var(--v3-azure-soft)] text-[var(--v3-azure-deep)] dark:text-[#fca5a5]" : it.status === "rejected" ? "bg-red-50 text-red-600 dark:bg-red-500/12 dark:text-red-400" : "bg-[var(--v3-amber-soft)] text-amber-600 dark:text-amber-400")}>
+              <span className={cn("shrink-0 rounded-full px-2 py-0.5 text-[9.5px] font-black", it.status === "approved" ? "bg-primary-fixed/40 text-primary dark:text-[#fca5a5]" : it.status === "rejected" ? "bg-red-50 text-red-600 dark:bg-red-500/12 dark:text-red-400" : "bg-warn/15 text-amber-600 dark:text-amber-400")}>
                 {STATUS_LABEL[it.status] ?? it.status}
               </span>
             </button>
@@ -177,9 +177,9 @@ export function ContentCalendar({ mine, onOpenNews }: { mine?: boolean; onOpenNe
       )}
 
       {/* راهنما */}
-      <p className="flex flex-wrap items-center gap-3 px-1 text-[10px] text-[var(--v3-ink-2)]">
-        <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-[var(--v3-amber)]" /> در بررسی</span>
-        <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-[var(--v3-azure)]" /> منتشر شده</span>
+      <p className="flex flex-wrap items-center gap-3 px-1 text-[10px] text-on-surface-variant">
+        <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-warn" /> در بررسی</span>
+        <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-primary" /> منتشر شده</span>
         <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-red-500" /> رد شده</span>
         <span className="flex items-center gap-1"><Eye className="h-3 w-3" /> پایه روز: زمان تهیه یا ثبت خبر</span>
         <span className="flex items-center gap-1"><Heart className="h-3 w-3" /> برای دیدن خبر، روی روز و سپس کارت بزنید</span>

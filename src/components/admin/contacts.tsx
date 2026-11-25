@@ -148,15 +148,15 @@ export function AdminContactsSection() {
       {/* راهنما */}
       <div className="flex items-start gap-2.5 rounded-[24px] border border-neon/25 bg-neon/6 p-4">
         <Radio className="mt-0.5 h-5 w-5 shrink-0 text-neon" />
-        <p className="text-[12px] leading-6 text-ink-muted">
+        <p className="text-[12px] leading-6 text-on-surface-variant">
           خبرنگاران رسانه‌های بیرونی را با نام و شماره ثبت کنید و یک‌طرفه با آنها در ارتباط باشید:
-          <b className="text-ink"> پیامک انبوه</b> مستقیم به گوشی‌شان، و <b className="text-ink">اخبار منتخب</b> روی کانال ایتا که دنبال می‌کنند.
+          <b className="text-on-surface"> پیامک انبوه</b> مستقیم به گوشی‌شان، و <b className="text-on-surface">اخبار منتخب</b> روی کانال ایتا که دنبال می‌کنند.
           این مخاطبان عضو اپ نمی‌شوند و حسابی ندارند.
         </p>
       </div>
 
       {/* نوار ابزار */}
-      <div className="flex flex-wrap items-center gap-2 rounded-[24px] border border-line bg-surface p-4">
+      <div className="flex flex-wrap items-center gap-2 rounded-[24px] border border-outline-variant/40 bg-surface p-4">
         <button
           onClick={() => setForm({ ...EMPTY_FORM })}
           className="flex items-center gap-1.5 rounded-full bg-neon px-4 py-2.5 text-[12.5px] font-bold text-neon-foreground transition-transform hover:scale-[1.02]"
@@ -169,7 +169,7 @@ export function AdminContactsSection() {
           disabled={contacts.length === 0 || (data ? !data.smsConfigured : false)}
           className={cn(
             "flex items-center gap-1.5 rounded-full border px-4 py-2.5 text-[12.5px] font-bold transition-colors disabled:opacity-40",
-            "border-line bg-surface-2 text-ink hover:border-neon/40 hover:text-neon",
+            "border-outline-variant/40 bg-surface-container-low text-on-surface hover:border-neon/40 hover:text-neon",
           )}
           title={data && !data.smsConfigured ? "ابتدا SMS_API_KEY و SMS_PATTERN_CODE را در سرور تنظیم کنید" : undefined}
         >
@@ -181,14 +181,14 @@ export function AdminContactsSection() {
           disabled={contacts.length === 0 || (data ? !data.eitaaConfigured : false)}
           className={cn(
             "flex items-center gap-1.5 rounded-full border px-4 py-2.5 text-[12.5px] font-bold transition-colors disabled:opacity-40",
-            "border-line bg-surface-2 text-ink hover:border-neon/40 hover:text-neon",
+            "border-outline-variant/40 bg-surface-container-low text-on-surface hover:border-neon/40 hover:text-neon",
           )}
           title={data && !data.eitaaConfigured ? "ابتدا BASHAR_EITAA_TOKEN و BASHAR_EITAA_CHANNEL را در سرور تنظیم کنید" : undefined}
         >
           <Send className="h-4 w-4" />
           خبر منتخب ← ایتا
         </button>
-        <span className="mr-auto text-[11px] font-bold text-ink-muted">
+        <span className="mr-auto text-[11px] font-bold text-on-surface-variant">
           <Users2 className="mr-1 inline h-3.5 w-3.5" />
           {faNum(contacts.length)} مخاطب {checked.length > 0 && `· ${fa(checked.length)} انتخاب‌شده`}
         </span>
@@ -196,7 +196,7 @@ export function AdminContactsSection() {
 
       {/* وضعیت تنظیمات */}
       {data && (!data.smsConfigured || !data.eitaaConfigured) && (
-        <div className="rounded-[24px] border border-warn/35 bg-warn/6 p-4 text-[11.5px] leading-6 text-ink-muted">
+        <div className="rounded-[24px] border border-warn/35 bg-warn/6 p-4 text-[11.5px] leading-6 text-on-surface-variant">
           <p className="mb-1 flex items-center gap-1.5 font-black text-warn"><ShieldCheck className="h-4 w-4" /> تنظیمات ارسال ناقص است:</p>
           {!data.smsConfigured && <p>• پیامک: در فایل .env سرور متغیرهای <span dir="ltr">SMS_API_KEY</span>، <span dir="ltr">SMS_PATTERN_CODE</span> و <span dir="ltr">SMS_SENDER</span> را بگذارید (سرویس فراز اس‌ام‌س/آی‌پنل — پترن با متغیر message).</p>}
           {!data.eitaaConfigured && <p>• ایتا: متغیرهای <span dir="ltr">BASHAR_EITAA_TOKEN</span> و <span dir="ltr">BASHAR_EITAA_CHANNEL</span> هنوز تنظیم نشده‌اند.</p>}
@@ -205,10 +205,10 @@ export function AdminContactsSection() {
 
       {/* فهرست مخاطبان */}
       {contacts.length === 0 ? (
-        <div className="flex flex-col items-center gap-2 rounded-[26px] border border-dashed border-line py-14 text-center">
+        <div className="flex flex-col items-center gap-2 rounded-[26px] border border-dashed border-outline-variant/40 py-14 text-center">
           <Phone className="h-9 w-9 text-neon/50" />
-          <p className="text-[14px] font-bold text-ink">دفترچهٔ مخاطبان خالی است</p>
-          <p className="max-w-[300px] text-[11.5px] leading-5 text-ink-muted">
+          <p className="text-[14px] font-bold text-on-surface">دفترچهٔ مخاطبان خالی است</p>
+          <p className="max-w-[300px] text-[11.5px] leading-5 text-on-surface-variant">
             اولین خبرنگار رسانهٔ بیرونی را با «ثبت مخاطب جدید» اضافه کنید — نام، رسانه و شماره تماس.
           </p>
         </div>
@@ -219,7 +219,7 @@ export function AdminContactsSection() {
               key={c.id}
               className={cn(
                 "rounded-[24px] border p-4 transition-colors",
-                checked.includes(c.id) ? "border-neon/50 bg-neon/6" : "border-line bg-surface",
+                checked.includes(c.id) ? "border-neon/50 bg-neon/6" : "border-outline-variant/40 bg-surface",
               )}
             >
               <div className="flex items-start gap-3">
@@ -227,23 +227,23 @@ export function AdminContactsSection() {
                   onClick={() => toggleCheck(c.id)}
                   className={cn(
                     "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border transition-colors",
-                    checked.includes(c.id) ? "border-neon bg-neon text-white" : "border-line",
+                    checked.includes(c.id) ? "border-neon bg-neon text-white" : "border-outline-variant/40",
                   )}
                   aria-label="انتخاب برای پیامک"
                 >
                   {checked.includes(c.id) && "✓"}
                 </button>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-[14px] font-black text-ink">{c.fullName}</p>
+                  <p className="truncate text-[14px] font-black text-on-surface">{c.fullName}</p>
                   {c.mediaName && <p className="mt-0.5 text-[11px] font-bold text-neon">{c.mediaName}</p>}
-                  <p className="mt-1 text-[11.5px] text-ink-muted" dir="ltr">{c.phone}</p>
-                  {c.note && <p className="mt-1 text-[10.5px] leading-4 text-ink-muted/80">{c.note}</p>}
+                  <p className="mt-1 text-[11.5px] text-on-surface-variant" dir="ltr">{c.phone}</p>
+                  {c.note && <p className="mt-1 text-[10.5px] leading-4 text-on-surface-variant/80">{c.note}</p>}
                 </div>
               </div>
-              <div className="mt-3 flex gap-2 border-t border-line pt-3">
+              <div className="mt-3 flex gap-2 border-t border-outline-variant/40 pt-3">
                 <button
                   onClick={() => setForm({ id: c.id, fullName: c.fullName, mediaName: c.mediaName, phone: c.phone, note: c.note })}
-                  className="flex flex-1 items-center justify-center gap-1 rounded-full border border-line py-2 text-[11.5px] font-bold text-ink transition-colors hover:border-neon/40 hover:text-neon"
+                  className="flex flex-1 items-center justify-center gap-1 rounded-full border border-outline-variant/40 py-2 text-[11.5px] font-bold text-on-surface transition-colors hover:border-neon/40 hover:text-neon"
                 >
                   <Pencil className="h-3.5 w-3.5" />
                   ویرایش
@@ -264,21 +264,21 @@ export function AdminContactsSection() {
 
       {/* دیالوگ ثبت/ویرایش مخاطب */}
       <Dialog open={form !== null} onOpenChange={(v) => !v && setForm(null)}>
-        <DialogContent className="rounded-[28px] border-line bg-popover p-5 sm:max-w-md">
+        <DialogContent className="rounded-[28px] border-outline-variant/40 bg-popover p-5 sm:max-w-md">
           <DialogHeader className="text-right">
-            <DialogTitle className="flex items-center gap-2 text-ink">
+            <DialogTitle className="flex items-center gap-2 text-on-surface">
               <Phone className="h-4.5 w-4.5 text-neon" />
               {form?.id ? "ویرایش مخاطب" : "ثبت مخاطب رسانهٔ بیرونی"}
             </DialogTitle>
-            <DialogDescription className="text-ink-muted">
+            <DialogDescription className="text-on-surface-variant">
               فقط در دفترچهٔ شما ذخیره می‌شود — این مخاطب به اپ دسترسی ندارد.
             </DialogDescription>
           </DialogHeader>
           <div className="mt-3 space-y-2.5">
-            <Input value={form?.fullName ?? ""} onChange={(e) => form && setForm({ ...form, fullName: e.target.value })} placeholder="نام و نام خانوادگی" className="rounded-2xl border-line bg-surface-2 text-ink placeholder:text-ink-muted/50" />
-            <Input value={form?.mediaName ?? ""} onChange={(e) => form && setForm({ ...form, mediaName: e.target.value })} placeholder="نام رسانه (خبرگزاری، روزنامه، کانال...)" className="rounded-2xl border-line bg-surface-2 text-ink placeholder:text-ink-muted/50" />
-            <Input value={form?.phone ?? ""} onChange={(e) => form && setForm({ ...form, phone: e.target.value })} placeholder="۰۹۱۲۳۴۵۶۷۸۹" dir="ltr" inputMode="tel" className="rounded-2xl border-line bg-surface-2 text-ink placeholder:text-ink-muted/50" />
-            <Textarea value={form?.note ?? ""} onChange={(e) => form && setForm({ ...form, note: e.target.value })} rows={2} placeholder="یادداشت (اختیاری)" className="rounded-2xl border-line bg-surface-2 text-ink leading-6 placeholder:text-ink-muted/50" />
+            <Input value={form?.fullName ?? ""} onChange={(e) => form && setForm({ ...form, fullName: e.target.value })} placeholder="نام و نام خانوادگی" className="rounded-2xl border-outline-variant/40 bg-surface-container-low text-on-surface placeholder:text-on-surface-variant/50" />
+            <Input value={form?.mediaName ?? ""} onChange={(e) => form && setForm({ ...form, mediaName: e.target.value })} placeholder="نام رسانه (خبرگزاری، روزنامه، کانال...)" className="rounded-2xl border-outline-variant/40 bg-surface-container-low text-on-surface placeholder:text-on-surface-variant/50" />
+            <Input value={form?.phone ?? ""} onChange={(e) => form && setForm({ ...form, phone: e.target.value })} placeholder="۰۹۱۲۳۴۵۶۷۸۹" dir="ltr" inputMode="tel" className="rounded-2xl border-outline-variant/40 bg-surface-container-low text-on-surface placeholder:text-on-surface-variant/50" />
+            <Textarea value={form?.note ?? ""} onChange={(e) => form && setForm({ ...form, note: e.target.value })} rows={2} placeholder="یادداشت (اختیاری)" className="rounded-2xl border-outline-variant/40 bg-surface-container-low text-on-surface leading-6 placeholder:text-on-surface-variant/50" />
             <button
               onClick={saveContact}
               disabled={busy || !form || form.fullName.trim().length < 2 || form.phone.trim().length < 10}
@@ -292,18 +292,18 @@ export function AdminContactsSection() {
 
       {/* دیالوگ پیامک انبوه */}
       <Dialog open={smsOpen} onOpenChange={(v) => !v && setSmsOpen(false)}>
-        <DialogContent className="rounded-[28px] border-line bg-popover p-5 sm:max-w-md">
+        <DialogContent className="rounded-[28px] border-outline-variant/40 bg-popover p-5 sm:max-w-md">
           <DialogHeader className="text-right">
-            <DialogTitle className="flex items-center gap-2 text-ink">
+            <DialogTitle className="flex items-center gap-2 text-on-surface">
               <MessageSquareText className="h-4.5 w-4.5 text-neon" />
               پیامک انبوه
             </DialogTitle>
-            <DialogDescription className="text-ink-muted">
+            <DialogDescription className="text-on-surface-variant">
               ارسال یک‌طرفه به {checked.length > 0 ? `${fa(checked.length)} مخاطب انتخاب‌شده` : `همهٔ ${faNum(contacts.length)} مخاطب`} — از خط سازمانی.
             </DialogDescription>
           </DialogHeader>
-          <Textarea value={smsText} onChange={(e) => setSmsText(e.target.value)} rows={5} maxLength={500} placeholder="متن پیامک (حداکثر ۵۰۰ کاراکتر)..." className="mt-3 rounded-2xl border-line bg-surface-2 text-ink leading-6 placeholder:text-ink-muted/50" />
-          <p className="mt-1 text-left text-[9.5px] text-ink-muted/60">{fa(smsText.length)} از ۵۰۰ کاراکتر</p>
+          <Textarea value={smsText} onChange={(e) => setSmsText(e.target.value)} rows={5} maxLength={500} placeholder="متن پیامک (حداکثر ۵۰۰ کاراکتر)..." className="mt-3 rounded-2xl border-outline-variant/40 bg-surface-container-low text-on-surface leading-6 placeholder:text-on-surface-variant/50" />
+          <p className="mt-1 text-left text-[9.5px] text-on-surface-variant/60">{fa(smsText.length)} از ۵۰۰ کاراکتر</p>
           <button
             onClick={sendSms}
             disabled={busy || smsText.trim().length < 5}
@@ -316,30 +316,30 @@ export function AdminContactsSection() {
 
       {/* دیالوگ ارسال خبر منتخب به ایتا */}
       <Dialog open={newsOpen} onOpenChange={(v) => !v && setNewsOpen(false)}>
-        <DialogContent className="max-h-[80dvh] overflow-y-auto nice-scroll rounded-[28px] border-line bg-popover p-5 sm:max-w-md">
+        <DialogContent className="max-h-[80dvh] overflow-y-auto nice-scroll rounded-[28px] border-outline-variant/40 bg-popover p-5 sm:max-w-md">
           <DialogHeader className="text-right">
-            <DialogTitle className="flex items-center gap-2 text-ink">
+            <DialogTitle className="flex items-center gap-2 text-on-surface">
               <Send className="h-4.5 w-4.5 text-neon" />
               ارسال خبر منتخب به ایتا
             </DialogTitle>
-            <DialogDescription className="text-ink-muted">
+            <DialogDescription className="text-on-surface-variant">
               خبر روی کانال ایتا منتشر می‌شود و مخاطبانِ ثبت‌شده که کانال را دنبال می‌کنند آن را می‌بینند.
             </DialogDescription>
           </DialogHeader>
           <div className="mt-3 space-y-2">
             {approvedNews.length === 0 ? (
-              <p className="py-8 text-center text-[12px] text-ink-muted">در فهرست خبرهای شما خبر تأییدشده‌ای نیست.</p>
+              <p className="py-8 text-center text-[12px] text-on-surface-variant">در فهرست خبرهای شما خبر تأییدشده‌ای نیست.</p>
             ) : (
               approvedNews.map((n) => (
                 <button
                   key={n.id}
                   onClick={() => sendNewsToEitaa(n.id)}
                   disabled={newsBusy !== null}
-                  className="flex w-full items-center justify-between gap-2 rounded-2xl border border-line bg-surface px-3.5 py-3 text-right transition-colors hover:border-neon/40 disabled:opacity-50"
+                  className="flex w-full items-center justify-between gap-2 rounded-2xl border border-outline-variant/40 bg-surface px-3.5 py-3 text-right transition-colors hover:border-neon/40 disabled:opacity-50"
                 >
                   <span className="min-w-0">
-                    <span className="block truncate text-[12.5px] font-bold text-ink">{n.title}</span>
-                    <span className="mt-0.5 block text-[9.5px] text-ink-muted" dir="ltr">{n.code}</span>
+                    <span className="block truncate text-[12.5px] font-bold text-on-surface">{n.title}</span>
+                    <span className="mt-0.5 block text-[9.5px] text-on-surface-variant" dir="ltr">{n.code}</span>
                   </span>
                   <span className="flex shrink-0 items-center gap-1 text-[11px] font-black text-neon">
                     {newsBusy === n.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <ExternalLink className="h-4 w-4" />}

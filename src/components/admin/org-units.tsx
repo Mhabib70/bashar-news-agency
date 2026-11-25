@@ -61,7 +61,7 @@ export function AdminOrgUnitsSection() {
 
   if (units === null) {
     return (
-      <div className="flex items-center justify-center gap-2 py-16 text-[13px] text-ink-muted">
+      <div className="flex items-center justify-center gap-2 py-16 text-[13px] text-on-surface-variant">
         <Loader2 className="h-5 w-5 animate-spin" />
         در حال بارگذاری حوزه‌ها...
       </div>
@@ -70,27 +70,27 @@ export function AdminOrgUnitsSection() {
 
   return (
     <div className="space-y-4">
-      <div className="rounded-[24px] border border-line bg-surface p-4">
+      <div className="rounded-[24px] border border-outline-variant/40 bg-surface p-4">
         <div className="flex items-center gap-2">
           <Landmark className="h-5 w-5 text-neon" />
-          <p className="text-[14px] font-black text-ink">حوزه‌ها و پایگاه‌های سازمان</p>
+          <p className="text-[14px] font-black text-on-surface">حوزه‌ها و پایگاه‌های سازمان</p>
           <span className="rounded-full bg-neon/12 px-2.5 py-0.5 text-[10px] font-bold text-neon">{units.length} حوزه</span>
         </div>
-        <p className="mt-1.5 text-[11.5px] leading-5 text-ink-muted">
+        <p className="mt-1.5 text-[11.5px] leading-5 text-on-surface-variant">
           اسامی حوزه‌ها و پایگاه‌ها را هر زمان لازم شد ویرایش، ثبت یا حذف کنید. تغییرات فوراً در فرم ثبت‌نام، فیلترها و پروفایل همه اعمال می‌شود. حوزه/پایگاهی که کاربر یا خبری به آن وصل باشد قابل حذف نیست.
         </p>
       </div>
 
       <div className="space-y-3">
         {units.map((d) => (
-          <div key={d.key} className="rounded-[24px] border border-line bg-surface p-4">
+          <div key={d.key} className="rounded-[24px] border border-outline-variant/40 bg-surface p-4">
             <div className="flex items-center gap-2">
               {editingDistrict === d.key ? (
                 <>
                   <input
                     value={districtDraft}
                     onChange={(e) => setDistrictDraft(e.target.value)}
-                    className="min-w-0 flex-1 rounded-xl border border-line bg-surface-2 px-3 py-2 text-[13px] font-bold text-ink outline-none focus:border-neon/50"
+                    className="min-w-0 flex-1 rounded-xl border border-outline-variant/40 bg-surface-container-low px-3 py-2 text-[13px] font-bold text-on-surface outline-none focus:border-neon/50"
                     autoFocus
                   />
                   <button
@@ -103,7 +103,7 @@ export function AdminOrgUnitsSection() {
                   </button>
                   <button
                     onClick={() => setEditingDistrict(null)}
-                    className="flex h-9 w-9 items-center justify-center rounded-full border border-line text-ink-muted"
+                    className="flex h-9 w-9 items-center justify-center rounded-full border border-outline-variant/40 text-on-surface-variant"
                     aria-label="انصراف"
                   >
                     <X className="h-4 w-4" />
@@ -111,15 +111,15 @@ export function AdminOrgUnitsSection() {
                 </>
               ) : (
                 <>
-                  <p className="flex-1 text-[14px] font-black text-ink">{d.label}</p>
-                  <span className="rounded-full bg-surface-2 px-2 py-0.5 text-[9.5px] font-bold text-ink-muted">{d.bases.length} پایگاه</span>
+                  <p className="flex-1 text-[14px] font-black text-on-surface">{d.label}</p>
+                  <span className="rounded-full bg-surface-container-low px-2 py-0.5 text-[9.5px] font-bold text-on-surface-variant">{d.bases.length} پایگاه</span>
                   <button
                     onClick={() => {
                       setEditingDistrict(d.key)
                       setDistrictDraft(d.label)
                     }}
                     disabled={busy}
-                    className="flex h-9 w-9 items-center justify-center rounded-full border border-line text-ink-muted transition-colors hover:border-neon/40 hover:text-neon disabled:opacity-50"
+                    className="flex h-9 w-9 items-center justify-center rounded-full border border-outline-variant/40 text-on-surface-variant transition-colors hover:border-neon/40 hover:text-neon disabled:opacity-50"
                     aria-label="ویرایش نام حوزه"
                   >
                     <Pencil className="h-4 w-4" />
@@ -144,7 +144,7 @@ export function AdminOrgUnitsSection() {
                     <input
                       value={editBaseDraft}
                       onChange={(e) => setEditBaseDraft(e.target.value)}
-                      className="w-36 bg-transparent text-[11.5px] font-bold text-ink outline-none"
+                      className="w-36 bg-transparent text-[11.5px] font-bold text-on-surface outline-none"
                       autoFocus
                     />
                     <button
@@ -155,12 +155,12 @@ export function AdminOrgUnitsSection() {
                     >
                       <Check className="h-3.5 w-3.5" />
                     </button>
-                    <button onClick={() => setEditingBase(null)} className="text-ink-muted" aria-label="انصراف">
+                    <button onClick={() => setEditingBase(null)} className="text-on-surface-variant" aria-label="انصراف">
                       <X className="h-3.5 w-3.5" />
                     </button>
                   </span>
                 ) : (
-                  <span key={b} className="group flex items-center gap-1.5 rounded-full border border-line bg-surface-2 px-3 py-1.5 text-[11.5px] font-bold text-ink">
+                  <span key={b} className="group flex items-center gap-1.5 rounded-full border border-outline-variant/40 bg-surface-container-low px-3 py-1.5 text-[11.5px] font-bold text-on-surface">
                     {b}
                     <button
                       onClick={() => {
@@ -168,7 +168,7 @@ export function AdminOrgUnitsSection() {
                         setEditBaseDraft(b)
                       }}
                       disabled={busy}
-                      className="text-ink-muted/60 transition-colors hover:text-neon"
+                      className="text-on-surface-variant/60 transition-colors hover:text-neon"
                       aria-label={`ویرایش ${b}`}
                     >
                       <Pencil className="h-3 w-3" />
@@ -176,7 +176,7 @@ export function AdminOrgUnitsSection() {
                     <button
                       onClick={() => act("delete_base", { districtKey: d.key, label: b })}
                       disabled={busy}
-                      className="text-ink-muted/60 transition-colors hover:text-danger-soft"
+                      className="text-on-surface-variant/60 transition-colors hover:text-danger-soft"
                       aria-label={`حذف ${b}`}
                     >
                       <Trash2 className="h-3 w-3" />
@@ -184,7 +184,7 @@ export function AdminOrgUnitsSection() {
                   </span>
                 )
               })}
-              {d.bases.length === 0 && <span className="text-[11px] text-ink-muted">پایگاهی ثبت نشده — از پایین اضافه کنید.</span>}
+              {d.bases.length === 0 && <span className="text-[11px] text-on-surface-variant">پایگاهی ثبت نشده — از پایین اضافه کنید.</span>}
             </div>
 
             <div className="mt-3 flex gap-2">
@@ -195,7 +195,7 @@ export function AdminOrgUnitsSection() {
                   if (e.key === "Enter" && (baseDraft[d.key] ?? "").trim().length >= 3) act("add_base", { districtKey: d.key, label: baseDraft[d.key].trim() })
                 }}
                 placeholder="نام پایگاه جدید..."
-                className="min-w-0 flex-1 rounded-xl border border-line bg-surface-2 px-3 py-2 text-[12px] text-ink outline-none focus:border-neon/50"
+                className="min-w-0 flex-1 rounded-xl border border-outline-variant/40 bg-surface-container-low px-3 py-2 text-[12px] text-on-surface outline-none focus:border-neon/50"
               />
               <button
                 onClick={() => (baseDraft[d.key] ?? "").trim().length >= 3 && act("add_base", { districtKey: d.key, label: baseDraft[d.key].trim() })}
@@ -218,7 +218,7 @@ export function AdminOrgUnitsSection() {
             if (e.key === "Enter" && newDistrict.trim().length >= 2) act("add_district", { label: newDistrict.trim() })
           }}
           placeholder="نام حوزه جدید (مثلاً: حوزه برادران ۷)..."
-          className="min-w-0 flex-1 rounded-xl border border-line bg-surface px-3 py-2.5 text-[12.5px] text-ink outline-none focus:border-neon/50"
+          className="min-w-0 flex-1 rounded-xl border border-outline-variant/40 bg-surface px-3 py-2.5 text-[12.5px] text-on-surface outline-none focus:border-neon/50"
         />
         <button
           onClick={() => newDistrict.trim().length >= 2 && act("add_district", { label: newDistrict.trim() })}

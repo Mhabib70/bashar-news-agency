@@ -25,7 +25,7 @@ export default function OrganizationPage() {
 
   if (!booted || !state) {
     return (
-      <main className="flex min-h-dvh items-center justify-center bg-[var(--page)]">
+      <main className="flex min-h-dvh items-center justify-center bg-surface">
         <Loader2 className="h-8 w-8 animate-spin text-neon" />
       </main>
     )
@@ -33,13 +33,13 @@ export default function OrganizationPage() {
 
   if (!allowed) {
     return (
-      <main className="flex min-h-dvh items-center justify-center bg-[var(--page)]">
+      <main className="flex min-h-dvh items-center justify-center bg-surface">
         <div className="flex flex-col items-center gap-4 text-center">
-          <span className="flex h-16 w-16 items-center justify-center rounded-full border border-line bg-surface">
+          <span className="flex h-16 w-16 items-center justify-center rounded-full border border-outline-variant/40 bg-surface">
             <ShieldCheck className="h-7 w-7 text-danger" />
           </span>
-          <p className="text-[14px] font-black text-ink">دسترسی محدود</p>
-          <p className="max-w-[260px] text-[12px] leading-5 text-ink-muted">مدیریت حوزه‌ها و پایگاه‌ها فقط برای ادمین کل و مدیر حوزه فعال است.</p>
+          <p className="text-[14px] font-black text-on-surface">دسترسی محدود</p>
+          <p className="max-w-[260px] text-[12px] leading-5 text-on-surface-variant">مدیریت حوزه‌ها و پایگاه‌ها فقط برای ادمین کل و مدیر حوزه فعال است.</p>
           <button onClick={() => router.replace("/")} className="rounded-full bg-neon px-6 py-3 text-[13px] font-bold text-neon-foreground">
             بازگشت به اپ
           </button>
@@ -51,18 +51,18 @@ export default function OrganizationPage() {
   const user = state.user
 
   return (
-    <main className="min-h-dvh bg-[var(--page)]">
-      <header className="sticky top-0 z-40 border-b border-line bg-[var(--nav-bg)]/95 backdrop-blur-md">
+    <main className="min-h-dvh bg-surface">
+      <header className="sticky top-0 z-40 border-b border-outline-variant/40 bg-surface/95 backdrop-blur-md">
         <div className="mx-auto flex h-14 w-full max-w-[720px] items-center gap-3 px-4">
           <button
             onClick={() => router.push(state.user.role === "admin" ? "/admin" : "/")}
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-line bg-surface text-ink"
+            className="flex h-10 w-10 items-center justify-center rounded-xl border border-outline-variant/40 bg-surface text-on-surface"
             aria-label="بازگشت"
           >
             <ArrowRight className="h-4.5 w-4.5" />
           </button>
           <div className="min-w-0 flex-1">
-            <p className="flex items-center gap-1.5 truncate text-[13.5px] font-black text-ink">
+            <p className="flex items-center gap-1.5 truncate text-[13.5px] font-black text-on-surface">
               <Landmark className="h-4 w-4 text-neon" />
               حوزه‌ها و پایگاه‌ها
             </p>
