@@ -17,7 +17,7 @@ PHASE = sys.argv[1] if len(sys.argv) > 1 else "sync"
 cfg = json.load(open(CFG))
 cli = paramiko.SSHClient()
 cli.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-cli.connect(cfg['ip'], username=cfg['username'], password=cfg['password'], timeout=25, allow_agent=False, look_for_keys=False)
+cli.connect(cfg['ip'], port=cfg.get('port', 22), username=cfg['username'], password=cfg['password'], timeout=25, allow_agent=False, look_for_keys=False)
 
 def run(cmd, timeout=900, show=True):
     _, out, err = cli.exec_command(cmd, timeout=timeout)
