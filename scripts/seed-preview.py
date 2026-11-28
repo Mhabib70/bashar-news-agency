@@ -21,6 +21,7 @@ ADMIN_PHONE = "09120000000"      # نرمال‌شده در API: 9120000000
 REPORTER_PHONE = "09120000001"
 ADMIN_PIN = ""                   # بدون رمز دوم — ورود مستقیم
 SUPER_PHONE = "09300500977"      # شمارهٔ ادمین کل سامانه (پیش‌فرض superadmin.ts)
+USER_PHONE = "09105912852"       # شمارهٔ کاربر — درخواست فعال‌سازی دستی
 
 con = sqlite3.connect(DB)
 cur = con.cursor()
@@ -57,6 +58,7 @@ for uid in old:
 cur.execute("DELETE FROM NewsItem WHERE id >= 9000")
 
 admin_id = upsert_user("admin", "مدیر کل خبرگزاری", "admin", SUPER_PHONE, canSendEitaa=1, canManageContent=1)
+user_admin = upsert_user("user-admin", "مدیر کل خبرگزاری (۰۹۱۰۵۹۱۲۸۵۲)", "admin", USER_PHONE, canSendEitaa=1, canManageContent=1)
 demo_admin = upsert_user("demo-admin", "ادمین آزمایشی", "admin", ADMIN_PHONE, canSendEitaa=1, canManageContent=1)
 rep1 = upsert_user("reporter1", "علی محمدی", "reporter", REPORTER_PHONE)
 rep2 = upsert_user("reporter2", "زهرا کریمی", "reporter", "09120000002", district="b2")
