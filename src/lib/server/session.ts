@@ -96,9 +96,17 @@ export function clearSession(res: NextResponse, req?: NextRequest): NextResponse
   return res
 }
 
-/** شناسهٔ کاربر از روی کوکی نشست (بدون بررسی وضعیت حساب) */
+/** شناسهٔ کاربر از روی کوکی نشست یا هدر جایگزین (بدون بررسی وضعیت حساب) */
+// پشتیبانی هدر x-session-token: در محیط‌هایی که کوکی را بلاک می‌کنند
+// (آیفریم وب‌ویو / پیش‌نمایش داخل چت) کوکی SameSite=Lax ثالث ذخیره نمی‌شود.
+// توکن امضاشده با HMAC همان امنیت کوکی را دارد؛ فقط مسیر رساندن آن متفاوت است.
+export const SESSION_TOKEN_HEADER = "x-session-token"
 export function sessionUserId(req: NextRequest): string | null {
-  return verifySessionToken(req.cookies.get(SESSION_COOKIE)?.value)
+  const fromCookie = verifySessionToken(req.cookies.get(SESSION_COOKIE)?.value)
+  if (fromCookie) return fromCookie
+  const headerToken = req.headers.get(SESSION_TOKEN_HEADER)?.trim()
+  if (headerToken) return verifySessionToken(headerToken)
+  return null
 }
 
 /**

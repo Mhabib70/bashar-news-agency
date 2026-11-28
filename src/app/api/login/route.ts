@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { normalizePhone } from "@/lib/domain"
-import { attachSession } from "@/lib/server/session"
+import { attachSession, createSessionToken } from "@/lib/server/session"
 import { logSec, pruneSecurityLog } from "@/lib/server/security-log"
 
 // ورود با شماره موبایل — تنها راه ورود به حساب.
@@ -56,7 +56,10 @@ export async function POST(req: NextRequest) {
 
     void logSec({ kind: "login", title: "ورود موفق به سامانه", detail: u.fullName, phone: norm, actorName: u.fullName })
     void pruneSecurityLog()
-    const res = NextResponse.json({ ok: true, userId: u.id, fullName: u.fullName })
+    // توکن در بدنهٔ پاسخ هم برمی‌گردد: اگر مرورگر کوکی را ذخیره نکرد
+    // (آیفریم پیش‌نمایش)، کلاینت آن را در localStorage نگه می‌دارد و
+    // در درخواست‌های بعدی با هدر x-session-token می‌فرستد.
+    const res = NextResponse.json({ ok: true, userId: u.id, fullName: u.fullName, token: createSessionToken(u.id) })
     return attachSession(res, u.id, req)
   } catch (e) {
     console.error(e)

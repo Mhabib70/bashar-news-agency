@@ -59,6 +59,11 @@ export function Welcome() {
         setPinName(d.fullName ?? "")
         setPin("")
       } else if (d.ok && d.userId) {
+        // اگر مرورگر کوکی نشست را ذخیره نکرد (پیش‌نمایش داخل آیفریم)،
+        // توکن امضاشدهٔ پاسخ را نگه می‌داریم و با هدر می‌فرستیم.
+        if (d.token) {
+          try { localStorage.setItem("newsapp_token", d.token) } catch {}
+        }
         await login()
         toast({ title: `خوش آمدی ${d.fullName}!`, description: "ورود با موفقیت انجام شد." })
         setOpen(false)
@@ -89,6 +94,9 @@ export function Welcome() {
       })
       const d = await res.json().catch(() => ({}))
       if (d.ok && d.userId) {
+        if (d.token) {
+          try { localStorage.setItem("newsapp_token", d.token) } catch {}
+        }
         await login()
         toast({ title: `خوش آمدی ${d.fullName}!`, description: "ورود با موفقیت انجام شد." })
         setOpen(false)

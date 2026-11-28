@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { normalizePhone } from "@/lib/domain"
-import { attachSession } from "@/lib/server/session"
+import { attachSession, createSessionToken } from "@/lib/server/session"
 import { verifyPin } from "@/lib/server/pin"
 
 // مرحله دوم ورود برای حساب‌هایی که PIN (رمز دوم) دارند.
@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: false, error: "PIN اشتباه است" }, { status: 401 })
     }
 
-    const res = NextResponse.json({ ok: true, userId: u.id, fullName: u.fullName })
+    const res = NextResponse.json({ ok: true, userId: u.id, fullName: u.fullName, token: createSessionToken(u.id) })
     return attachSession(res, u.id, req)
   } catch (e) {
     console.error(e)

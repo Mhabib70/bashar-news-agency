@@ -193,12 +193,29 @@ type Store = {
   register: (p: { fullName: string; phone: string; age: string; education: string; district: string; base: string }) => Promise<{ ok: boolean; userId?: string; status?: string; message?: string }>
 }
 
+// توکن نشست برای محیط‌هایی که کوکی را ذخیره نمی‌کنند (آیفریم پیش‌نمایش).
+// اگر باشد با هر درخواست به‌صورت هدر x-session-token ارسال می‌شود؛
+// کوکی همچنان مسیر اصلی نشست است و هدر فقط جایگزینِ اضطراری است.
+function sessionToken(): string {
+  if (typeof window === "undefined") return ""
+  try {
+    return localStorage.getItem("newsapp_token") ?? ""
+  } catch {
+    return ""
+  }
+}
+
 async function api<T>(url: string, init?: RequestInit): Promise<T> {
+  const token = sessionToken()
   const res = await fetch(url, {
     ...init,
     // کوکی نشست (HttpOnly) به‌صورت خودکار همراه درخواست فرستاده می‌شود
     credentials: "same-origin",
-    headers: { "Content-Type": "application/json", ...(init?.headers ?? {}) },
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { "x-session-token": token } : {}),
+      ...(init?.headers ?? {}),
+    },
   })
   const data = await res.json().catch(() => ({}))
   if (!res.ok) throw new Error((data as { error?: string }).error ?? "خطای غیرمنتظره")
@@ -236,6 +253,7 @@ export const useApp = create<Store>((set, get) => ({
     // حذف کوکی نشست از سمت سرور
     await api("/api/logout", { method: "POST" }).catch(() => {})
     localStorage.removeItem("newsapp_uid")
+    localStorage.removeItem("newsapp_token")
     set({ userId: null, state: null, tab: "home", booted: true })
   },
 
