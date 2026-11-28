@@ -1,7 +1,8 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *));
+@custom-variant dark (&:is(.dark *, .onyx *));
+@custom-variant onyx (&:is(.onyx *));
 
 @font-face {
   font-family: "Vazirmatn";
@@ -378,6 +379,109 @@ html.dark {
   --grad-ink: #ffdad5;
 }
 
+/* ---------- پالت Onyx — زغالی تیره با اکسنت سبز (مطابق تصویر مرجع) ---------- */
+/* سطوح لایه‌لایهٔ خاکستری زغالی، متن سفید گرم، اکسنت سبز ۲۲c55e —
+   دقیقاً همان هویت UI-Kit تیرهٔ تصویر: کارت‌های ۲۶۲۶۲b/۳۰۳۰۳۵، چک‌های سبز، پیل‌های خاکستری */
+html.onyx {
+  --radius: 1.5rem;
+
+  /* سطوح — از صفحهٔ نزدیک به سیاه تا کارت‌های زغالی */
+  --surface: #131316;
+  --surface-dim: #0c0c0e;
+  --surface-bright: #1d1d21;
+  --surface-ctnr-lowest: #1d1d21;
+  --surface-ctnr-low: #222226;
+  --surface-ctnr: #26262b;
+  --surface-ctnr-high: #303035;
+  --surface-ctnr-highest: #3a3a40;
+  --surface-variant: #303035;
+  --on-surface: #f2f2ee;
+  --on-surface-variant: #9a9aa0;
+
+  /* سبز اصلی تصویر */
+  --primary: #22c55e;
+  --primary-foreground: #052e12;
+  --primary-container: #14532d;
+  --on-primary-container: #bbf7d0;
+  --primary-fixed: #4ade80;
+  --primary-fixed-dim: #22c55e;
+  --on-primary-fixed: #052e12;
+
+  /* پیل‌ها و چیپ‌های خاکستری */
+  --secondary: #3a3a40;
+  --on-secondary: #e4e4e7;
+  --secondary-container: #303035;
+  --on-secondary-container: #d4d4d8;
+  --secondary-fixed: #303035;
+  --secondary-fixed-dim: #3a3a40;
+  --on-secondary-fixed: #e4e4e7;
+
+  /* نعنایی برای تنوع کم‌رنگ */
+  --tertiary: #86efac;
+  --on-tertiary: #052e12;
+  --tertiary-container: #14532d;
+  --on-tertiary-container: #bbf7d0;
+  --tertiary-fixed: #86efac;
+  --tertiary-fixed-dim: #4ade80;
+  --on-tertiary-fixed: #052e12;
+
+  --outline: #52525b;
+  --outline-variant: #3f3f46;
+  --inverse-surface: #f2f2ee;
+  --inverse-on-surface: #26262b;
+  --inverse-primary: #16a34a;
+  --error-container: #7f1d1d;
+  --on-error-container: #fecaca;
+
+  /* نگاشت shadcn/اپ به Onyx */
+  --background: #131316;
+  --foreground: #f2f2ee;
+  --card: #1d1d21;
+  --card-foreground: #f2f2ee;
+  --popover: #26262b;
+  --popover-foreground: #f2f2ee;
+  --secondary-foreground: #e4e4e7;
+  --muted: #26262b;
+  --muted-foreground: #9a9aa0;
+  --accent: #26262b;
+  --accent-foreground: #f2f2ee;
+  --destructive: #ef4444;
+  --destructive-foreground: #1a0505;
+  --border: #2e2e33;
+  --input: #2e2e33;
+  --ring: #22c55e;
+  --chart-1: #22c55e;
+  --chart-2: #4ade80;
+  --chart-3: #a3a3aa;
+  --chart-4: #86efac;
+  --chart-5: #166534;
+  --sidebar: #0c0c0e;
+  --sidebar-foreground: #f2f2ee;
+  --sidebar-primary: #22c55e;
+  --sidebar-primary-foreground: #052e12;
+  --sidebar-accent: #26262b;
+  --sidebar-accent-foreground: #f2f2ee;
+  --sidebar-border: #2e2e33;
+  --sidebar-ring: #22c55e;
+  --neon: #22c55e;
+  --neon-foreground: #052e12;
+  --surface-2: #1d1d21;
+  --ink: #f2f2ee;
+  --ink-muted: #9a9aa0;
+  --line: #2e2e33;
+  --warn: #fbbf24;
+  --danger: #ef4444;
+  --danger-soft: #f87171;
+  --page: #131316;
+  --frame-border: #2e2e33;
+  --nav-bg: #131316;
+  --success: #22c55e;
+  --success-soft: #14532d;
+  --grad-a: #14532d;
+  --grad-b: #052e12;
+  --grad-ink: #dcfce7;
+}
+
 * {
   border-color: var(--border);
 }
@@ -648,6 +752,20 @@ body {
   inset: 0;
   background: linear-gradient(160deg, rgba(255, 255, 255, 0.3) 0%, transparent 45%);
   pointer-events: none;
+}
+
+/* ---------- تایل‌های میانبر در تم اونیکس — زغالی با هالهٔ سبز مطابق تصویر مرجع ---------- */
+html.onyx .candy-tile-red,
+html.onyx .candy-tile-amber {
+  background:
+    radial-gradient(120% 90% at 85% -10%, rgba(34, 197, 94, 0.18) 0%, transparent 55%),
+    linear-gradient(160deg, #303035 0%, #26262b 48%, #1d1d21 100%);
+  color: #f2f2ee;
+  box-shadow: 0 16px 34px -16px rgba(0, 0, 0, 0.6);
+}
+html.onyx .candy-tile-red::before,
+html.onyx .candy-tile-amber::before {
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.08) 0%, transparent 45%);
 }
 
 /* نوار ناوبری پایین شناور — سفید شیشه‌ای قرصی مطابق طراحی */

@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#f7f2f2",
+  themeColor: "#131316",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -25,7 +25,8 @@ export default function RootLayout({
   return (
     <html lang="fa" dir="rtl" suppressHydrationWarning>
       <body className="antialiased bg-background text-foreground">
-        <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} disableTransitionOnChange>
+        {/* تم پیش‌فرض: اونیکس (زغالی + سبز، مطابق تصویر مرجع) — کاربر می‌تواند به روشن/تیره سوییچ کند */}
+        <ThemeProvider attribute="class" themes={["onyx", "light", "dark"]} defaultTheme="onyx" enableSystem={false} disableTransitionOnChange>
           {children}
           <Toaster />
           <UpdateBanner />
